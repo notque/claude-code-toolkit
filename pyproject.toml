@@ -34,8 +34,8 @@ select = [
     "SIM",
     # flake8-unused-arguments
     "ARG",
-    # flake8-use-pathlib
-    "PTH",
+    # flake8-use-pathlib (disabled: 490 existing violations, fix incrementally)
+    # "PTH",
     # Ruff-specific rules
     "RUF",
 ]
