@@ -45,7 +45,8 @@
         "world-class"
       ],
       "message": "Empty adjectives add no specific meaning and inflate prose",
-      "suggestion_template": "Remove or replace with concrete description of what makes it notable"
+      "suggestion_template": "Remove or replace with concrete description of what makes it notable",
+      "notes": "'comprehensive' is valid when it is a literal skill/command name (e.g. /comprehensive-review). Flag only as standalone adjective."
     },
     "corporate_verbs": {
       "severity": "error",
@@ -77,16 +78,13 @@
         "ecosystem",
         "landscape",
         "paradigm",
-        "framework",
-        "methodology",
         "synergies",
         "bandwidth",
-        "learnings",
-        "asks",
         "deliverables"
       ],
+      "notes": "Removed 'framework', 'methodology', 'learnings', 'asks'. Framework and methodology are legitimate technical terms. Learnings is used by retro system. Asks matched as substring of 'tasks'.",
       "message": "Abstract nouns obscure meaning with vague corporate-speak",
-      "suggestion_template": "Name the specific thing: system, field, approach, method, time, lessons, requests, outputs"
+      "suggestion_template": "Name the specific thing: system, field, approach, time, requests, outputs"
     },
     "opening_phrases": {
       "severity": "error",
@@ -162,8 +160,8 @@
     "forbidden_punctuation": {
       "severity": "error",
       "patterns": [
-        "\u2014",
-        "\u2013"
+        "—",
+        "–"
       ],
       "message": "Em-dashes (U+2014) and en-dashes (U+2013) are absolutely forbidden. Use commas, periods, or hyphens",
       "suggestion_template": "Replace em-dash with comma, period, or restructure sentence. Use hyphen (-) for compound words only"
@@ -231,7 +229,7 @@
       "suggestion_template": "State what it IS directly: 'Errors are measurements' instead of 'They're not failures. They're measurements'"
     },
     "false_agency": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "the decision emerges",
         "the culture shifts",
@@ -297,7 +295,7 @@
       "suggestion_template": "Use 'you' or 'I' or name a specific person. 'You don't sit down one day and decide to build this' instead of 'Nobody designed this'"
     },
     "performative_emphasis": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "full stop",
         "let that sink in",
@@ -336,7 +334,7 @@
       "suggestion_template": "Show with facts. If it matters, the facts will show it. Drop the emphasis crutch."
     },
     "dramatic_fragmentation": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "\\.\\s+that's it\\.\\s+that's the",
         "\\.\\s+and that's (okay|fine|the point|enough)",
@@ -395,7 +393,7 @@
       "suggestion_template": "Delete entirely. Start with the actual point."
     },
     "vague_declaratives": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "the reasons are structural",
         "the implications are significant",
@@ -420,7 +418,7 @@
       "suggestion_template": "Replace with the specific fact: 'The stakes are high' -> 'A loss here means missing the deadline by two weeks'"
     },
     "adverb_crutches": {
-      "severity": "info",
+      "severity": "warning",
       "patterns": [
         "genuinely",
         "honestly",
@@ -439,7 +437,7 @@
       "suggestion_template": "Remove the adverb. If the sentence loses meaning, the verb was too weak. Fix the verb."
     },
     "meta_commentary": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "hint:",
         "plot twist:",
@@ -466,30 +464,22 @@
       "suggestion_template": "Delete entirely. Let the essay move without narrating itself."
     },
     "lazy_extremes": {
-      "severity": "info",
+      "severity": "warning",
       "patterns": [
         "every single",
         "each and every",
-        "always",
-        "never",
         "everyone knows",
-        "everybody",
-        "nobody",
+        "everybody knows",
         "no one ever",
         "nothing ever",
-        "everything about",
-        "completely",
-        "entirely",
-        "absolutely",
-        "all of",
-        "none of"
+        "everything about"
       ],
       "notes": "Sweeping claims that substitute false authority for specifics. 'Every developer' should be 'most developers on the team' or 'the three senior engineers'. Lower severity because sometimes accurate.",
       "message": "Sweeping generalization substitutes false authority for specific evidence",
       "suggestion_template": "Replace with specifics: 'every developer' -> 'the five engineers on the platform team'"
     },
     "negative_listing": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "not a .+\\. not a .+\\.",
         "it wasn't .+\\. it wasn't .+\\. it was",
@@ -514,7 +504,7 @@
       "suggestion_template": "Restructure: 'What makes this hard is X' -> 'X makes this hard' or 'The constraint is X'"
     },
     "formulaic_constructions": {
-      "severity": "info",
+      "severity": "warning",
       "patterns": [
         "by the time .+, i was",
         "by the time .+, we were",
