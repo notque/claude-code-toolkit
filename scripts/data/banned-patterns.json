@@ -23,10 +23,9 @@
       "suggestion_template": "Use direct verbs: examine, look at, consider, discuss"
     },
     "empty_adjectives": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "robust",
-        "comprehensive",
         "holistic",
         "cutting-edge",
         "innovative",
@@ -73,7 +72,7 @@
       "suggestion_template": "Use plain verbs: use, help, improve, lead, change"
     },
     "abstract_nouns": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "ecosystem",
         "landscape",
@@ -167,7 +166,7 @@
       "suggestion_template": "Replace em-dash with comma, period, or restructure sentence. Use hyphen (-) for compound words only"
     },
     "hedging_language": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "i think",
         "i believe",
@@ -199,7 +198,7 @@
       "suggestion_template": "State the significance directly: X shows, X proves, X means"
     },
     "ai_rhetorical_structures": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "it's not .+\\. it's",
         "this isn't .+\\. this is",
@@ -418,7 +417,7 @@
       "suggestion_template": "Replace with the specific fact: 'The stakes are high' -> 'A loss here means missing the deadline by two weeks'"
     },
     "adverb_crutches": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "genuinely",
         "honestly",
@@ -464,7 +463,7 @@
       "suggestion_template": "Delete entirely. Let the essay move without narrating itself."
     },
     "lazy_extremes": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "every single",
         "each and every",
@@ -504,7 +503,7 @@
       "suggestion_template": "Restructure: 'What makes this hard is X' -> 'X makes this hard' or 'The constraint is X'"
     },
     "formulaic_constructions": {
-      "severity": "warning",
+      "severity": "error",
       "patterns": [
         "by the time .+, i was",
         "by the time .+, we were",
