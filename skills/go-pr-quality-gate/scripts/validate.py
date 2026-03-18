@@ -16,20 +16,14 @@ def validate_skill_structure() -> List[Tuple[str, bool, str]]:
     skill_dir = Path(__file__).parent.parent
 
     # Check required files
-    required_files = [
-        'SKILL.md',
-        'scripts/quality_checker.py',
-        'scripts/validate.py'
-    ]
+    required_files = ["SKILL.md", "scripts/quality_checker.py", "scripts/validate.py"]
 
     for file_path in required_files:
         full_path = skill_dir / file_path
         exists = full_path.exists()
-        results.append((
-            f"File exists: {file_path}",
-            exists,
-            f"Missing required file: {file_path}" if not exists else "OK"
-        ))
+        results.append(
+            (f"File exists: {file_path}", exists, f"Missing required file: {file_path}" if not exists else "OK")
+        )
 
     return results
 
@@ -38,21 +32,21 @@ def validate_yaml_frontmatter() -> List[Tuple[str, bool, str]]:
     """Validate SKILL.md YAML frontmatter."""
     results = []
     skill_dir = Path(__file__).parent.parent
-    skill_md = skill_dir / 'SKILL.md'
+    skill_md = skill_dir / "SKILL.md"
 
     if not skill_md.exists():
         return [("YAML frontmatter validation", False, "SKILL.md not found")]
 
-    with open(skill_md, 'r', encoding='utf-8') as f:
+    with open(skill_md, "r", encoding="utf-8") as f:
         content = f.read()
 
     # Check for YAML frontmatter
-    if not content.startswith('---'):
+    if not content.startswith("---"):
         results.append(("YAML frontmatter exists", False, "Missing opening ---"))
         return results
 
     # Extract frontmatter
-    parts = content.split('---', 2)
+    parts = content.split("---", 2)
     if len(parts) < 3:
         results.append(("YAML frontmatter format", False, "Missing closing ---"))
         return results
@@ -60,7 +54,7 @@ def validate_yaml_frontmatter() -> List[Tuple[str, bool, str]]:
     frontmatter = parts[1].strip()
 
     # Check required fields
-    required_fields = ['name:', 'description:', 'version:']
+    required_fields = ["name:", "description:", "version:"]
     for field in required_fields:
         if field in frontmatter:
             results.append((f"YAML field {field}", True, "OK"))
@@ -68,7 +62,7 @@ def validate_yaml_frontmatter() -> List[Tuple[str, bool, str]]:
             results.append((f"YAML field {field}", False, f"Missing {field}"))
 
     # Validate name
-    if 'name: go-pr-quality-gate' in frontmatter:
+    if "name: go-pr-quality-gate" in frontmatter:
         results.append(("Skill name correct", True, "OK"))
     else:
         results.append(("Skill name correct", False, "Expected 'go-pr-quality-gate'"))
@@ -80,7 +74,7 @@ def validate_reference_files() -> List[Tuple[str, bool, str]]:
     """Validate reference files exist and are valid JSON."""
     results = []
     skill_dir = Path(__file__).parent.parent
-    references_dir = skill_dir / 'references'
+    references_dir = skill_dir / "references"
 
     if not references_dir.exists():
         return [("References directory", False, "references/ directory not found")]
@@ -88,10 +82,7 @@ def validate_reference_files() -> List[Tuple[str, bool, str]]:
     results.append(("References directory exists", True, "OK"))
 
     # Expected reference files
-    expected_files = [
-        'common-lint-errors.json',
-        'makefile-targets.json'
-    ]
+    expected_files = ["common-lint-errors.json", "makefile-targets.json"]
 
     for ref_file in expected_files:
         ref_path = references_dir / ref_file
@@ -100,21 +91,13 @@ def validate_reference_files() -> List[Tuple[str, bool, str]]:
         if exists:
             # Validate JSON
             try:
-                with open(ref_path, 'r', encoding='utf-8') as f:
+                with open(ref_path, "r", encoding="utf-8") as f:
                     json.load(f)
                 results.append((f"Reference file valid: {ref_file}", True, "OK"))
             except json.JSONDecodeError as e:
-                results.append((
-                    f"Reference file valid: {ref_file}",
-                    False,
-                    f"Invalid JSON: {e}"
-                ))
+                results.append((f"Reference file valid: {ref_file}", False, f"Invalid JSON: {e}"))
         else:
-            results.append((
-                f"Reference file exists: {ref_file}",
-                False,
-                f"Missing reference file: {ref_file}"
-            ))
+            results.append((f"Reference file exists: {ref_file}", False, f"Missing reference file: {ref_file}"))
 
     return results
 
@@ -123,20 +106,22 @@ def validate_script_executability() -> List[Tuple[str, bool, str]]:
     """Validate scripts are executable."""
     results = []
     skill_dir = Path(__file__).parent.parent
-    scripts_dir = skill_dir / 'scripts'
+    scripts_dir = skill_dir / "scripts"
 
     if not scripts_dir.exists():
         return [("Scripts directory", False, "scripts/ directory not found")]
 
-    python_scripts = list(scripts_dir.glob('*.py'))
+    python_scripts = list(scripts_dir.glob("*.py"))
     for script in python_scripts:
         # Check if file has execute permissions
         is_executable = script.stat().st_mode & 0o111 != 0
-        results.append((
-            f"Script executable: {script.name}",
-            is_executable,
-            f"Script not executable: {script.name}" if not is_executable else "OK"
-        ))
+        results.append(
+            (
+                f"Script executable: {script.name}",
+                is_executable,
+                f"Script not executable: {script.name}" if not is_executable else "OK",
+            )
+        )
 
     return results
 
@@ -154,15 +139,11 @@ def validate_script_imports() -> List[Tuple[str, bool, str]]:
         import subprocess
         import sys
         from pathlib import Path
-        from typing import Dict, List, Any, Optional, Tuple
+        from typing import Any, Dict, List, Optional, Tuple
 
         results.append(("Required modules importable", True, "OK"))
     except ImportError as e:
-        results.append((
-            "Required modules importable",
-            False,
-            f"Import error: {e}"
-        ))
+        results.append(("Required modules importable", False, f"Import error: {e}"))
 
     return results
 
@@ -182,7 +163,7 @@ def run_all_validations() -> bool:
         ("YAML Frontmatter", validate_yaml_frontmatter),
         ("Reference Files", validate_reference_files),
         ("Script Executability", validate_script_executability),
-        ("Script Imports", validate_script_imports)
+        ("Script Imports", validate_script_imports),
     ]
 
     all_passed = True
@@ -224,5 +205,5 @@ def main():
         sys.exit(2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

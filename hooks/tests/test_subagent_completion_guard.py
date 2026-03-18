@@ -12,8 +12,6 @@ import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 # ---------------------------------------------------------------------------
 # Import the module under test
 # ---------------------------------------------------------------------------
@@ -73,6 +71,7 @@ class TestCaptureWorktreeMetadata:
         responses maps a key string (matched against the args) to a mock result.
         Keys are checked with substring matching against the joined args.
         """
+
         def _dispatch(*args, **kwargs):
             cmd = args[0] if args else kwargs.get("args", [])
             cmd_str = " ".join(cmd)
@@ -81,6 +80,7 @@ class TestCaptureWorktreeMetadata:
                     return result
             # Default: command not recognized, return failure
             return _subprocess_result(returncode=1)
+
         return _dispatch
 
     def test_not_a_git_repo_returns_empty(self):
@@ -93,25 +93,29 @@ class TestCaptureWorktreeMetadata:
     def test_main_repo_not_worktree_returns_empty(self):
         """Main repo (git_dir == common_dir) returns empty dict."""
         with patch("subprocess.run") as mock_run:
-            mock_run.side_effect = self._mock_git_responses({
-                "--is-inside-work-tree": _subprocess_result(stdout="true\n"),
-                "--git-common-dir": _subprocess_result(stdout="/repo/.git\n"),
-                "--git-dir": _subprocess_result(stdout="/repo/.git\n"),
-            })
+            mock_run.side_effect = self._mock_git_responses(
+                {
+                    "--is-inside-work-tree": _subprocess_result(stdout="true\n"),
+                    "--git-common-dir": _subprocess_result(stdout="/repo/.git\n"),
+                    "--git-dir": _subprocess_result(stdout="/repo/.git\n"),
+                }
+            )
             result = capture_worktree_metadata("/repo")
         assert result == {}
 
     def test_worktree_detected_with_commits(self):
         """Worktree with commits and no uncommitted changes."""
         with patch("subprocess.run") as mock_run:
-            mock_run.side_effect = self._mock_git_responses({
-                "--is-inside-work-tree": _subprocess_result(stdout="true\n"),
-                "--git-common-dir": _subprocess_result(stdout="/repo/.git\n"),
-                "--git-dir": _subprocess_result(stdout="/repo/.git/worktrees/feat-audit\n"),
-                "symbolic-ref": _subprocess_result(stdout="feat/audit-impl\n"),
-                "rev-list": _subprocess_result(stdout="3\n"),
-                "--porcelain": _subprocess_result(stdout=""),
-            })
+            mock_run.side_effect = self._mock_git_responses(
+                {
+                    "--is-inside-work-tree": _subprocess_result(stdout="true\n"),
+                    "--git-common-dir": _subprocess_result(stdout="/repo/.git\n"),
+                    "--git-dir": _subprocess_result(stdout="/repo/.git/worktrees/feat-audit\n"),
+                    "symbolic-ref": _subprocess_result(stdout="feat/audit-impl\n"),
+                    "rev-list": _subprocess_result(stdout="3\n"),
+                    "--porcelain": _subprocess_result(stdout=""),
+                }
+            )
             result = capture_worktree_metadata("/tmp/worktree-feat-audit")
 
         assert result["is_worktree"] is True
@@ -124,14 +128,16 @@ class TestCaptureWorktreeMetadata:
     def test_worktree_with_uncommitted_files(self):
         """Worktree with uncommitted changes detected."""
         with patch("subprocess.run") as mock_run:
-            mock_run.side_effect = self._mock_git_responses({
-                "--is-inside-work-tree": _subprocess_result(stdout="true\n"),
-                "--git-common-dir": _subprocess_result(stdout="/repo/.git\n"),
-                "--git-dir": _subprocess_result(stdout="/repo/.git/worktrees/wt\n"),
-                "symbolic-ref": _subprocess_result(stdout="feat/metrics\n"),
-                "rev-list": _subprocess_result(stdout="1\n"),
-                "--porcelain": _subprocess_result(stdout=" M file1.go\n M file2.go\n?? new.txt\n"),
-            })
+            mock_run.side_effect = self._mock_git_responses(
+                {
+                    "--is-inside-work-tree": _subprocess_result(stdout="true\n"),
+                    "--git-common-dir": _subprocess_result(stdout="/repo/.git\n"),
+                    "--git-dir": _subprocess_result(stdout="/repo/.git/worktrees/wt\n"),
+                    "symbolic-ref": _subprocess_result(stdout="feat/metrics\n"),
+                    "rev-list": _subprocess_result(stdout="1\n"),
+                    "--porcelain": _subprocess_result(stdout=" M file1.go\n M file2.go\n?? new.txt\n"),
+                }
+            )
             result = capture_worktree_metadata("/tmp/wt")
 
         assert result["is_worktree"] is True
@@ -141,14 +147,16 @@ class TestCaptureWorktreeMetadata:
     def test_worktree_zero_commits_no_changes(self):
         """Worktree with no commits and no uncommitted changes (empty worktree)."""
         with patch("subprocess.run") as mock_run:
-            mock_run.side_effect = self._mock_git_responses({
-                "--is-inside-work-tree": _subprocess_result(stdout="true\n"),
-                "--git-common-dir": _subprocess_result(stdout="/repo/.git\n"),
-                "--git-dir": _subprocess_result(stdout="/repo/.git/worktrees/empty\n"),
-                "symbolic-ref": _subprocess_result(stdout="feat/noop\n"),
-                "rev-list": _subprocess_result(stdout="0\n"),
-                "--porcelain": _subprocess_result(stdout=""),
-            })
+            mock_run.side_effect = self._mock_git_responses(
+                {
+                    "--is-inside-work-tree": _subprocess_result(stdout="true\n"),
+                    "--git-common-dir": _subprocess_result(stdout="/repo/.git\n"),
+                    "--git-dir": _subprocess_result(stdout="/repo/.git/worktrees/empty\n"),
+                    "symbolic-ref": _subprocess_result(stdout="feat/noop\n"),
+                    "rev-list": _subprocess_result(stdout="0\n"),
+                    "--porcelain": _subprocess_result(stdout=""),
+                }
+            )
             result = capture_worktree_metadata("/tmp/empty")
 
         assert result["is_worktree"] is True
@@ -158,14 +166,16 @@ class TestCaptureWorktreeMetadata:
     def test_detached_head_in_worktree(self):
         """Worktree with detached HEAD — branch is empty string."""
         with patch("subprocess.run") as mock_run:
-            mock_run.side_effect = self._mock_git_responses({
-                "--is-inside-work-tree": _subprocess_result(stdout="true\n"),
-                "--git-common-dir": _subprocess_result(stdout="/repo/.git\n"),
-                "--git-dir": _subprocess_result(stdout="/repo/.git/worktrees/detached\n"),
-                "symbolic-ref": _subprocess_result(returncode=128, stdout=""),
-                "rev-list": _subprocess_result(returncode=128),
-                "--porcelain": _subprocess_result(stdout=""),
-            })
+            mock_run.side_effect = self._mock_git_responses(
+                {
+                    "--is-inside-work-tree": _subprocess_result(stdout="true\n"),
+                    "--git-common-dir": _subprocess_result(stdout="/repo/.git\n"),
+                    "--git-dir": _subprocess_result(stdout="/repo/.git/worktrees/detached\n"),
+                    "symbolic-ref": _subprocess_result(returncode=128, stdout=""),
+                    "rev-list": _subprocess_result(returncode=128),
+                    "--porcelain": _subprocess_result(stdout=""),
+                }
+            )
             result = capture_worktree_metadata("/tmp/detached")
 
         assert result["is_worktree"] is True
@@ -213,11 +223,13 @@ class TestCaptureWorktreeMetadata:
     def test_common_dir_failure_returns_empty(self):
         """If --git-common-dir fails, return empty."""
         with patch("subprocess.run") as mock_run:
-            mock_run.side_effect = self._mock_git_responses({
-                "--is-inside-work-tree": _subprocess_result(stdout="true\n"),
-                "--git-common-dir": _subprocess_result(returncode=1),
-                "--git-dir": _subprocess_result(stdout="/repo/.git\n"),
-            })
+            mock_run.side_effect = self._mock_git_responses(
+                {
+                    "--is-inside-work-tree": _subprocess_result(stdout="true\n"),
+                    "--git-common-dir": _subprocess_result(returncode=1),
+                    "--git-dir": _subprocess_result(stdout="/repo/.git\n"),
+                }
+            )
             result = capture_worktree_metadata("/repo")
         assert result == {}
 
@@ -304,8 +316,7 @@ class TestRecordWorktreeLearning:
     def test_no_branch_does_nothing(self):
         """Worktree detected but no branch (detached HEAD) — skip recording."""
         record_worktree_learning(
-            {"is_worktree": True, "branch": "", "worktree_path": "/tmp/wt",
-             "commits_ahead": 0, "uncommitted_files": 0},
+            {"is_worktree": True, "branch": "", "worktree_path": "/tmp/wt", "commits_ahead": 0, "uncommitted_files": 0},
             "some-agent",
         )
 
@@ -375,7 +386,7 @@ class TestCheckBranchSafety:
         with patch("subprocess.run") as mock_run:
             mock_run.side_effect = [
                 _subprocess_result(stdout="master\n"),  # symbolic-ref
-                _subprocess_result(stdout=""),           # git log (empty)
+                _subprocess_result(stdout=""),  # git log (empty)
             ]
             result = check_branch_safety("/repo")
 
@@ -426,9 +437,7 @@ class TestCheckBranchSafety:
         with patch("subprocess.run") as mock_run:
             mock_run.side_effect = [
                 _subprocess_result(stdout="master\n"),
-                _subprocess_result(
-                    stdout="aaa hotfix [APPROVED-DIRECT]\nbbb bad commit\n"
-                ),
+                _subprocess_result(stdout="aaa hotfix [APPROVED-DIRECT]\nbbb bad commit\n"),
             ]
             result = check_branch_safety("/repo")
 
@@ -498,26 +507,30 @@ class TestFindWriteToolInTranscript:
 
     def test_write_tool_at_content_block_index_0(self):
         """Write tool embedded in content[0] block."""
-        path = _make_transcript([
-            {
-                "content": [
-                    {"type": "tool_use", "name": "Write", "input": {"file_path": "/a.txt"}},
-                ]
-            }
-        ])
+        path = _make_transcript(
+            [
+                {
+                    "content": [
+                        {"type": "tool_use", "name": "Write", "input": {"file_path": "/a.txt"}},
+                    ]
+                }
+            ]
+        )
         result = find_write_tool_in_transcript(path)
         assert result == "Write"
 
     def test_write_tool_at_content_block_index_1_detected(self):
         """Write tool at content[1] — the original bug would miss this."""
-        path = _make_transcript([
-            {
-                "content": [
-                    {"type": "text", "text": "Some reasoning here"},
-                    {"type": "tool_use", "name": "Write", "input": {"file_path": "/b.txt"}},
-                ]
-            }
-        ])
+        path = _make_transcript(
+            [
+                {
+                    "content": [
+                        {"type": "text", "text": "Some reasoning here"},
+                        {"type": "tool_use", "name": "Write", "input": {"file_path": "/b.txt"}},
+                    ]
+                }
+            ]
+        )
         result = find_write_tool_in_transcript(path)
         assert result == "Write"
 
@@ -528,14 +541,16 @@ class TestFindWriteToolInTranscript:
         assert result is None
 
     def test_non_write_tool_in_content_blocks_ignored(self):
-        path = _make_transcript([
-            {
-                "content": [
-                    {"type": "tool_use", "name": "Bash", "input": {}},
-                    {"type": "tool_use", "name": "Read", "input": {}},
-                ]
-            }
-        ])
+        path = _make_transcript(
+            [
+                {
+                    "content": [
+                        {"type": "tool_use", "name": "Bash", "input": {}},
+                        {"type": "tool_use", "name": "Read", "input": {}},
+                    ]
+                }
+            ]
+        )
         assert find_write_tool_in_transcript(path) is None
 
     def test_missing_transcript_path_returns_none(self):
@@ -588,20 +603,17 @@ class TestIsProtectedOrgRepo:
     """Unit tests for is_protected_org_repo."""
 
     def test_matching_org_detected(self):
-        with patch("subprocess.run") as mock_run, \
-             patch.dict(os.environ, {"PROTECTED_ORGS": "my-company,acme-corp"}):
+        with patch("subprocess.run") as mock_run, patch.dict(os.environ, {"PROTECTED_ORGS": "my-company,acme-corp"}):
             mock_run.return_value = _subprocess_result(stdout="git@github.com:my-company/my-repo.git")
             assert is_protected_org_repo("/repo") is True
 
     def test_case_insensitive_match(self):
-        with patch("subprocess.run") as mock_run, \
-             patch.dict(os.environ, {"PROTECTED_ORGS": "My-Company"}):
+        with patch("subprocess.run") as mock_run, patch.dict(os.environ, {"PROTECTED_ORGS": "My-Company"}):
             mock_run.return_value = _subprocess_result(stdout="git@github.com:my-company/my-repo.git")
             assert is_protected_org_repo("/repo") is True
 
     def test_non_matching_org_not_detected(self):
-        with patch("subprocess.run") as mock_run, \
-             patch.dict(os.environ, {"PROTECTED_ORGS": "my-company"}):
+        with patch("subprocess.run") as mock_run, patch.dict(os.environ, {"PROTECTED_ORGS": "my-company"}):
             mock_run.return_value = _subprocess_result(stdout="git@github.com:other-org/my-repo.git")
             assert is_protected_org_repo("/repo") is False
 
@@ -614,16 +626,17 @@ class TestIsProtectedOrgRepo:
             assert is_protected_org_repo("/repo") is False
 
     def test_git_failure_returns_false(self):
-        with patch("subprocess.run") as mock_run, \
-             patch.dict(os.environ, {"PROTECTED_ORGS": "my-company"}):
+        with patch("subprocess.run") as mock_run, patch.dict(os.environ, {"PROTECTED_ORGS": "my-company"}):
             mock_run.return_value = _subprocess_result(returncode=128)
             assert is_protected_org_repo("/repo") is False
 
     def test_timeout_returns_false(self):
         import subprocess
 
-        with patch.dict(os.environ, {"PROTECTED_ORGS": "my-company"}), \
-             patch("subprocess.run", side_effect=subprocess.TimeoutExpired(cmd="git", timeout=1)):
+        with (
+            patch.dict(os.environ, {"PROTECTED_ORGS": "my-company"}),
+            patch("subprocess.run", side_effect=subprocess.TimeoutExpired(cmd="git", timeout=1)),
+        ):
             assert is_protected_org_repo("/repo") is False
 
 
@@ -631,46 +644,34 @@ class TestFindGatedCommandInTranscript:
     """Unit tests for the organization gated-command scanner."""
 
     def test_git_push_detected(self):
-        path = _make_transcript([
-            {"tool_name": "Bash", "tool_input": {"command": "git push origin main"}}
-        ])
+        path = _make_transcript([{"tool_name": "Bash", "tool_input": {"command": "git push origin main"}}])
         result = find_gated_command_in_transcript(path)
         assert result == "git push origin main"
 
     def test_gh_pr_merge_detected(self):
-        path = _make_transcript([
-            {"tool_name": "Bash", "tool_input": {"command": "gh pr merge 42 --squash"}}
-        ])
+        path = _make_transcript([{"tool_name": "Bash", "tool_input": {"command": "gh pr merge 42 --squash"}}])
         result = find_gated_command_in_transcript(path)
         assert result is not None
         assert "gh pr merge" in result
 
     def test_gh_pr_create_detected(self):
-        path = _make_transcript([
-            {"tool_name": "Bash", "tool_input": {"command": "gh pr create --title 'foo'"}}
-        ])
+        path = _make_transcript([{"tool_name": "Bash", "tool_input": {"command": "gh pr create --title 'foo'"}}])
         result = find_gated_command_in_transcript(path)
         assert result is not None
         assert "gh pr create" in result
 
     def test_safe_bash_command_not_detected(self):
-        path = _make_transcript([
-            {"tool_name": "Bash", "tool_input": {"command": "git status"}}
-        ])
+        path = _make_transcript([{"tool_name": "Bash", "tool_input": {"command": "git status"}}])
         assert find_gated_command_in_transcript(path) is None
 
     def test_tool_name_case_insensitive_bash(self):
         """tool_name='bash' (lowercase) should still be detected."""
-        path = _make_transcript([
-            {"tool_name": "bash", "tool_input": {"command": "git push origin main"}}
-        ])
+        path = _make_transcript([{"tool_name": "bash", "tool_input": {"command": "git push origin main"}}])
         result = find_gated_command_in_transcript(path)
         assert result is not None
 
     def test_non_bash_tool_not_checked(self):
-        path = _make_transcript([
-            {"tool_name": "Read", "tool_input": {"command": "git push"}}
-        ])
+        path = _make_transcript([{"tool_name": "Read", "tool_input": {"command": "git push"}}])
         assert find_gated_command_in_transcript(path) is None
 
     def test_empty_transcript_returns_none(self):
@@ -685,11 +686,8 @@ class TestCheckProtectedOrgWorkflow:
     """Integration of is_protected_org_repo + find_gated_command_in_transcript."""
 
     def test_protected_org_repo_with_git_push_blocks(self):
-        path = _make_transcript([
-            {"tool_name": "Bash", "tool_input": {"command": "git push origin main"}}
-        ])
-        with patch("subprocess.run") as mock_run, \
-             patch.dict(os.environ, {"PROTECTED_ORGS": "my-company"}):
+        path = _make_transcript([{"tool_name": "Bash", "tool_input": {"command": "git push origin main"}}])
+        with patch("subprocess.run") as mock_run, patch.dict(os.environ, {"PROTECTED_ORGS": "my-company"}):
             mock_run.return_value = _subprocess_result(stdout="git@github.com:my-company/repo.git")
             result = check_protected_org_workflow("/repo", path)
 
@@ -698,31 +696,23 @@ class TestCheckProtectedOrgWorkflow:
         assert "git push" in result
 
     def test_non_protected_org_repo_with_git_push_passes(self):
-        path = _make_transcript([
-            {"tool_name": "Bash", "tool_input": {"command": "git push origin main"}}
-        ])
-        with patch("subprocess.run") as mock_run, \
-             patch.dict(os.environ, {"PROTECTED_ORGS": "my-company"}):
+        path = _make_transcript([{"tool_name": "Bash", "tool_input": {"command": "git push origin main"}}])
+        with patch("subprocess.run") as mock_run, patch.dict(os.environ, {"PROTECTED_ORGS": "my-company"}):
             mock_run.return_value = _subprocess_result(stdout="git@github.com:other-org/repo.git")
             result = check_protected_org_workflow("/repo", path)
 
         assert result is None
 
     def test_protected_org_repo_without_gated_command_passes(self):
-        path = _make_transcript([
-            {"tool_name": "Bash", "tool_input": {"command": "git status"}}
-        ])
-        with patch("subprocess.run") as mock_run, \
-             patch.dict(os.environ, {"PROTECTED_ORGS": "my-company"}):
+        path = _make_transcript([{"tool_name": "Bash", "tool_input": {"command": "git status"}}])
+        with patch("subprocess.run") as mock_run, patch.dict(os.environ, {"PROTECTED_ORGS": "my-company"}):
             mock_run.return_value = _subprocess_result(stdout="git@github.com:my-company/repo.git")
             result = check_protected_org_workflow("/repo", path)
 
         assert result is None
 
     def test_no_protected_orgs_configured_passes(self):
-        path = _make_transcript([
-            {"tool_name": "Bash", "tool_input": {"command": "git push origin main"}}
-        ])
+        path = _make_transcript([{"tool_name": "Bash", "tool_input": {"command": "git push origin main"}}])
         with patch.dict(os.environ, {}, clear=True):
             result = check_protected_org_workflow("/repo", path)
 

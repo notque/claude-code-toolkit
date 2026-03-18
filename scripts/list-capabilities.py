@@ -80,9 +80,7 @@ def check_staleness(index_path: Path, generated: str | None, glob_pattern: str, 
         return False
 
     # Count files newer than the index
-    newer_count = sum(
-        1 for p in base.glob(glob_pattern) if p.is_file() and p.stat().st_mtime > index_mtime
-    )
+    newer_count = sum(1 for p in base.glob(glob_pattern) if p.is_file() and p.stat().st_mtime > index_mtime)
     if newer_count > 0:
         if "skill" in label.lower():
             regen_script = "scripts/generate-skill-index.py"
@@ -183,10 +181,15 @@ def cmd_summary(args) -> int:
     total_agents = len(agents_dict)
 
     if args.json_output:
-        print(json.dumps({
-            "skills": {"total": len(skills), "pipelines": len(pipelines), "standard": len(standard)},
-            "agents": {"total": total_agents},
-        }, indent=2))
+        print(
+            json.dumps(
+                {
+                    "skills": {"total": len(skills), "pipelines": len(pipelines), "standard": len(standard)},
+                    "agents": {"total": total_agents},
+                },
+                indent=2,
+            )
+        )
     else:
         print(f"Skills:  {len(skills):>4} total ({len(pipelines)} pipelines, {len(standard)} standard)")
         print(f"Agents:  {total_agents:>4} total")
@@ -230,10 +233,7 @@ def cmd_skills(args) -> int:
     cols = [("NAME", 24), ("TRIGGERS", 22), ("DESCRIPTION", 55)]
 
     if args.markdown:
-        rows = [
-            [s.get("name", ""), ",".join(s.get("triggers", [])), s.get("description", "")]
-            for s in skills
-        ]
+        rows = [[s.get("name", ""), ",".join(s.get("triggers", [])), s.get("description", "")] for s in skills]
         print(_markdown_table(["NAME", "TRIGGERS", "DESCRIPTION"], rows))
     else:
         print(_table_header(cols))
@@ -285,10 +285,7 @@ def cmd_agents(args) -> int:
     cols = [("NAME", 30), ("TRIGGERS", 22), ("DESCRIPTION", 55)]
 
     if args.markdown:
-        rows = [
-            [a.get("name", ""), ",".join(a.get("triggers", [])), a.get("short_description", "")]
-            for a in agents
-        ]
+        rows = [[a.get("name", ""), ",".join(a.get("triggers", [])), a.get("short_description", "")] for a in agents]
         print(_markdown_table(["NAME", "TRIGGERS", "DESCRIPTION"], rows))
     else:
         print(_table_header(cols))
@@ -321,10 +318,7 @@ def cmd_pipelines(args) -> int:
     cols = [("NAME", 26), ("PHASES", 7), ("DESCRIPTION", 55)]
 
     if args.markdown:
-        rows = [
-            [s.get("name", ""), _extract_phases(s), s.get("description", "")]
-            for s in pipelines
-        ]
+        rows = [[s.get("name", ""), _extract_phases(s), s.get("description", "")] for s in pipelines]
         print(_markdown_table(["NAME", "PHASES", "DESCRIPTION"], rows))
     else:
         print(_table_header(cols))
@@ -413,12 +407,14 @@ def cmd_search(args) -> int:
         else:
             continue
 
-        results.append({
-            "match": match_field,
-            "type": "skill",
-            "name": name,
-            "description": desc,
-        })
+        results.append(
+            {
+                "match": match_field,
+                "type": "skill",
+                "name": name,
+                "description": desc,
+            }
+        )
 
     for agent_name, info in agents_dict.items():
         desc = info.get("short_description", "")
@@ -433,12 +429,14 @@ def cmd_search(args) -> int:
         else:
             continue
 
-        results.append({
-            "match": match_field,
-            "type": "agent",
-            "name": agent_name,
-            "description": desc,
-        })
+        results.append(
+            {
+                "match": match_field,
+                "type": "agent",
+                "name": agent_name,
+                "description": desc,
+            }
+        )
 
     # Sort: name > trigger > description
     _order = {"name": 0, "trigger": 1, "description": 2}
@@ -541,12 +539,14 @@ def _route_prompt(prompt_text: str) -> dict:
                     best_conf = conf
                 matched.append(trigger)
         if matched:
-            candidates.append({
-                "agent": agent,
-                "skill": effective_skill,
-                "confidence": best_conf,
-                "triggers_matched": matched,
-            })
+            candidates.append(
+                {
+                    "agent": agent,
+                    "skill": effective_skill,
+                    "confidence": best_conf,
+                    "triggers_matched": matched,
+                }
+            )
 
     for entry in config.get("domain_agents", []):
         _score_entry(entry, "agent", "default_skill")

@@ -60,8 +60,10 @@ def cmd_record(args):
         project_path=args.project_path,
     )
     action = "Updated" if not result["is_new"] else "Recorded"
-    print(f"{action}: [{result['category']}] {result['topic']}/{result['key']} "
-          f"(confidence: {result['confidence']:.2f}, observations: {result['observation_count']})")
+    print(
+        f"{action}: [{result['category']}] {result['topic']}/{result['key']} "
+        f"(confidence: {result['confidence']:.2f}, observations: {result['observation_count']})"
+    )
 
 
 def cmd_query(args):
@@ -223,15 +225,15 @@ def cmd_migrate(args):
                 print(f"  error: {e}")
 
     stats = get_stats()
-    print(f"\nPost-migration: {stats['total_learnings']} total learnings, "
-          f"{stats['high_confidence']} high confidence, "
-          f"{stats['sessions_tracked']} sessions")
+    print(
+        f"\nPost-migration: {stats['total_learnings']} total learnings, "
+        f"{stats['high_confidence']} high confidence, "
+        f"{stats['sessions_tracked']} sessions"
+    )
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Learning Database CLI — manage the unified knowledge store"
-    )
+    parser = argparse.ArgumentParser(description="Learning Database CLI — manage the unified knowledge store")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # record
@@ -239,9 +241,12 @@ def main():
     p_record.add_argument("topic", help="Domain category (e.g., go-patterns, debugging)")
     p_record.add_argument("key", help="Short identifier (e.g., mutex-over-atomics)")
     p_record.add_argument("value", help="Learning content")
-    p_record.add_argument("--category", default="design",
-                          choices=["error", "pivot", "review", "design", "debug", "gotcha", "effectiveness"],
-                          help="Learning category")
+    p_record.add_argument(
+        "--category",
+        default="design",
+        choices=["error", "pivot", "review", "design", "debug", "gotcha", "effectiveness"],
+        help="Learning category",
+    )
     p_record.add_argument("--confidence", type=float, default=None)
     p_record.add_argument("--tags", help="Comma-separated tags")
     p_record.add_argument("--source", help="Source identifier")

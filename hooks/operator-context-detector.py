@@ -174,7 +174,7 @@ def _read_git_branch() -> str | None:
             try:
                 content = head_file.read_text(encoding="utf-8").strip()
                 if content.startswith("ref: refs/heads/"):
-                    return content[len("ref: refs/heads/"):]
+                    return content[len("ref: refs/heads/") :]
                 # Detached HEAD (commit hash) - not a branch
                 return None
             except OSError:
@@ -281,9 +281,7 @@ def main():
             print(f"[operator-context] Error: {e}", file=sys.stderr)
             traceback.print_exc(file=sys.stderr)
         else:
-            print(
-                f"[operator-context] Error: {type(e).__name__}: {e}", file=sys.stderr
-            )
+            print(f"[operator-context] Error: {type(e).__name__}: {e}", file=sys.stderr)
         empty_output(EVENT_NAME).print_and_exit()
 
 

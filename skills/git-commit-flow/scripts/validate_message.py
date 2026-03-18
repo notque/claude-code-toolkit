@@ -332,15 +332,15 @@ def validate_message(
 
     # Run validations
     if check_conventional:
-        conv_valid, conv_issues = validate_conventional_commit(message)
+        _conv_valid, conv_issues = validate_conventional_commit(message)
         all_issues.extend(conv_issues)
 
     if check_banned:
-        banned_valid, banned_issues = validate_banned_patterns(message, banned_patterns)
+        _banned_valid, banned_issues = validate_banned_patterns(message, banned_patterns)
         all_issues.extend(banned_issues)
 
     if check_formatting:
-        format_valid, format_issues = validate_body_formatting(message)
+        _format_valid, format_issues = validate_body_formatting(message)
         all_issues.extend(format_issues)
 
     # Determine overall validity

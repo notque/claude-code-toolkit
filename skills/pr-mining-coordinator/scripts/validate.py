@@ -73,9 +73,7 @@ def validate_yaml_frontmatter() -> List[Tuple[str, bool, str]]:
     if "name: pr-mining-coordinator" in frontmatter:
         results.append(("Skill name correct", True, "OK"))
     else:
-        results.append(
-            ("Skill name correct", False, "Name should be 'pr-mining-coordinator'")
-        )
+        results.append(("Skill name correct", False, "Name should be 'pr-mining-coordinator'"))
 
     return results
 
@@ -142,9 +140,7 @@ def validate_github_token() -> List[Tuple[str, bool, str]]:
             token = result.stdout.strip()
             # Check token starts with expected prefix
             if token.startswith("ghp_") or token.startswith("github_pat_"):
-                results.append(
-                    ("GitHub token available", True, "Token found in macOS keychain")
-                )
+                results.append(("GitHub token available", True, "Token found in macOS keychain"))
             else:
                 results.append(
                     (
@@ -207,10 +203,7 @@ def run_all_validations() -> bool:
             if not passed:
                 print(f"         {message}")
                 # Don't fail overall for missing directories (created on demand)
-                if (
-                    "will be created on first use" not in message
-                    and category != "GitHub Token"
-                ):
+                if "will be created on first use" not in message and category != "GitHub Token":
                     all_passed = False
 
     # Summary

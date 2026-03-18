@@ -486,7 +486,7 @@ def main():
                     high_issues = [i for i in result.issues if i[0] == "HIGH"]
                     if high_issues:
                         print(f"  Issues: {len(high_issues)} HIGH priority")
-                        for priority, issue in high_issues[:2]:
+                        for _priority, issue in high_issues[:2]:
                             print(f"    - {issue}")
                 print()
 

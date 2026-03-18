@@ -131,7 +131,7 @@ def _extract_domain(path: Path) -> str:
     """
     stem = path.stem  # filename without extension
     if stem.startswith("pipeline-"):
-        return stem[len("pipeline-"):]
+        return stem[len("pipeline-") :]
     return stem
 
 
@@ -386,9 +386,7 @@ def cmd_list(_args: argparse.Namespace) -> int:
                 "hash": _compute_hash(md_file),
                 "domain": _extract_domain(md_file),
                 "status": _extract_status(content),
-                "last_modified": datetime.fromtimestamp(
-                    md_file.stat().st_mtime, tz=timezone.utc
-                ).isoformat(),
+                "last_modified": datetime.fromtimestamp(md_file.stat().st_mtime, tz=timezone.utc).isoformat(),
             }
         )
 

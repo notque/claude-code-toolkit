@@ -185,12 +185,17 @@ def main():
 
             # Re-record to boost confidence
             record_learning(
-                topic=error_type, key=signature,
+                topic=error_type,
+                key=signature,
                 value=f"{error_message[:200]} → {solution}",
-                category="error", source="hook:error-learner",
-                source_detail=source_detail, project_path=cwd,
-                error_signature=signature, error_type=error_type,
-                fix_type=fix_type, fix_action=fix_action,
+                category="error",
+                source="hook:error-learner",
+                source_detail=source_detail,
+                project_path=cwd,
+                error_signature=signature,
+                error_type=error_type,
+                fix_type=fix_type,
+                fix_action=fix_action,
             )
         else:
             # New error — record with default fix action
@@ -215,12 +220,17 @@ def main():
             )
 
             record_learning(
-                topic=error_type, key=signature,
+                topic=error_type,
+                key=signature,
                 value=f"{error_message[:200]} → {solution}",
-                category="error", source="hook:error-learner",
-                source_detail=source_detail, project_path=cwd,
-                error_signature=signature, error_type=error_type,
-                fix_type=fix_type, fix_action=fix_action,
+                category="error",
+                source="hook:error-learner",
+                source_detail=source_detail,
+                project_path=cwd,
+                error_signature=signature,
+                error_type=error_type,
+                fix_type=fix_type,
+                fix_action=fix_action,
             )
 
     except (json.JSONDecodeError, Exception):

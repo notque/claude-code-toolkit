@@ -152,11 +152,13 @@ def read_l2_files(retro_dir: Path) -> list[dict]:
                         tags = {t.strip().lower() for t in tag_str.split(",")}
                         break
 
-                results.append({
-                    "name": f.stem,
-                    "tags": tags,
-                    "content": content,
-                })
+                results.append(
+                    {
+                        "name": f.stem,
+                        "tags": tags,
+                        "content": content,
+                    }
+                )
             except OSError:
                 continue
     except OSError:
@@ -176,15 +178,82 @@ def extract_prompt_keywords(prompt: str) -> set[str]:
     words = set(re.findall(r"\b[a-z][a-z0-9_-]+\b", prompt.lower()))
     # Remove very common stop words
     stop_words = {
-        "the", "a", "an", "is", "are", "was", "were", "be", "been",
-        "this", "that", "these", "those", "it", "its", "and", "or",
-        "but", "not", "for", "with", "from", "into", "can", "will",
-        "should", "would", "could", "have", "has", "had", "do", "does",
-        "did", "to", "of", "in", "on", "at", "by", "as", "if", "so",
-        "up", "out", "about", "all", "some", "any", "no", "my", "your",
-        "we", "us", "our", "they", "them", "their", "me", "you", "he",
-        "she", "him", "her", "also", "just", "like", "need", "want",
-        "make", "new", "use", "using", "please", "let", "get",
+        "the",
+        "a",
+        "an",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "this",
+        "that",
+        "these",
+        "those",
+        "it",
+        "its",
+        "and",
+        "or",
+        "but",
+        "not",
+        "for",
+        "with",
+        "from",
+        "into",
+        "can",
+        "will",
+        "should",
+        "would",
+        "could",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "to",
+        "of",
+        "in",
+        "on",
+        "at",
+        "by",
+        "as",
+        "if",
+        "so",
+        "up",
+        "out",
+        "about",
+        "all",
+        "some",
+        "any",
+        "no",
+        "my",
+        "your",
+        "we",
+        "us",
+        "our",
+        "they",
+        "them",
+        "their",
+        "me",
+        "you",
+        "he",
+        "she",
+        "him",
+        "her",
+        "also",
+        "just",
+        "like",
+        "need",
+        "want",
+        "make",
+        "new",
+        "use",
+        "using",
+        "please",
+        "let",
+        "get",
     }
     return words - stop_words
 
@@ -201,11 +270,7 @@ def is_trivial(prompt: str) -> bool:
         return True
 
     # Starts with trivial prefix
-    for pattern in SKIP_PREFIXES:
-        if pattern.search(prompt):
-            return True
-
-    return False
+    return any(pattern.search(prompt) for pattern in SKIP_PREFIXES)
 
 
 def detect_project_languages() -> set[str]:
@@ -460,7 +525,10 @@ def main():
             if score >= L2_RELEVANCE_THRESHOLD:
                 relevant_l2.append({**l2, "score": score})
                 if debug:
-                    print(f"[retro] L2 relevant: {l2['name']} (score={score}, tags={l2['tags'] & prompt_keywords})", file=sys.stderr)
+                    print(
+                        f"[retro] L2 relevant: {l2['name']} (score={score}, tags={l2['tags'] & prompt_keywords})",
+                        file=sys.stderr,
+                    )
             elif debug:
                 print(f"[retro] L2 skipped: {l2['name']} (score={score})", file=sys.stderr)
 

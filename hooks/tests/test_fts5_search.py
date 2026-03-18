@@ -55,17 +55,14 @@ class TestFTS5SchemaCreation:
     def test_fts_table_exists(self):
         db.init_db()
         with db.get_connection() as conn:
-            row = conn.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='learnings_fts'"
-            ).fetchone()
+            row = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='learnings_fts'").fetchone()
             assert row is not None, "learnings_fts table should exist"
 
     def test_triggers_exist(self):
         db.init_db()
         with db.get_connection() as conn:
             triggers = {
-                r["name"]
-                for r in conn.execute("SELECT name FROM sqlite_master WHERE type='trigger'").fetchall()
+                r["name"] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='trigger'").fetchall()
             }
             assert "learnings_ai" in triggers, "INSERT trigger missing"
             assert "learnings_ad" in triggers, "DELETE trigger missing"
@@ -85,8 +82,10 @@ class TestTriggerSync:
         _record("go-patterns", "mutex-usage", "Short value", tags=["go"])
         # Re-record with longer value triggers UPDATE path
         _record(
-            "go-patterns", "mutex-usage",
-            "Always use sync.Mutex for shared state access in goroutines", tags=["go"],
+            "go-patterns",
+            "mutex-usage",
+            "Always use sync.Mutex for shared state access in goroutines",
+            tags=["go"],
         )
 
         results = db.search_learnings("goroutines")
@@ -278,8 +277,14 @@ class TestMigrationBackfill:
         # Insert rows before FTS exists
         conn.execute(
             "INSERT INTO learnings (topic, key, value, category, source, tags) VALUES (?, ?, ?, ?, ?, ?)",
-            ("pre-existing", "old-entry", "This is a pre-existing learning about goroutines",
-             "design", "test", "go,concurrency"),
+            (
+                "pre-existing",
+                "old-entry",
+                "This is a pre-existing learning about goroutines",
+                "design",
+                "test",
+                "go,concurrency",
+            ),
         )
         conn.commit()
         conn.close()

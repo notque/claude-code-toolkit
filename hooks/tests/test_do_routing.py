@@ -91,10 +91,7 @@ def find_skill(prompt: str) -> Optional[str]:
 
 def is_trivial(prompt: str) -> bool:
     """Check if prompt is trivial and doesn't need routing."""
-    for pattern in TRIVIAL_PATTERNS:
-        if pattern.search(prompt):
-            return True
-    return False
+    return any(pattern.search(prompt) for pattern in TRIVIAL_PATTERNS)
 
 
 def should_parallelize(prompt: str) -> bool:

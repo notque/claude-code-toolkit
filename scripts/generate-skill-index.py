@@ -114,9 +114,7 @@ def extract_short_description(description: str) -> str:
 
     # First sentence - but don't split on dots in identifiers like t.Run, Next.js,
     # config.fish, CLAUDE.md (dot followed by lowercase letter or known extension)
-    match = re.match(
-        r"((?:[^.!?]|\.(?=[a-zA-Z0-9_]))+[.!?])", desc
-    )
+    match = re.match(r"((?:[^.!?]|\.(?=[a-zA-Z0-9_]))+[.!?])", desc)
     if match and len(match.group(1)) <= 200:
         return match.group(1).strip()
 

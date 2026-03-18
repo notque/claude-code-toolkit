@@ -57,9 +57,7 @@ class FileValidator:
             # Count print statements (excluding function definitions)
             print_count = content.count("print(")
             if print_count > 0:
-                issues.append(
-                    f"Found {print_count} print() statements (consider using logging)"
-                )
+                issues.append(f"Found {print_count} print() statements (consider using logging)")
 
         # Check for TODO/FIXME
         if "TODO" in content or "FIXME" in content:
@@ -77,11 +75,7 @@ class FileValidator:
             import ast
 
             tree = ast.parse(content)
-            import_count = sum(
-                1
-                for node in ast.walk(tree)
-                if isinstance(node, (ast.Import, ast.ImportFrom))
-            )
+            import_count = sum(1 for node in ast.walk(tree) if isinstance(node, (ast.Import, ast.ImportFrom)))
             self.log(f"✓ Found {import_count} import statements")
         except SyntaxError as e:
             return False, f"AST parse error: {e}"
@@ -163,9 +157,7 @@ class FileValidator:
 
         if "fmt.Println(" in content:
             println_count = content.count("fmt.Println(")
-            issues.append(
-                f"Found {println_count} fmt.Println() statements (use structured logging)"
-            )
+            issues.append(f"Found {println_count} fmt.Println() statements (use structured logging)")
 
         if "TODO" in content or "FIXME" in content:
             todo_count = content.count("TODO") + content.count("FIXME")
@@ -235,9 +227,7 @@ class ProjectValidator:
 
         # Check if pytest is available
         try:
-            result = subprocess.run(
-                ["pytest", "--version"], capture_output=True, timeout=5
-            )
+            result = subprocess.run(["pytest", "--version"], capture_output=True, timeout=5)
             if result.returncode != 0:
                 return True, "pytest not available, skipping tests", ""
         except (FileNotFoundError, subprocess.TimeoutExpired):
@@ -292,9 +282,7 @@ class ProjectValidator:
 
         # Check if npm is available
         try:
-            result = subprocess.run(
-                ["npm", "--version"], capture_output=True, timeout=5
-            )
+            result = subprocess.run(["npm", "--version"], capture_output=True, timeout=5)
             if result.returncode != 0:
                 return True, "npm not available, skipping tests", ""
         except (FileNotFoundError, subprocess.TimeoutExpired):
@@ -350,9 +338,7 @@ def main():
         default=Path.cwd(),
         help="Project root directory (default: current directory)",
     )
-    parser.add_argument(
-        "--run-tests", action="store_true", help="Run project test suite"
-    )
+    parser.add_argument("--run-tests", action="store_true", help="Run project test suite")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     parser.add_argument(
         "--output-format",
@@ -396,9 +382,7 @@ def main():
             print(f"  {status} - {file_path}")
             print(f"         {message}")
 
-            results["file_validations"].append(
-                {"file": str(file_path), "passed": passed, "message": message}
-            )
+            results["file_validations"].append({"file": str(file_path), "passed": passed, "message": message})
 
             if passed:
                 results["checks_passed"] += 1
@@ -442,9 +426,7 @@ def main():
 
     # Summary
     print("=" * 60)
-    print(
-        f"SUMMARY: {results['checks_passed']}/{results['checks_total']} checks passed"
-    )
+    print(f"SUMMARY: {results['checks_passed']}/{results['checks_total']} checks passed")
 
     if results["success"]:
         print("✓ Validation PASSED")

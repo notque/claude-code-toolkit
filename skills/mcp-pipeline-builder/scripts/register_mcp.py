@@ -116,14 +116,14 @@ def parse_env_vars(env_list: list[str]) -> dict[str, str]:
     for item in env_list:
         if "=" not in item:
             print(
-                f"ERROR: --env value must be KEY=VALUE format, got: {repr(item)}",
+                f"ERROR: --env value must be KEY=VALUE format, got: {item!r}",
                 file=sys.stderr,
             )
             sys.exit(1)
         key, _, value = item.partition("=")
         if not key:
             print(
-                f"ERROR: --env key cannot be empty, got: {repr(item)}",
+                f"ERROR: --env key cannot be empty, got: {item!r}",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -215,7 +215,7 @@ def main() -> None:
             "Existing entry was NOT modified. To update it, edit the config manually.",
             file=sys.stderr,
         )
-        print(f"\nExisting entry:", file=sys.stderr)
+        print("\nExisting entry:", file=sys.stderr)
         print(
             json.dumps({args.name: config["mcpServers"][args.name]}, indent=2),
             file=sys.stderr,

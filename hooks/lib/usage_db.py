@@ -20,7 +20,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-
 # Database location - same directory as patterns.db
 _DEFAULT_DB_DIR = Path.home() / ".claude" / "learning"
 

@@ -16,7 +16,6 @@ Exit codes:
 from __future__ import annotations
 
 import json
-import os
 import subprocess
 import sys
 import tempfile
@@ -215,7 +214,9 @@ def test_09_list_subcommand() -> None:
 def test_10_compliance_clean_file() -> None:
     """[10] adr-compliance.py: clean file (expect PASS)"""
     if not STEP_MENU.exists() or not SPEC_FORMAT.exists():
-        report(10, "adr-compliance.py: clean file (expect PASS)", False, "Missing step-menu.md or pipeline-spec-format.md")
+        report(
+            10, "adr-compliance.py: clean file (expect PASS)", False, "Missing step-menu.md or pipeline-spec-format.md"
+        )
         return
 
     # Write a minimal clean file with no step names, no schema, no family values
@@ -240,12 +241,19 @@ Produce the final report.
         tmp_path = f.name
 
     try:
-        result = run([
-            sys.executable, str(ADR_COMPLIANCE), "check",
-            "--file", tmp_path,
-            "--step-menu", str(STEP_MENU),
-            "--spec-format", str(SPEC_FORMAT),
-        ])
+        result = run(
+            [
+                sys.executable,
+                str(ADR_COMPLIANCE),
+                "check",
+                "--file",
+                tmp_path,
+                "--step-menu",
+                str(STEP_MENU),
+                "--spec-format",
+                str(SPEC_FORMAT),
+            ]
+        )
         if result.returncode not in (0, 1):
             passed = False
             detail = f"unexpected rc={result.returncode}"
@@ -266,7 +274,12 @@ Produce the final report.
 def test_11_compliance_violation_file() -> None:
     """[11] adr-compliance.py: violation file (expect FAIL)"""
     if not STEP_MENU.exists() or not SPEC_FORMAT.exists():
-        report(11, "adr-compliance.py: violation file (expect FAIL)", False, "Missing step-menu.md or pipeline-spec-format.md")
+        report(
+            11,
+            "adr-compliance.py: violation file (expect FAIL)",
+            False,
+            "Missing step-menu.md or pipeline-spec-format.md",
+        )
         return
 
     # Write a file with a bogus schema value that will trigger a violation
@@ -286,12 +299,19 @@ def test_11_compliance_violation_file() -> None:
         tmp_path = f.name
 
     try:
-        result = run([
-            sys.executable, str(ADR_COMPLIANCE), "check",
-            "--file", tmp_path,
-            "--step-menu", str(STEP_MENU),
-            "--spec-format", str(SPEC_FORMAT),
-        ])
+        result = run(
+            [
+                sys.executable,
+                str(ADR_COMPLIANCE),
+                "check",
+                "--file",
+                tmp_path,
+                "--step-menu",
+                str(STEP_MENU),
+                "--spec-format",
+                str(SPEC_FORMAT),
+            ]
+        )
         if result.returncode not in (0, 1):
             passed = False
             detail = f"unexpected rc={result.returncode}"
@@ -344,10 +364,12 @@ def test_13_hook_fires_on_pipeline_prompt() -> None:
             report(13, "hooks: adr-context-injector.py fires on pipeline prompt", False, "Could not register ADR")
             return
 
-    payload = json.dumps({
-        "userMessage": "Create a new pipeline skill for the prometheus subdomain",
-        "cwd": str(REPO_ROOT),
-    })
+    payload = json.dumps(
+        {
+            "userMessage": "Create a new pipeline skill for the prometheus subdomain",
+            "cwd": str(REPO_ROOT),
+        }
+    )
 
     result = run([sys.executable, str(ADR_CONTEXT_INJECTOR)], input_data=payload)
     passed = result.returncode == 0 and "[adr-system]" in result.stdout
@@ -363,10 +385,12 @@ def test_14_hook_silent_on_unrelated_prompt() -> None:
 
     # Session must still exist from test 13; if not, we'll work without it
     # An unrelated prompt should produce no [adr-system] output
-    payload = json.dumps({
-        "userMessage": "What is the capital of France?",
-        "cwd": str(REPO_ROOT),
-    })
+    payload = json.dumps(
+        {
+            "userMessage": "What is the capital of France?",
+            "cwd": str(REPO_ROOT),
+        }
+    )
 
     result = run([sys.executable, str(ADR_CONTEXT_INJECTOR)], input_data=payload)
     # Hook must always exit 0; should NOT inject [adr-system] for an unrelated prompt
@@ -380,17 +404,22 @@ def test_15_adr_architecture_rules_section() -> None:
     if PRIMARY_ADR is None:
         report(15, "ADR validity: architecture-rules section has content", False, "No ADR file found")
         return
-    result = run([
-        sys.executable, str(ADR_QUERY), "context",
-        "--adr", str(PRIMARY_ADR),
-        "--role", "skill-creator",
-    ])
+    result = run(
+        [
+            sys.executable,
+            str(ADR_QUERY),
+            "context",
+            "--adr",
+            str(PRIMARY_ADR),
+            "--role",
+            "skill-creator",
+        ]
+    )
     content = result.stdout
     # The skill-creator role pulls architecture-rules section
     has_content = (
-        result.returncode == 0
-        and "architecture-rules" in content.lower() or "rule" in content.lower()
-        and len(content.strip()) > 200  # non-trivial content
+        (result.returncode == 0 and "architecture-rules" in content.lower())
+        or ("rule" in content.lower() and len(content.strip()) > 200)  # non-trivial content
     )
     # Also directly check the ADR file for the section
     adr_text = PRIMARY_ADR.read_text(encoding="utf-8")
@@ -467,77 +496,77 @@ def test_20_canonical_chains_valid() -> None:
     # The 8 canonical chains from the ADR (as step/schema arrays for validate-chain)
     # validate-chain expects a JSON array of {"step": NAME, "schema": TYPE} objects
     chains = {
-        "generation":      [
-            {"step": "ADR",      "schema": "decision-record"},
+        "generation": [
+            {"step": "ADR", "schema": "decision-record"},
             {"step": "RESEARCH", "schema": "research-artifact"},
-            {"step": "COMPILE",  "schema": "structured-corpus"},
+            {"step": "COMPILE", "schema": "structured-corpus"},
             {"step": "GENERATE", "schema": "generation-artifact"},
             {"step": "VALIDATE", "schema": "verdict"},
-            {"step": "OUTPUT",   "schema": "pipeline-summary"},
+            {"step": "OUTPUT", "schema": "pipeline-summary"},
         ],
         "review": [
-            {"step": "ADR",       "schema": "decision-record"},
-            {"step": "RESEARCH",  "schema": "research-artifact"},
-            {"step": "ASSESS",    "schema": "decision-record"},
-            {"step": "REVIEW",    "schema": "verdict"},
+            {"step": "ADR", "schema": "decision-record"},
+            {"step": "RESEARCH", "schema": "research-artifact"},
+            {"step": "ASSESS", "schema": "decision-record"},
+            {"step": "REVIEW", "schema": "verdict"},
             {"step": "AGGREGATE", "schema": "verdict"},
-            {"step": "REPORT",    "schema": "pipeline-summary"},
+            {"step": "REPORT", "schema": "pipeline-summary"},
         ],
         "debugging": [
-            {"step": "ADR",     "schema": "decision-record"},
-            {"step": "PROBE",   "schema": "research-artifact"},
-            {"step": "SEARCH",  "schema": "research-artifact"},
-            {"step": "ASSESS",  "schema": "decision-record"},
-            {"step": "PLAN",    "schema": "decision-record"},
+            {"step": "ADR", "schema": "decision-record"},
+            {"step": "PROBE", "schema": "research-artifact"},
+            {"step": "SEARCH", "schema": "research-artifact"},
+            {"step": "ASSESS", "schema": "decision-record"},
+            {"step": "PLAN", "schema": "decision-record"},
             {"step": "EXECUTE", "schema": "execution-report"},
-            {"step": "VERIFY",  "schema": "verdict"},
-            {"step": "OUTPUT",  "schema": "pipeline-summary"},
+            {"step": "VERIFY", "schema": "verdict"},
+            {"step": "OUTPUT", "schema": "pipeline-summary"},
         ],
         "operations": [
-            {"step": "ADR",      "schema": "decision-record"},
-            {"step": "PROBE",    "schema": "research-artifact"},
-            {"step": "ASSESS",   "schema": "decision-record"},
-            {"step": "PLAN",     "schema": "decision-record"},
-            {"step": "GUARD",    "schema": "safety-record"},
-            {"step": "EXECUTE",  "schema": "execution-report"},
+            {"step": "ADR", "schema": "decision-record"},
+            {"step": "PROBE", "schema": "research-artifact"},
+            {"step": "ASSESS", "schema": "decision-record"},
+            {"step": "PLAN", "schema": "decision-record"},
+            {"step": "GUARD", "schema": "safety-record"},
+            {"step": "EXECUTE", "schema": "execution-report"},
             {"step": "VALIDATE", "schema": "verdict"},
-            {"step": "OUTPUT",   "schema": "pipeline-summary"},
+            {"step": "OUTPUT", "schema": "pipeline-summary"},
         ],
         "configuration": [
-            {"step": "ADR",      "schema": "decision-record"},
+            {"step": "ADR", "schema": "decision-record"},
             {"step": "RESEARCH", "schema": "research-artifact"},
-            {"step": "COMPILE",  "schema": "structured-corpus"},
+            {"step": "COMPILE", "schema": "structured-corpus"},
             {"step": "TEMPLATE", "schema": "generation-artifact"},
-            {"step": "CONFORM",  "schema": "verdict"},
+            {"step": "CONFORM", "schema": "verdict"},
             {"step": "VALIDATE", "schema": "verdict"},
-            {"step": "OUTPUT",   "schema": "pipeline-summary"},
+            {"step": "OUTPUT", "schema": "pipeline-summary"},
         ],
         "analysis": [
-            {"step": "ADR",       "schema": "decision-record"},
-            {"step": "RESEARCH",  "schema": "research-artifact"},
-            {"step": "COMPILE",   "schema": "structured-corpus"},
-            {"step": "ASSESS",    "schema": "decision-record"},
-            {"step": "SYNTHESIZE","schema": "decision-record"},
-            {"step": "REPORT",    "schema": "pipeline-summary"},
+            {"step": "ADR", "schema": "decision-record"},
+            {"step": "RESEARCH", "schema": "research-artifact"},
+            {"step": "COMPILE", "schema": "structured-corpus"},
+            {"step": "ASSESS", "schema": "decision-record"},
+            {"step": "SYNTHESIZE", "schema": "decision-record"},
+            {"step": "REPORT", "schema": "pipeline-summary"},
         ],
         "migration": [
-            {"step": "ADR",         "schema": "decision-record"},
-            {"step": "CHARACTERIZE","schema": "verdict"},
-            {"step": "PLAN",        "schema": "decision-record"},
-            {"step": "GUARD",       "schema": "safety-record"},
-            {"step": "SNAPSHOT",    "schema": "safety-record"},
-            {"step": "EXECUTE",     "schema": "execution-report"},
-            {"step": "VALIDATE",    "schema": "verdict"},
-            {"step": "OUTPUT",      "schema": "pipeline-summary"},
+            {"step": "ADR", "schema": "decision-record"},
+            {"step": "CHARACTERIZE", "schema": "verdict"},
+            {"step": "PLAN", "schema": "decision-record"},
+            {"step": "GUARD", "schema": "safety-record"},
+            {"step": "SNAPSHOT", "schema": "safety-record"},
+            {"step": "EXECUTE", "schema": "execution-report"},
+            {"step": "VALIDATE", "schema": "verdict"},
+            {"step": "OUTPUT", "schema": "pipeline-summary"},
         ],
         "testing": [
-            {"step": "ADR",         "schema": "decision-record"},
-            {"step": "RESEARCH",    "schema": "research-artifact"},
-            {"step": "COMPILE",     "schema": "structured-corpus"},
-            {"step": "CHARACTERIZE","schema": "structured-corpus"},
-            {"step": "GENERATE",    "schema": "generation-artifact"},
-            {"step": "VALIDATE",    "schema": "verdict"},
-            {"step": "REPORT",      "schema": "pipeline-summary"},
+            {"step": "ADR", "schema": "decision-record"},
+            {"step": "RESEARCH", "schema": "research-artifact"},
+            {"step": "COMPILE", "schema": "structured-corpus"},
+            {"step": "CHARACTERIZE", "schema": "structured-corpus"},
+            {"step": "GENERATE", "schema": "generation-artifact"},
+            {"step": "VALIDATE", "schema": "verdict"},
+            {"step": "REPORT", "schema": "pipeline-summary"},
         ],
     }
 

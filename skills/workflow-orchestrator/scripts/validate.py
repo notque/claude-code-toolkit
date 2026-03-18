@@ -88,9 +88,7 @@ def validate_yaml_frontmatter() -> List[Tuple[str, bool, str]]:
         if tool in frontmatter:
             results.append((f"Allowed tool: {tool}", True, "OK"))
         else:
-            results.append(
-                (f"Allowed tool: {tool}", False, f"Missing {tool} in allowed_tools")
-            )
+            results.append((f"Allowed tool: {tool}", False, f"Missing {tool} in allowed_tools"))
 
     return results
 
@@ -128,9 +126,7 @@ def validate_operator_context() -> List[Tuple[str, bool, str]]:
         if subsection in content:
             results.append((f"Subsection: {subsection}", True, "OK"))
         else:
-            results.append(
-                (f"Subsection: {subsection}", False, f"Missing {subsection}")
-            )
+            results.append((f"Subsection: {subsection}", False, f"Missing {subsection}"))
 
     # Check for hardcoded behaviors
     hardcoded_checks = [
@@ -265,17 +261,13 @@ def validate_reference_files() -> List[Tuple[str, bool, str]]:
             if check in content:
                 results.append((f"Template: {check}", True, "OK"))
             else:
-                results.append(
-                    (f"Template: {check}", False, f"Missing template: {check}")
-                )
+                results.append((f"Template: {check}", False, f"Missing template: {check}"))
 
         # Check for JSON plan examples
         if "```json" in content:
             results.append(("JSON plan examples present", True, "OK"))
         else:
-            results.append(
-                ("JSON plan examples present", False, "Missing JSON plan examples")
-            )
+            results.append(("JSON plan examples present", False, "Missing JSON plan examples"))
 
     else:
         results.append(("Plan template file exists", False, "Missing plan-template.md"))
@@ -409,9 +401,7 @@ def validate_json_examples() -> List[Tuple[str, bool, str]]:
                 json.loads(block)
                 results.append((f"JSON example {i + 1} valid", True, "OK"))
             except json.JSONDecodeError as e:
-                results.append(
-                    (f"JSON example {i + 1} valid", False, f"Invalid JSON: {e}")
-                )
+                results.append((f"JSON example {i + 1} valid", False, f"Invalid JSON: {e}"))
 
     return results
 

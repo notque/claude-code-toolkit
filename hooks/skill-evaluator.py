@@ -208,10 +208,7 @@ def should_skip(prompt: str) -> bool:
     if any(p in prompt_lower for p in skip_patterns):
         return True
 
-    if prompt_lower.endswith("?") and len(prompt_lower) < 50:
-        return True
-
-    return False
+    return bool(prompt_lower.endswith("?") and len(prompt_lower) < 50)
 
 
 def main():

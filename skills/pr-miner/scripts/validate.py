@@ -7,10 +7,13 @@ import os
 import sys
 from pathlib import Path
 
+
 def check_command(command: str) -> bool:
     """Check if a command is available"""
     import shutil
+
     return shutil.which(command) is not None
+
 
 def check_python_package(package: str) -> bool:
     """Check if Python package is installed"""
@@ -20,6 +23,7 @@ def check_python_package(package: str) -> bool:
     except ImportError:
         return False
 
+
 def check_file(file_path: Path, description: str) -> bool:
     """Check if a file exists"""
     exists = file_path.exists()
@@ -27,14 +31,15 @@ def check_file(file_path: Path, description: str) -> bool:
     print(f"{status} {description}: {file_path}")
     return exists
 
+
 def check_github_token() -> bool:
     """Check if GitHub token is available"""
-    token = os.environ.get('GITHUB_TOKEN')
+    token = os.environ.get("GITHUB_TOKEN")
     if token:
         print(f"✓ GITHUB_TOKEN is set (length: {len(token)})")
         return True
 
-    token_file = Path.home() / '.github-token'
+    token_file = Path.home() / ".github-token"
     if token_file.exists():
         token = token_file.read_text().strip()
         print(f"✓ GitHub token found in ~/.github-token (length: {len(token)})")
@@ -44,10 +49,11 @@ def check_github_token() -> bool:
     print("  Set GITHUB_TOKEN or create ~/.github-token")
     return False
 
+
 def main():
-    print("="*70)
+    print("=" * 70)
     print("PR Miner - Skill Validation")
-    print("="*70)
+    print("=" * 70)
 
     skill_dir = Path(__file__).parent.parent
     all_good = True
@@ -81,7 +87,7 @@ def main():
     check_file(skill_dir / "references", "references directory")
 
     # Summary
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     if all_good:
         print("✓ Skill validation PASSED")
         print("Ready to mine PRs!")
@@ -93,6 +99,7 @@ def main():
         print("  - PyGithub: pip install PyGithub")
         print("  - GitHub token: Set GITHUB_TOKEN or create ~/.github-token")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -12,20 +12,19 @@ Why This Works:
 - Complements pr-miner (explicit rules) with implicit rules (what they actually do)
 """
 
-import os
-import re
 import json
-import glob
+import re
 import sys
-from pathlib import Path
-from collections import Counter, defaultdict
+from collections import Counter
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple
+from pathlib import Path
+from typing import Dict, List
 
 
 @dataclass
 class CodebaseProfile:
     """Statistical profile of a codebase"""
+
     repo_name: str
     total_go_files: int = 0
     total_lines: int = 0
@@ -67,9 +66,7 @@ class CodeCartographer:
 
     def __init__(self, root_path: str, repo_name: str = None):
         self.root = Path(root_path)
-        self.profile = CodebaseProfile(
-            repo_name=repo_name or self.root.name
-        )
+        self.profile = CodebaseProfile(repo_name=repo_name or self.root.name)
 
     def scan(self) -> CodebaseProfile:
         """Scan the entire codebase and build statistical profile"""
@@ -94,15 +91,15 @@ class CodeCartographer:
     def _analyze_file(self, file_path: Path):
         """Analyze a single Go file"""
         try:
-            content = file_path.read_text(errors='ignore')
+            content = file_path.read_text(errors="ignore")
         except Exception as e:
             print(f"Warning: Could not read {file_path}: {e}")
             return
 
-        lines = content.split('\n')
+        lines = content.split("\n")
         self.profile.total_lines += len(lines)
 
-        is_test_file = file_path.name.endswith('_test.go')
+        is_test_file = file_path.name.endswith("_test.go")
 
         # Lens 1: Imports (What tools do they use?)
         self._analyze_imports(content, is_test_file)
@@ -124,7 +121,7 @@ class CodeCartographer:
 
     def _analyze_imports(self, content: str, is_test: bool):
         """Analyze import patterns"""
-        import_block = re.search(r'import \((.*?)\)', content, re.DOTALL)
+        import_block = re.search(r"import \((.*?)\)", content, re.DOTALL)
         if import_block:
             imports = re.findall(r'"([^"]+)"', import_block.group(1))
         else:
@@ -147,7 +144,7 @@ class CodeCartographer:
     def _analyze_signatures(self, content: str):
         """Analyze function and method signatures"""
         # Find all function declarations
-        funcs = re.findall(r'func\s+(?:\([^)]+\)\s+)?([A-Z][a-zA-Z0-9_]*)', content)
+        funcs = re.findall(r"func\s+(?:\([^)]+\)\s+)?([A-Z][a-zA-Z0-9_]*)", content)
         self.profile.func_names.extend(funcs)
 
         # Constructor patterns
@@ -160,51 +157,51 @@ class CodeCartographer:
                 self.profile.constructor_patterns["Make_prefix"] += 1
 
         # Receiver naming patterns
-        receivers = re.findall(r'func\s+\((\w+)\s+\*?(\w+)\)', content)
+        receivers = re.findall(r"func\s+\((\w+)\s+\*?(\w+)\)", content)
         for receiver_name, _type_name in receivers:
             self.profile.receiver_names[receiver_name] += 1
 
     def _analyze_error_handling(self, content: str):
         """Analyze error handling patterns"""
         # Find all error checks
-        error_checks = re.finditer(r'if\s+err\s*!=\s*nil\s*\{([^}]+)\}', content, re.DOTALL)
+        error_checks = re.finditer(r"if\s+err\s*!=\s*nil\s*\{([^}]+)\}", content, re.DOTALL)
 
         for match in error_checks:
             block = match.group(1).strip()
 
             # Categorize error handling
-            if 'fmt.Errorf' in block and '%w' in block:
+            if "fmt.Errorf" in block and "%w" in block:
                 self.profile.error_patterns["fmt_errorf_with_w"] += 1
-            elif 'fmt.Errorf' in block:
+            elif "fmt.Errorf" in block:
                 self.profile.error_patterns["fmt_errorf_without_w"] += 1
-            elif 'errors.Wrap' in block:
+            elif "errors.Wrap" in block:
                 self.profile.error_patterns["pkg_errors_wrap"] += 1
-            elif 'log.Fatal' in block or 'log.Panic' in block:
+            elif "log.Fatal" in block or "log.Panic" in block:
                 self.profile.error_patterns["log_fatal_or_panic"] += 1
-            elif 'log.Error' in block or 'log.Warn' in block:
+            elif "log.Error" in block or "log.Warn" in block:
                 self.profile.error_patterns["log_error_or_warn"] += 1
-            elif re.search(r'return\s+err\b', block):
+            elif re.search(r"return\s+err\b", block):
                 self.profile.error_patterns["return_raw_err"] += 1
-            elif re.search(r'return\s+nil', block):
+            elif re.search(r"return\s+nil", block):
                 self.profile.error_patterns["return_nil_on_error"] += 1
 
         # Error variable naming
-        error_vars = re.findall(r'(\w+)\s*:?=\s*[^=].*?\berr\b', content)
+        error_vars = re.findall(r"(\w+)\s*:?=\s*[^=].*?\berr\b", content)
         for var in error_vars:
-            if var in ['err', 'e', 'error', 'er']:
+            if var in ["err", "e", "error", "er"]:
                 self.profile.error_var_names[var] += 1
 
     def _analyze_context_usage(self, content: str):
         """Analyze context.Context usage patterns"""
         # Check if context is first parameter
-        ctx_first = re.findall(r'func\s+\w+\s*\(\s*ctx\s+context\.Context\s*,', content)
-        ctx_not_first = re.findall(r'func\s+\w+\s*\([^)]*,\s*ctx\s+context\.Context', content)
+        ctx_first = re.findall(r"func\s+\w+\s*\(\s*ctx\s+context\.Context\s*,", content)
+        ctx_not_first = re.findall(r"func\s+\w+\s*\([^)]*,\s*ctx\s+context\.Context", content)
 
         self.profile.context_patterns["ctx_first_param"] += len(ctx_first)
         self.profile.context_patterns["ctx_not_first"] += len(ctx_not_first)
 
         # Context variable naming
-        ctx_vars = re.findall(r'(\w+)\s+context\.Context', content)
+        ctx_vars = re.findall(r"(\w+)\s+context\.Context", content)
         for var in ctx_vars:
             if var == "ctx":
                 self.profile.context_patterns["named_ctx"] += 1
@@ -213,7 +210,7 @@ class CodeCartographer:
 
     def _analyze_defer_patterns(self, content: str):
         """Analyze defer usage patterns"""
-        defers = re.findall(r'defer\s+(\w+)', content)
+        defers = re.findall(r"defer\s+(\w+)", content)
 
         for defer_call in defers:
             if "Close" in defer_call:
@@ -228,30 +225,30 @@ class CodeCartographer:
     def _analyze_control_flow(self, content: str):
         """Analyze control flow patterns"""
         # Guard clauses (early return)
-        guard_clauses = re.findall(r'if\s+.*?\s*\{\s*return', content)
+        guard_clauses = re.findall(r"if\s+.*?\s*\{\s*return", content)
         self.profile.guard_clause_usage += len(guard_clauses)
 
         # Else blocks
-        else_blocks = re.findall(r'\}\s*else\s*\{', content)
+        else_blocks = re.findall(r"\}\s*else\s*\{", content)
         self.profile.else_block_usage += len(else_blocks)
 
     def _analyze_logging(self, content: str):
         """Analyze logging patterns"""
-        if 'logg.' in content or 'log.' in content:
-            if 'logg.Debug' in content or 'log.Debug' in content:
-                self.profile.logging_patterns["debug"] += content.count('Debug')
-            if 'logg.Info' in content or 'log.Info' in content:
-                self.profile.logging_patterns["info"] += content.count('Info')
-            if 'logg.Error' in content or 'log.Error' in content:
-                self.profile.logging_patterns["error"] += content.count('Error')
-            if 'logg.Fatal' in content or 'log.Fatal' in content:
-                self.profile.logging_patterns["fatal"] += content.count('Fatal')
+        if "logg." in content or "log." in content:
+            if "logg.Debug" in content or "log.Debug" in content:
+                self.profile.logging_patterns["debug"] += content.count("Debug")
+            if "logg.Info" in content or "log.Info" in content:
+                self.profile.logging_patterns["info"] += content.count("Info")
+            if "logg.Error" in content or "log.Error" in content:
+                self.profile.logging_patterns["error"] += content.count("Error")
+            if "logg.Fatal" in content or "log.Fatal" in content:
+                self.profile.logging_patterns["fatal"] += content.count("Fatal")
 
     def _analyze_nil_checks(self, content: str):
         """Analyze nil checking patterns"""
         # Check for != nil vs == nil
-        not_nil = len(re.findall(r'!=\s*nil', content))
-        is_nil = len(re.findall(r'==\s*nil', content))
+        not_nil = len(re.findall(r"!=\s*nil", content))
+        is_nil = len(re.findall(r"==\s*nil", content))
 
         self.profile.nil_check_patterns["not_nil_checks"] = not_nil
         self.profile.nil_check_patterns["is_nil_checks"] = is_nil
@@ -259,31 +256,33 @@ class CodeCartographer:
     def _analyze_comments(self, content: str):
         """Analyze comment patterns"""
         # Multi-line comments explaining WHY
-        multiline_comments = re.findall(r'//.*\n(?://.*\n)+', content)
-        self.profile.comment_types["multiline_why_comments"] += len([c for c in multiline_comments if len(c.split('\n')) >= 3])
+        multiline_comments = re.findall(r"//.*\n(?://.*\n)+", content)
+        self.profile.comment_types["multiline_why_comments"] += len(
+            [c for c in multiline_comments if len(c.split("\n")) >= 3]
+        )
 
         # TODO comments
-        self.profile.comment_types["todo_comments"] += len(re.findall(r'//\s*TODO', content))
+        self.profile.comment_types["todo_comments"] += len(re.findall(r"//\s*TODO", content))
 
         # FIXME comments
-        self.profile.comment_types["fixme_comments"] += len(re.findall(r'//\s*FIXME', content))
+        self.profile.comment_types["fixme_comments"] += len(re.findall(r"//\s*FIXME", content))
 
     def _analyze_modern_go(self, content: str):
         """Analyze usage of modern Go features"""
         # slices package (Go 1.21+)
-        if 'slices.' in content:
+        if "slices." in content:
             self.profile.modern_features["slices_package"] += 1
 
         # maps package (Go 1.21+)
-        if 'maps.' in content:
+        if "maps." in content:
             self.profile.modern_features["maps_package"] += 1
 
         # min/max builtin (Go 1.21+)
-        if re.search(r'\bmin\(', content) or re.search(r'\bmax\(', content):
+        if re.search(r"\bmin\(", content) or re.search(r"\bmax\(", content):
             self.profile.modern_features["min_max_builtin"] += 1
 
         # clear builtin (Go 1.21+)
-        if re.search(r'\bclear\(', content):
+        if re.search(r"\bclear\(", content):
             self.profile.modern_features["clear_builtin"] += 1
 
     def generate_report(self, output_path: Path = None) -> Dict:
@@ -293,18 +292,18 @@ class CodeCartographer:
                 "repo_name": self.profile.repo_name,
                 "total_files": self.profile.total_go_files,
                 "total_lines": self.profile.total_lines,
-                "analysis_date": "2025-11-20"
+                "analysis_date": "2025-11-20",
             },
             "lens_1_consistency": {
                 "top_dependencies": dict(self.profile.imports.most_common(20)),
                 "test_framework_usage": dict(self.profile.test_libraries),
-                "test_framework_percentages": self._calculate_percentages(self.profile.test_libraries)
+                "test_framework_percentages": self._calculate_percentages(self.profile.test_libraries),
             },
             "lens_2_structure": {
                 "constructor_patterns": dict(self.profile.constructor_patterns),
                 "constructor_percentages": self._calculate_percentages(self.profile.constructor_patterns),
                 "receiver_naming": dict(self.profile.receiver_names.most_common(10)),
-                "top_function_prefixes": self._analyze_function_prefixes()
+                "top_function_prefixes": self._analyze_function_prefixes(),
             },
             "lens_3_implementation": {
                 "error_handling": dict(self.profile.error_patterns),
@@ -312,20 +311,20 @@ class CodeCartographer:
                 "error_variable_names": dict(self.profile.error_var_names),
                 "context_usage": dict(self.profile.context_patterns),
                 "defer_patterns": dict(self.profile.defer_patterns),
-                "logging_levels": dict(self.profile.logging_patterns)
+                "logging_levels": dict(self.profile.logging_patterns),
             },
             "control_flow": {
                 "guard_clauses": self.profile.guard_clause_usage,
                 "else_blocks": self.profile.else_block_usage,
-                "guard_clause_ratio": round(self.profile.guard_clause_usage / max(self.profile.else_block_usage, 1), 2)
+                "guard_clause_ratio": round(self.profile.guard_clause_usage / max(self.profile.else_block_usage, 1), 2),
             },
             "modern_go_adoption": dict(self.profile.modern_features),
-            "derived_rules": self._derive_rules()
+            "derived_rules": self._derive_rules(),
         }
 
         if output_path:
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(output_path, 'w') as f:
+            with open(output_path, "w") as f:
                 json.dump(report, f, indent=2)
             print(f"\n📊 Report saved to: {output_path}")
 
@@ -352,24 +351,28 @@ class CodeCartographer:
         if error_total > 0:
             fmt_w_pct = (self.profile.error_patterns.get("fmt_errorf_with_w", 0) / error_total) * 100
             if fmt_w_pct >= 70:
-                rules.append({
-                    "category": "error_handling",
-                    "rule": "All errors must be wrapped using fmt.Errorf with %w verb",
-                    "evidence": f"{fmt_w_pct:.0f}% consistency across {error_total} error checks",
-                    "confidence": "HIGH" if fmt_w_pct >= 85 else "MEDIUM"
-                })
+                rules.append(
+                    {
+                        "category": "error_handling",
+                        "rule": "All errors must be wrapped using fmt.Errorf with %w verb",
+                        "evidence": f"{fmt_w_pct:.0f}% consistency across {error_total} error checks",
+                        "confidence": "HIGH" if fmt_w_pct >= 85 else "MEDIUM",
+                    }
+                )
 
         # Rule 2: Constructor naming
         ctor_total = sum(self.profile.constructor_patterns.values())
         if ctor_total > 0:
             new_pct = (self.profile.constructor_patterns.get("New_prefix", 0) / ctor_total) * 100
             if new_pct >= 70:
-                rules.append({
-                    "category": "naming",
-                    "rule": "Constructors must use New{Type} naming pattern",
-                    "evidence": f"{new_pct:.0f}% of {ctor_total} constructors follow this pattern",
-                    "confidence": "HIGH" if new_pct >= 90 else "MEDIUM"
-                })
+                rules.append(
+                    {
+                        "category": "naming",
+                        "rule": "Constructors must use New{Type} naming pattern",
+                        "evidence": f"{new_pct:.0f}% of {ctor_total} constructors follow this pattern",
+                        "confidence": "HIGH" if new_pct >= 90 else "MEDIUM",
+                    }
+                )
 
         # Rule 3: Context parameter position
         ctx_first = self.profile.context_patterns.get("ctx_first_param", 0)
@@ -377,34 +380,40 @@ class CodeCartographer:
         if ctx_first + ctx_not_first > 0:
             ctx_first_pct = (ctx_first / (ctx_first + ctx_not_first)) * 100
             if ctx_first_pct >= 85:
-                rules.append({
-                    "category": "function_signature",
-                    "rule": "context.Context must be the first parameter",
-                    "evidence": f"{ctx_first_pct:.0f}% consistency across {ctx_first + ctx_not_first} functions",
-                    "confidence": "HIGH"
-                })
+                rules.append(
+                    {
+                        "category": "function_signature",
+                        "rule": "context.Context must be the first parameter",
+                        "evidence": f"{ctx_first_pct:.0f}% consistency across {ctx_first + ctx_not_first} functions",
+                        "confidence": "HIGH",
+                    }
+                )
 
         # Rule 4: Guard clauses vs else blocks
         if self.profile.guard_clause_usage > self.profile.else_block_usage * 2:
             ratio = self.profile.guard_clause_usage / max(self.profile.else_block_usage, 1)
-            rules.append({
-                "category": "control_flow",
-                "rule": "Prefer guard clauses (early returns) over else blocks",
-                "evidence": f"{ratio:.1f}x more guard clauses than else blocks",
-                "confidence": "HIGH"
-            })
+            rules.append(
+                {
+                    "category": "control_flow",
+                    "rule": "Prefer guard clauses (early returns) over else blocks",
+                    "evidence": f"{ratio:.1f}x more guard clauses than else blocks",
+                    "confidence": "HIGH",
+                }
+            )
 
         # Rule 5: Error variable naming
         err_var_total = sum(self.profile.error_var_names.values())
         if err_var_total > 0:
             err_pct = (self.profile.error_var_names.get("err", 0) / err_var_total) * 100
             if err_pct >= 90:
-                rules.append({
-                    "category": "naming",
-                    "rule": "Error variables must be named 'err', not 'e' or 'error'",
-                    "evidence": f"{err_pct:.0f}% consistency across {err_var_total} error variables",
-                    "confidence": "HIGH"
-                })
+                rules.append(
+                    {
+                        "category": "naming",
+                        "rule": "Error variables must be named 'err', not 'e' or 'error'",
+                        "evidence": f"{err_pct:.0f}% consistency across {err_var_total} error variables",
+                        "confidence": "HIGH",
+                    }
+                )
 
         return rules
 
@@ -412,9 +421,7 @@ class CodeCartographer:
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Code Cartographer: Statistical analysis for rule extraction"
-    )
+    parser = argparse.ArgumentParser(description="Code Cartographer: Statistical analysis for rule extraction")
     parser.add_argument("repo_path", help="Path to Go repository")
     parser.add_argument("--output", "-o", help="Output JSON file path")
     parser.add_argument("--name", help="Repository name (defaults to directory name)")
@@ -439,9 +446,9 @@ def main():
     report = cartographer.generate_report(output_path)
 
     # Print summary
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("CODE CARTOGRAPHY SUMMARY")
-    print("="*80)
+    print("=" * 80)
     print(f"\n📦 Repository: {profile.repo_name}")
     print(f"📄 Files analyzed: {profile.total_go_files}")
     print(f"📏 Total lines: {profile.total_lines:,}")
@@ -452,7 +459,7 @@ def main():
             print(f"\n  [{rule['confidence']}] {rule['rule']}")
             print(f"  Evidence: {rule['evidence']}")
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
 
 
 if __name__ == "__main__":

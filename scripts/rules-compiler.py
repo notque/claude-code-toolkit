@@ -23,7 +23,6 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-
 # Rule categories matching references/rule-categories.md
 VALID_CATEGORIES = [
     "naming",
@@ -37,9 +36,9 @@ VALID_CATEGORIES = [
 ]
 
 CONFIDENCE_THRESHOLDS = {
-    "high": 3,     # Seen in 3+ repos OR 2+ repos + review signal
-    "medium": 2,   # Seen in 2 repos
-    "low": 1,      # Seen in 1 repo only
+    "high": 3,  # Seen in 3+ repos OR 2+ repos + review signal
+    "medium": 2,  # Seen in 2 repos
+    "low": 1,  # Seen in 1 repo only
 }
 
 
@@ -77,10 +76,12 @@ def load_input_data(input_dir: str) -> dict:
     # Load research markdown files
     for md_file in input_path.glob("research-*.md"):
         with open(md_file) as f:
-            data["research_files"].append({
-                "name": md_file.stem,
-                "content": f.read(),
-            })
+            data["research_files"].append(
+                {
+                    "name": md_file.stem,
+                    "content": f.read(),
+                }
+            )
 
     return data
 
@@ -119,11 +120,7 @@ def deduplicate_rules(rules: list[dict]) -> list[dict]:
 
     for rule in rules:
         # Create a normalized key from category + rule text
-        key = (
-            rule.get("category", "").lower()
-            + ":"
-            + rule.get("rule", "").lower().strip()
-        )
+        key = rule.get("category", "").lower() + ":" + rule.get("rule", "").lower().strip()
 
         # Simple dedup: skip exact matches
         if key in seen_keys:
@@ -147,32 +144,37 @@ def validate_rules(rules: list[dict]) -> list[dict]:
         # Check actionability: rule text should be specific
         rule_text = rule.get("rule", "")
         if len(rule_text) < 10:
-            issues.append({
-                "rule": rule_name,
-                "issue": "too_short",
-                "message": f"Rule text is too short ({len(rule_text)} chars). "
-                           "Rules must be specific enough to follow.",
-            })
+            issues.append(
+                {
+                    "rule": rule_name,
+                    "issue": "too_short",
+                    "message": f"Rule text is too short ({len(rule_text)} chars). "
+                    "Rules must be specific enough to follow.",
+                }
+            )
 
         # Check for evidence
         repos_observed = rule.get("repos_observed", [])
         examples = rule.get("examples", [])
         if not repos_observed and not examples:
-            issues.append({
-                "rule": rule_name,
-                "issue": "no_evidence",
-                "message": "Rule has no evidence (no repos or examples cited).",
-            })
+            issues.append(
+                {
+                    "rule": rule_name,
+                    "issue": "no_evidence",
+                    "message": "Rule has no evidence (no repos or examples cited).",
+                }
+            )
 
         # Check category validity
         category = rule.get("category", "")
         if category not in VALID_CATEGORIES:
-            issues.append({
-                "rule": rule_name,
-                "issue": "invalid_category",
-                "message": f"Category '{category}' is not in the valid set: "
-                           f"{', '.join(VALID_CATEGORIES)}",
-            })
+            issues.append(
+                {
+                    "rule": rule_name,
+                    "issue": "invalid_category",
+                    "message": f"Category '{category}' is not in the valid set: {', '.join(VALID_CATEGORIES)}",
+                }
+            )
 
     # Check for contradictions (simple heuristic)
     by_category: dict[str, list[dict]] = {}
@@ -193,13 +195,15 @@ def validate_rules(rules: list[dict]) -> list[dict]:
             has_t1 = any(t1 in t for t in texts)
             has_t2 = any(t2 in t for t in texts)
             if has_t1 and has_t2:
-                issues.append({
-                    "rule": f"{cat} category",
-                    "issue": "contradiction",
-                    "message": f"Potential contradiction in {cat}: "
-                               f"rules mention both '{t1}' and '{t2}'. "
-                               "Check if they apply to different languages.",
-                })
+                issues.append(
+                    {
+                        "rule": f"{cat} category",
+                        "issue": "contradiction",
+                        "message": f"Potential contradiction in {cat}: "
+                        f"rules mention both '{t1}' and '{t2}'. "
+                        "Check if they apply to different languages.",
+                    }
+                )
 
     return issues
 
@@ -252,10 +256,7 @@ def format_rules_markdown(rules: list[dict], username: str, metadata: dict) -> s
 
             lines.append(f"### {cat_title}: {name}")
             lines.append("")
-            lines.append(
-                f"**Confidence**: {confidence} "
-                f"(seen in {len(repos)} repos, {review_signals} review comments)"
-            )
+            lines.append(f"**Confidence**: {confidence} (seen in {len(repos)} repos, {review_signals} review comments)")
             lines.append("")
             lines.append(rule_text)
             lines.append("")
@@ -268,9 +269,7 @@ def format_rules_markdown(rules: list[dict], username: str, metadata: dict) -> s
                 for example in rule.get("examples", []):
                     if isinstance(example, dict):
                         lines.append(
-                            f"- {example.get('repo', '')}: "
-                            f"`{example.get('file', '')}` -- "
-                            f"{example.get('pattern', '')}"
+                            f"- {example.get('repo', '')}: `{example.get('file', '')}` -- {example.get('pattern', '')}"
                         )
                     else:
                         lines.append(f"- {example}")
@@ -337,24 +336,16 @@ def cmd_compile(args: argparse.Namespace) -> int:
         if "confidence" not in rule:
             rule["confidence"] = compute_confidence(repos_count, review_signals)
         if "score" not in rule:
-            rule["score"] = compute_score(
-                rule["confidence"], repos_count, review_signals
-            )
+            rule["score"] = compute_score(rule["confidence"], repos_count, review_signals)
 
     # Sort by score descending
     rules.sort(key=lambda r: r.get("score", 0), reverse=True)
 
     # Build metadata
     metadata = {
-        "repos_analyzed": (
-            data["repos"].get("repos_fetched", 0) if data["repos"] else 0
-        ),
-        "files_sampled": sum(
-            fs.get("files_sampled", 0) for fs in data["file_samples"]
-        ),
-        "reviews_mined": (
-            data["pr_reviews"].get("reviews_fetched", 0) if data["pr_reviews"] else 0
-        ),
+        "repos_analyzed": (data["repos"].get("repos_fetched", 0) if data["repos"] else 0),
+        "files_sampled": sum(fs.get("files_sampled", 0) for fs in data["file_samples"]),
+        "reviews_mined": (data["pr_reviews"].get("reviews_fetched", 0) if data["pr_reviews"] else 0),
     }
 
     # Determine username
@@ -468,40 +459,20 @@ def main() -> int:
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # compile command
-    compile_parser = subparsers.add_parser(
-        "compile", help="Compile raw pattern data into structured rules"
-    )
-    compile_parser.add_argument(
-        "--input-dir", required=True, help="Directory containing fetched data"
-    )
-    compile_parser.add_argument(
-        "--output", required=True, help="Output file path for compiled rules JSON"
-    )
+    compile_parser = subparsers.add_parser("compile", help="Compile raw pattern data into structured rules")
+    compile_parser.add_argument("--input-dir", required=True, help="Directory containing fetched data")
+    compile_parser.add_argument("--output", required=True, help="Output file path for compiled rules JSON")
 
     # validate command
-    validate_parser = subparsers.add_parser(
-        "validate", help="Validate compiled rules for quality"
-    )
-    validate_parser.add_argument(
-        "--input-dir", required=True, help="Directory containing compiled rules"
-    )
-    validate_parser.add_argument(
-        "--output", default=None, help="Output file for validation report"
-    )
+    validate_parser = subparsers.add_parser("validate", help="Validate compiled rules for quality")
+    validate_parser.add_argument("--input-dir", required=True, help="Directory containing compiled rules")
+    validate_parser.add_argument("--output", default=None, help="Output file for validation report")
 
     # format command
-    format_parser = subparsers.add_parser(
-        "format", help="Format compiled rules into markdown and JSON"
-    )
-    format_parser.add_argument(
-        "--input", required=True, help="Input compiled rules JSON file"
-    )
-    format_parser.add_argument(
-        "--output-md", default=None, help="Output markdown file path"
-    )
-    format_parser.add_argument(
-        "--output-json", default=None, help="Output JSON file path"
-    )
+    format_parser = subparsers.add_parser("format", help="Format compiled rules into markdown and JSON")
+    format_parser.add_argument("--input", required=True, help="Input compiled rules JSON file")
+    format_parser.add_argument("--output-md", default=None, help="Output markdown file path")
+    format_parser.add_argument("--output-json", default=None, help="Output JSON file path")
 
     args = parser.parse_args()
 

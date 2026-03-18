@@ -66,11 +66,7 @@ def is_pipeline_component(file_path: str) -> bool:
         if re.search(exclude, rel_str):
             return False
 
-    for pattern in _PIPELINE_COMPONENT_PATTERNS:
-        if re.match(pattern, rel_str):
-            return True
-
-    return False
+    return any(re.match(pattern, rel_str) for pattern in _PIPELINE_COMPONENT_PATTERNS)
 
 
 def load_session(cwd: str) -> dict | None:
@@ -99,9 +95,12 @@ def run_compliance_check(
         sys.executable,
         str(compliance_script),
         "check",
-        "--file", file_path,
-        "--step-menu", _STEP_MENU,
-        "--spec-format", _SPEC_FORMAT,
+        "--file",
+        file_path,
+        "--step-menu",
+        _STEP_MENU,
+        "--spec-format",
+        _SPEC_FORMAT,
     ]
 
     try:
@@ -142,21 +141,15 @@ def format_violations(file_path: str, check_result: dict) -> str:
         v_type = v.get("type", "unknown")
         value = v.get("value", "")
         suggestion = v.get("suggestion", "")
-        entry = f"  Line {line_num}: {v_type} \"{value}\""
+        entry = f'  Line {line_num}: {v_type} "{value}"'
         if suggestion:
             entry += f" — {suggestion}"
         lines.append(f"[adr-enforcement] {entry}")
 
     lines.append("[adr-enforcement] FIX REQUIRED before proceeding:")
-    lines.append(
-        f"[adr-enforcement]   python3 scripts/adr-compliance.py check --file {display_path} \\"
-    )
-    lines.append(
-        f"[adr-enforcement]     --step-menu {_STEP_MENU} \\"
-    )
-    lines.append(
-        f"[adr-enforcement]     --spec-format {_SPEC_FORMAT}"
-    )
+    lines.append(f"[adr-enforcement]   python3 scripts/adr-compliance.py check --file {display_path} \\")
+    lines.append(f"[adr-enforcement]     --step-menu {_STEP_MENU} \\")
+    lines.append(f"[adr-enforcement]     --spec-format {_SPEC_FORMAT}")
 
     return "\n".join(lines)
 

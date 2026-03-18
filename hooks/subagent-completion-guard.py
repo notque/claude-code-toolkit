@@ -146,10 +146,7 @@ def format_worktree_output(meta: dict) -> list[str]:
     commits = meta["commits_ahead"]
     uncommitted = meta["uncommitted_files"]
 
-    lines.append(
-        f"[worktree-result] path={path} branch={branch} "
-        f"commits={commits} uncommitted={uncommitted}"
-    )
+    lines.append(f"[worktree-result] path={path} branch={branch} commits={commits} uncommitted={uncommitted}")
 
     if meta["has_uncommitted"]:
         lines.append(
@@ -158,9 +155,7 @@ def format_worktree_output(meta: dict) -> list[str]:
         )
 
     if commits == 0 and not meta["has_uncommitted"]:
-        lines.append(
-            f"[worktree-empty] Worktree {path} has no changes — safe to remove"
-        )
+        lines.append(f"[worktree-empty] Worktree {path} has no changes — safe to remove")
 
     return lines
 
@@ -246,10 +241,7 @@ def check_branch_safety(cwd: str) -> str | None:
 
         # Check if any commit has the approved-direct marker (escape hatch)
         lines = commits.splitlines()
-        unapproved = [
-            line for line in lines
-            if _APPROVED_DIRECT_MARKER not in line
-        ]
+        unapproved = [line for line in lines if _APPROVED_DIRECT_MARKER not in line]
         if not unapproved:
             print(
                 f"[subagent-guard] escape hatch used: {len(lines)} commit(s) approved via {_APPROVED_DIRECT_MARKER}",

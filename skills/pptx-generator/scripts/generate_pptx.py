@@ -22,9 +22,9 @@ from pathlib import Path
 
 try:
     from pptx import Presentation
-    from pptx.util import Inches, Pt, Emu
     from pptx.dml.color import RGBColor
     from pptx.enum.text import PP_ALIGN
+    from pptx.util import Emu, Inches, Pt
 except ImportError:
     print("ERROR: python-pptx not installed. Run: pip install python-pptx", file=sys.stderr)
     sys.exit(1)
@@ -35,36 +35,68 @@ except ImportError:
 # ---------------------------------------------------------------------------
 PALETTES = {
     "corporate": {
-        "primary": "#2C3E50", "secondary": "#34495E", "accent": "#E74C3C",
-        "background": "#FFFFFF", "text": "#2C3E50", "muted": "#BDC3C7",
+        "primary": "#2C3E50",
+        "secondary": "#34495E",
+        "accent": "#E74C3C",
+        "background": "#FFFFFF",
+        "text": "#2C3E50",
+        "muted": "#BDC3C7",
     },
     "tech": {
-        "primary": "#1A1A2E", "secondary": "#16213E", "accent": "#0F3460",
-        "background": "#F5F5F5", "text": "#1A1A2E", "muted": "#A0A0A0",
+        "primary": "#1A1A2E",
+        "secondary": "#16213E",
+        "accent": "#0F3460",
+        "background": "#F5F5F5",
+        "text": "#1A1A2E",
+        "muted": "#A0A0A0",
     },
     "warm": {
-        "primary": "#D4A574", "secondary": "#C68B59", "accent": "#8B4513",
-        "background": "#FFF8F0", "text": "#3D2B1F", "muted": "#D2B48C",
+        "primary": "#D4A574",
+        "secondary": "#C68B59",
+        "accent": "#8B4513",
+        "background": "#FFF8F0",
+        "text": "#3D2B1F",
+        "muted": "#D2B48C",
     },
     "ocean": {
-        "primary": "#006994", "secondary": "#008B8B", "accent": "#20B2AA",
-        "background": "#F0FFFF", "text": "#003333", "muted": "#B0C4DE",
+        "primary": "#006994",
+        "secondary": "#008B8B",
+        "accent": "#20B2AA",
+        "background": "#F0FFFF",
+        "text": "#003333",
+        "muted": "#B0C4DE",
     },
     "midnight": {
-        "primary": "#1B1464", "secondary": "#2E1A47", "accent": "#7B2FBE",
-        "background": "#0D0D0D", "text": "#E0E0E0", "muted": "#4A4A6A",
+        "primary": "#1B1464",
+        "secondary": "#2E1A47",
+        "accent": "#7B2FBE",
+        "background": "#0D0D0D",
+        "text": "#E0E0E0",
+        "muted": "#4A4A6A",
     },
     "forest": {
-        "primary": "#2D5016", "secondary": "#3A6B1E", "accent": "#7CB342",
-        "background": "#F5F9F0", "text": "#1A2E0A", "muted": "#A5D6A7",
+        "primary": "#2D5016",
+        "secondary": "#3A6B1E",
+        "accent": "#7CB342",
+        "background": "#F5F9F0",
+        "text": "#1A2E0A",
+        "muted": "#A5D6A7",
     },
     "sunset": {
-        "primary": "#FF6B35", "secondary": "#F7931E", "accent": "#FFD700",
-        "background": "#FFF5E6", "text": "#333333", "muted": "#FFE0B2",
+        "primary": "#FF6B35",
+        "secondary": "#F7931E",
+        "accent": "#FFD700",
+        "background": "#FFF5E6",
+        "text": "#333333",
+        "muted": "#FFE0B2",
     },
     "minimal": {
-        "primary": "#333333", "secondary": "#666666", "accent": "#0066CC",
-        "background": "#FFFFFF", "text": "#333333", "muted": "#CCCCCC",
+        "primary": "#333333",
+        "secondary": "#666666",
+        "accent": "#0066CC",
+        "background": "#FFFFFF",
+        "text": "#333333",
+        "muted": "#CCCCCC",
     },
 }
 
@@ -85,6 +117,7 @@ def get_palette(name: str) -> dict:
 # Slide builders
 # ---------------------------------------------------------------------------
 
+
 def set_slide_background(slide, color: RGBColor):
     """Set solid background color on a slide."""
     bg = slide.background
@@ -93,13 +126,23 @@ def set_slide_background(slide, color: RGBColor):
     fill.fore_color.rgb = color
 
 
-def add_text_box(slide, left, top, width, height, text, font_size=18,
-                 bold=False, italic=False, color=None, alignment=None,
-                 word_wrap=True, line_spacing=None):
+def add_text_box(
+    slide,
+    left,
+    top,
+    width,
+    height,
+    text,
+    font_size=18,
+    bold=False,
+    italic=False,
+    color=None,
+    alignment=None,
+    word_wrap=True,
+    line_spacing=None,
+):
     """Add a text box with formatted text to a slide."""
-    txBox = slide.shapes.add_textbox(
-        Inches(left), Inches(top), Inches(width), Inches(height)
-    )
+    txBox = slide.shapes.add_textbox(Inches(left), Inches(top), Inches(width), Inches(height))
     tf = txBox.text_frame
     tf.word_wrap = word_wrap
     p = tf.paragraphs[0]
@@ -117,12 +160,9 @@ def add_text_box(slide, left, top, width, height, text, font_size=18,
     return txBox
 
 
-def add_bullet_list(slide, left, top, width, height, bullets, font_size=18,
-                    color=None, line_spacing=1.15):
+def add_bullet_list(slide, left, top, width, height, bullets, font_size=18, color=None, line_spacing=1.15):
     """Add a bulleted list text box to a slide."""
-    txBox = slide.shapes.add_textbox(
-        Inches(left), Inches(top), Inches(width), Inches(height)
-    )
+    txBox = slide.shapes.add_textbox(Inches(left), Inches(top), Inches(width), Inches(height))
     tf = txBox.text_frame
     tf.word_wrap = True
 
@@ -160,15 +200,28 @@ def build_title_slide(prs, slide_data, palette):
     subtitle = slide_data.get("subtitle", "")
 
     add_text_box(
-        slide, 1, 2, 11.333, 2, title,
-        font_size=44, bold=True, color=palette["text"],
+        slide,
+        1,
+        2,
+        11.333,
+        2,
+        title,
+        font_size=44,
+        bold=True,
+        color=palette["text"],
         alignment=PP_ALIGN.CENTER,
     )
 
     if subtitle:
         add_text_box(
-            slide, 2, 4.2, 9.333, 1, subtitle,
-            font_size=22, color=palette["secondary"],
+            slide,
+            2,
+            4.2,
+            9.333,
+            1,
+            subtitle,
+            font_size=22,
+            color=palette["secondary"],
             alignment=PP_ALIGN.CENTER,
         )
 
@@ -186,15 +239,28 @@ def build_section_divider(prs, slide_data, palette):
     # White text on primary background
     white = RGBColor(0xFF, 0xFF, 0xFF)
     add_text_box(
-        slide, 1, 2.5, 11.333, 2, title,
-        font_size=36, bold=True, color=white,
+        slide,
+        1,
+        2.5,
+        11.333,
+        2,
+        title,
+        font_size=36,
+        bold=True,
+        color=white,
         alignment=PP_ALIGN.LEFT,
     )
 
     if subtitle:
         add_text_box(
-            slide, 1, 4.5, 11.333, 1, subtitle,
-            font_size=20, color=RGBColor(0xE0, 0xE0, 0xE0),
+            slide,
+            1,
+            4.5,
+            11.333,
+            1,
+            subtitle,
+            font_size=20,
+            color=RGBColor(0xE0, 0xE0, 0xE0),
             alignment=PP_ALIGN.LEFT,
         )
 
@@ -211,14 +277,27 @@ def build_content_bullets(prs, slide_data, palette):
 
     if title:
         add_text_box(
-            slide, 0.5, 0.5, 12.333, 1, title,
-            font_size=28, bold=True, color=palette["text"],
+            slide,
+            0.5,
+            0.5,
+            12.333,
+            1,
+            title,
+            font_size=28,
+            bold=True,
+            color=palette["text"],
         )
 
     if bullets:
         add_bullet_list(
-            slide, 0.5, 1.8, 12.333, 5.2, bullets,
-            font_size=18, color=palette["text"],
+            slide,
+            0.5,
+            1.8,
+            12.333,
+            5.2,
+            bullets,
+            font_size=18,
+            color=palette["text"],
         )
 
     return slide
@@ -235,40 +314,73 @@ def build_two_column(prs, slide_data, palette):
 
     if title:
         add_text_box(
-            slide, 0.5, 0.5, 12.333, 1, title,
-            font_size=28, bold=True, color=palette["text"],
+            slide,
+            0.5,
+            0.5,
+            12.333,
+            1,
+            title,
+            font_size=28,
+            bold=True,
+            color=palette["text"],
         )
 
     # Left column header
     left_header = left_content.get("header", "")
     if left_header:
         add_text_box(
-            slide, 0.5, 1.8, 5.9, 0.6, left_header,
-            font_size=20, bold=True, color=palette["primary"],
+            slide,
+            0.5,
+            1.8,
+            5.9,
+            0.6,
+            left_header,
+            font_size=20,
+            bold=True,
+            color=palette["primary"],
         )
 
     left_bullets = left_content.get("bullets", [])
     if left_bullets:
         top = 2.5 if left_header else 1.8
         add_bullet_list(
-            slide, 0.5, top, 5.9, 4.5, left_bullets,
-            font_size=18, color=palette["text"],
+            slide,
+            0.5,
+            top,
+            5.9,
+            4.5,
+            left_bullets,
+            font_size=18,
+            color=palette["text"],
         )
 
     # Right column header
     right_header = right_content.get("header", "")
     if right_header:
         add_text_box(
-            slide, 6.933, 1.8, 5.9, 0.6, right_header,
-            font_size=20, bold=True, color=palette["primary"],
+            slide,
+            6.933,
+            1.8,
+            5.9,
+            0.6,
+            right_header,
+            font_size=20,
+            bold=True,
+            color=palette["primary"],
         )
 
     right_bullets = right_content.get("bullets", [])
     if right_bullets:
         top = 2.5 if right_header else 1.8
         add_bullet_list(
-            slide, 6.933, top, 5.9, 4.5, right_bullets,
-            font_size=18, color=palette["text"],
+            slide,
+            6.933,
+            top,
+            5.9,
+            4.5,
+            right_bullets,
+            font_size=18,
+            color=palette["text"],
         )
 
     return slide
@@ -284,15 +396,28 @@ def build_quote(prs, slide_data, palette):
 
     if quote_text:
         add_text_box(
-            slide, 1.5, 2, 10.333, 3, f'"{quote_text}"',
-            font_size=28, italic=True, color=palette["text"],
+            slide,
+            1.5,
+            2,
+            10.333,
+            3,
+            f'"{quote_text}"',
+            font_size=28,
+            italic=True,
+            color=palette["text"],
             alignment=PP_ALIGN.CENTER,
         )
 
     if attribution:
         add_text_box(
-            slide, 2, 5.2, 9.333, 0.8, f"-- {attribution}",
-            font_size=16, color=palette["muted"],
+            slide,
+            2,
+            5.2,
+            9.333,
+            0.8,
+            f"-- {attribution}",
+            font_size=16,
+            color=palette["muted"],
             alignment=PP_ALIGN.CENTER,
         )
 
@@ -310,8 +435,15 @@ def build_table_slide(prs, slide_data, palette):
 
     if title:
         add_text_box(
-            slide, 0.5, 0.5, 12.333, 1, title,
-            font_size=28, bold=True, color=palette["text"],
+            slide,
+            0.5,
+            0.5,
+            12.333,
+            1,
+            title,
+            font_size=28,
+            bold=True,
+            color=palette["text"],
         )
 
     if headers and rows_data:
@@ -319,9 +451,12 @@ def build_table_slide(prs, slide_data, palette):
         num_cols = len(headers)
 
         table_shape = slide.shapes.add_table(
-            num_rows, num_cols,
-            Inches(0.5), Inches(1.8),
-            Inches(12.333), Inches(min(5.0, 0.5 * num_rows + 0.5)),
+            num_rows,
+            num_cols,
+            Inches(0.5),
+            Inches(1.8),
+            Inches(12.333),
+            Inches(min(5.0, 0.5 * num_rows + 0.5)),
         )
         table = table_shape.table
 
@@ -366,8 +501,15 @@ def build_image_text(prs, slide_data, palette):
 
     if title:
         add_text_box(
-            slide, 0.5, 0.5, 12.333, 1, title,
-            font_size=28, bold=True, color=palette["text"],
+            slide,
+            0.5,
+            0.5,
+            12.333,
+            1,
+            title,
+            font_size=28,
+            bold=True,
+            color=palette["text"],
         )
 
     if image_side == "left":
@@ -379,14 +521,23 @@ def build_image_text(prs, slide_data, palette):
     if image_path and Path(image_path).exists():
         slide.shapes.add_picture(
             image_path,
-            Inches(img_left), Inches(1.8), Inches(5.9), Inches(5.2),
+            Inches(img_left),
+            Inches(1.8),
+            Inches(5.9),
+            Inches(5.2),
         )
 
     # Add text bullets
     if bullets:
         add_bullet_list(
-            slide, text_left, 1.8, 5.9, 5.2, bullets,
-            font_size=18, color=palette["text"],
+            slide,
+            text_left,
+            1.8,
+            5.9,
+            5.2,
+            bullets,
+            font_size=18,
+            color=palette["text"],
         )
 
     return slide
@@ -402,15 +553,28 @@ def build_closing_slide(prs, slide_data, palette):
 
     white = RGBColor(0xFF, 0xFF, 0xFF)
     add_text_box(
-        slide, 1, 2.5, 11.333, 2, main_text,
-        font_size=36, bold=True, color=white,
+        slide,
+        1,
+        2.5,
+        11.333,
+        2,
+        main_text,
+        font_size=36,
+        bold=True,
+        color=white,
         alignment=PP_ALIGN.CENTER,
     )
 
     if subtitle:
         add_text_box(
-            slide, 2, 4.8, 9.333, 1, subtitle,
-            font_size=18, color=RGBColor(0xE0, 0xE0, 0xE0),
+            slide,
+            2,
+            4.8,
+            9.333,
+            1,
+            subtitle,
+            font_size=18,
+            color=RGBColor(0xE0, 0xE0, 0xE0),
             alignment=PP_ALIGN.CENTER,
         )
 
@@ -481,20 +645,22 @@ def build_presentation(slide_map: list, design: dict, output_path: str) -> str:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main():
-    parser = argparse.ArgumentParser(
-        description="Generate a PPTX presentation from a slide map JSON."
-    )
+    parser = argparse.ArgumentParser(description="Generate a PPTX presentation from a slide map JSON.")
     parser.add_argument(
-        "--slide-map", required=True,
+        "--slide-map",
+        required=True,
         help="Path to slide map JSON file",
     )
     parser.add_argument(
-        "--design", required=True,
+        "--design",
+        required=True,
         help="Path to design config JSON file",
     )
     parser.add_argument(
-        "--output", required=True,
+        "--output",
+        required=True,
         help="Output .pptx file path",
     )
     args = parser.parse_args()

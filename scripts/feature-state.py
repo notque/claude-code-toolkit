@@ -271,9 +271,7 @@ def cmd_checkpoint(args: argparse.Namespace) -> int:
     else:
         # Create empty checkpoint marker
         checkpoint_file.write_text(
-            f"# {phase.title()} Checkpoint: {feature}\n\n"
-            f"**Date**: {today}\n"
-            f"**Status**: completed\n"
+            f"# {phase.title()} Checkpoint: {feature}\n\n**Date**: {today}\n**Status**: completed\n"
         )
 
     output_json(
@@ -508,10 +506,10 @@ def cmd_retro_record_adhoc(args: argparse.Namespace) -> int:
         # Create new L2 topic file with proper metadata
         lines = [
             f"# Retro: {topic.replace('-', ' ').title()}",
-            f"**Source**: adhoc",
+            "**Source**: adhoc",
             f"**Confidence**: {confidence.upper()}",
             f"**Tags**: {topic.replace('-', ', ')}",
-            f"**Languages**: ",
+            "**Languages**: ",
             "",
             f"### {heading}",
             value,
@@ -809,7 +807,7 @@ def _increment_observation(content: str, heading: str) -> tuple[str, bool]:
     if match:
         count = int(match.group(2) or 1) + 1
         replacement = f"{match.group(1)} [{count}x]"
-        return content[:match.start()] + replacement + content[match.end():], True
+        return content[: match.start()] + replacement + content[match.end() :], True
     return content, False
 
 
@@ -904,17 +902,18 @@ def _archive_retro_knowledge(root: Path, feature_dir: Path, feature: str) -> boo
     archived = False
 
     # Primary path: build enriched L2 file from retro_records (has tags + languages)
-    if hasattr(feature_dir, 'exists'):
+    if hasattr(feature_dir, "exists"):
         state = load_state(feature_dir, feature)
         if state and state.retro_records:
-            promoted = {k: v for k, v in state.retro_records.items()
-                        if v.get("confidence", "low").upper() in ("MEDIUM", "HIGH")}
+            promoted = {
+                k: v for k, v in state.retro_records.items() if v.get("confidence", "low").upper() in ("MEDIUM", "HIGH")
+            }
             if promoted:
                 l2_dest.mkdir(parents=True, exist_ok=True)
                 dest_file = l2_dest / f"{feature}.md"
                 lines = [f"# Retro: {feature.replace('-', ' ').title()}"]
                 lines.append(f"**Source**: feature/{feature}")
-                lines.append(f"**Confidence**: MEDIUM")
+                lines.append("**Confidence**: MEDIUM")
 
                 # Collect tags from record keys and expand with synonyms
                 tags: set[str] = set()
@@ -929,7 +928,7 @@ def _archive_retro_knowledge(root: Path, feature_dir: Path, feature: str) -> boo
                 lines.append("")
 
                 for key, record in promoted.items():
-                    heading = key.replace('-', ' ').title()
+                    heading = key.replace("-", " ").title()
                     obs_count = record.get("observations", 1)
                     count_tag = f" [{obs_count}x]" if obs_count > 1 else ""
                     lines.append(f"### {heading}{count_tag}")
@@ -941,7 +940,7 @@ def _archive_retro_knowledge(root: Path, feature_dir: Path, feature: str) -> boo
                     existing = dest_file.read_text()
                     # Observation clustering: increment counts for existing headings
                     for key, record in promoted.items():
-                        heading = key.replace('-', ' ').title()
+                        heading = key.replace("-", " ").title()
                         updated, clustered = _increment_observation(existing, heading)
                         if clustered:
                             existing = updated
@@ -993,8 +992,7 @@ def cmd_retro_audit(args: argparse.Namespace) -> int:
     l2_dir = retro_dir / "L2"
 
     if not l2_dir.is_dir():
-        output_json({"audit": "retro-l2", "total_files": 0, "issues": [],
-                      "message": "No retro/L2/ directory"}, args)
+        output_json({"audit": "retro-l2", "total_files": 0, "issues": [], "message": "No retro/L2/ directory"}, args)
         return 0
 
     issues = []
@@ -1012,19 +1010,26 @@ def cmd_retro_audit(args: argparse.Namespace) -> int:
 
         # Check for missing Tags line
         if "**Tags**:" not in content:
-            file_issues.append({"type": "missing_tags", "severity": "high",
-                                "hint": "Add **Tags**: line for relevance matching"})
+            file_issues.append(
+                {"type": "missing_tags", "severity": "high", "hint": "Add **Tags**: line for relevance matching"}
+            )
 
         # Check for missing Languages line
         if "**Languages**:" not in content:
-            file_issues.append({"type": "missing_languages", "severity": "medium",
-                                "hint": "Add **Languages**: line for cross-language gating"})
+            file_issues.append(
+                {
+                    "type": "missing_languages",
+                    "severity": "medium",
+                    "hint": "Add **Languages**: line for cross-language gating",
+                }
+            )
 
         # Check for empty content (no ### headings = no learnings)
         headings = re.findall(r"^### (.+?)(?:\s*\[\d+x\])?$", content, re.MULTILINE)
         if not headings:
-            file_issues.append({"type": "no_learnings", "severity": "high",
-                                "hint": "No ### headings found; no actionable learnings"})
+            file_issues.append(
+                {"type": "no_learnings", "severity": "high", "hint": "No ### headings found; no actionable learnings"}
+            )
 
         # Track headings for cross-file duplicate detection
         for h in headings:
@@ -1037,13 +1042,15 @@ def cmd_retro_audit(args: argparse.Namespace) -> int:
     # Report cross-file duplicates
     duplicates = {h: files for h, files in all_headings.items() if len(files) > 1}
     for heading, files in duplicates.items():
-        issues.append({
-            "type": "cross_file_duplicate",
-            "heading": heading,
-            "files": files,
-            "severity": "low",
-            "hint": "Same learning in multiple files; consider consolidating",
-        })
+        issues.append(
+            {
+                "type": "cross_file_duplicate",
+                "heading": heading,
+                "files": files,
+                "severity": "low",
+                "hint": "Same learning in multiple files; consider consolidating",
+            }
+        )
 
     summary = {
         "audit": "retro-l2",
@@ -1088,7 +1095,7 @@ def cmd_retro_candidates(args: argparse.Namespace) -> int:
 
         # Extract confidence
         conf_match = re.search(r"\*\*Confidence\*\*:\s*(\w+)", content)
-        confidence = (conf_match.group(1).upper() if conf_match else "LOW")
+        confidence = conf_match.group(1).upper() if conf_match else "LOW"
 
         # Extract tags
         tags_match = re.search(r"\*\*Tags\*\*:\s*(.+)", content)
@@ -1106,15 +1113,17 @@ def cmd_retro_candidates(args: argparse.Namespace) -> int:
 
             # Filter: HIGH confidence + enough observations
             if confidence == "HIGH" and obs_count >= min_observations:
-                candidates.append({
-                    "topic": f.stem,
-                    "key": heading,
-                    "value": value,
-                    "confidence": confidence,
-                    "observations": obs_count,
-                    "tags": tags,
-                    "source_file": str(f.relative_to(root)),
-                })
+                candidates.append(
+                    {
+                        "topic": f.stem,
+                        "key": heading,
+                        "value": value,
+                        "confidence": confidence,
+                        "observations": obs_count,
+                        "tags": tags,
+                        "source_file": str(f.relative_to(root)),
+                    }
+                )
 
     # Find matching agents by reading retro-topics from frontmatter
     agent_matches = {}
@@ -1136,11 +1145,7 @@ def cmd_retro_candidates(args: argparse.Namespace) -> int:
                 fm_match.group(1),
             )
             if topics_match:
-                topics = [
-                    t.strip().lstrip("- ")
-                    for t in topics_match.group(1).strip().split("\n")
-                    if t.strip()
-                ]
+                topics = [t.strip().lstrip("- ") for t in topics_match.group(1).strip().split("\n") if t.strip()]
                 for topic in topics:
                     agent_matches.setdefault(topic, []).append(agent_file.stem)
 
@@ -1148,15 +1153,18 @@ def cmd_retro_candidates(args: argparse.Namespace) -> int:
     for c in candidates:
         c["matching_agents"] = agent_matches.get(c["topic"], [])
 
-    output_json({
-        "candidates": candidates,
-        "total_l2_files": len(list(l2_dir.glob("*.md"))),
-        "graduation_criteria": {
-            "min_confidence": "HIGH",
-            "min_observations": min_observations,
+    output_json(
+        {
+            "candidates": candidates,
+            "total_l2_files": len(list(l2_dir.glob("*.md"))),
+            "graduation_criteria": {
+                "min_confidence": "HIGH",
+                "min_observations": min_observations,
+            },
+            "agent_topic_map": agent_matches,
         },
-        "agent_topic_map": agent_matches,
-    }, args)
+        args,
+    )
     return 0
 
 
@@ -1189,9 +1197,7 @@ def cmd_abandon(args: argparse.Namespace) -> int:
         )
 
     reason = args.reason or "No reason given"
-    output_json(
-        {"action": "abandon", "feature": feature, "reason": reason}, args
-    )
+    output_json({"action": "abandon", "feature": feature, "reason": reason}, args)
     return 0
 
 
@@ -1223,9 +1229,7 @@ def output_error(message: str) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Feature lifecycle state management CLI"
-    )
+    parser = argparse.ArgumentParser(description="Feature lifecycle state management CLI")
     parser.add_argument("--human", action="store_true", help="Human-readable output")
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
@@ -1263,8 +1267,12 @@ def main() -> int:
     p_rra.add_argument("topic", help="L2 topic file name (e.g., go-patterns, testing)")
     p_rra.add_argument("key", help="Record key (becomes ### heading)")
     p_rra.add_argument("value", help="Record value")
-    p_rra.add_argument("--confidence", default="medium", choices=["low", "medium", "high"],
-                       help="Confidence level (default: medium). Use 'high' for valuable single findings.")
+    p_rra.add_argument(
+        "--confidence",
+        default="medium",
+        choices=["low", "medium", "high"],
+        help="Confidence level (default: medium). Use 'high' for valuable single findings.",
+    )
 
     # retro-promote
     p_rp = subparsers.add_parser("retro-promote", help="Promote retro record L3→L2")

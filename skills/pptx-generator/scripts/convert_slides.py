@@ -55,8 +55,10 @@ def pptx_to_pdf(soffice_path: str, pptx_path: str, output_dir: str) -> str:
     cmd = [
         soffice_path,
         "--headless",
-        "--convert-to", "pdf",
-        "--outdir", output_dir,
+        "--convert-to",
+        "pdf",
+        "--outdir",
+        output_dir,
         pptx_path,
     ]
 
@@ -68,11 +70,7 @@ def pptx_to_pdf(soffice_path: str, pptx_path: str, output_dir: str) -> str:
     )
 
     if result.returncode != 0:
-        raise RuntimeError(
-            f"LibreOffice PDF conversion failed:\n"
-            f"stdout: {result.stdout}\n"
-            f"stderr: {result.stderr}"
-        )
+        raise RuntimeError(f"LibreOffice PDF conversion failed:\nstdout: {result.stdout}\nstderr: {result.stderr}")
 
     # Find the generated PDF
     pptx_name = Path(pptx_path).stem
@@ -85,15 +83,13 @@ def pptx_to_pdf(soffice_path: str, pptx_path: str, output_dir: str) -> str:
             pdf_path = pdfs[0]
         else:
             raise RuntimeError(
-                f"PDF not found after conversion. Expected: {pdf_path}\n"
-                f"LibreOffice output: {result.stdout}"
+                f"PDF not found after conversion. Expected: {pdf_path}\nLibreOffice output: {result.stdout}"
             )
 
     return str(pdf_path)
 
 
-def pdf_to_pngs_pdftoppm(pdftoppm_path: str, pdf_path: str, output_dir: str,
-                          dpi: int = 150) -> list[str]:
+def pdf_to_pngs_pdftoppm(pdftoppm_path: str, pdf_path: str, output_dir: str, dpi: int = 150) -> list[str]:
     """Convert PDF pages to PNGs using pdftoppm.
 
     Returns list of PNG paths sorted by page number.
@@ -103,7 +99,8 @@ def pdf_to_pngs_pdftoppm(pdftoppm_path: str, pdf_path: str, output_dir: str,
     cmd = [
         pdftoppm_path,
         "-png",
-        "-r", str(dpi),
+        "-r",
+        str(dpi),
         pdf_path,
         prefix,
     ]
@@ -111,18 +108,14 @@ def pdf_to_pngs_pdftoppm(pdftoppm_path: str, pdf_path: str, output_dir: str,
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
 
     if result.returncode != 0:
-        raise RuntimeError(
-            f"pdftoppm conversion failed:\n"
-            f"stderr: {result.stderr}"
-        )
+        raise RuntimeError(f"pdftoppm conversion failed:\nstderr: {result.stderr}")
 
     # Find generated PNGs
     pngs = sorted(Path(output_dir).glob("slide-*.png"))
     return [str(p) for p in pngs]
 
 
-def pdf_to_pngs_soffice(soffice_path: str, pdf_path: str,
-                         output_dir: str) -> list[str]:
+def pdf_to_pngs_soffice(soffice_path: str, pdf_path: str, output_dir: str) -> list[str]:
     """Convert PDF pages to PNGs using LibreOffice (fallback).
 
     Note: This produces one image per page but quality may vary.
@@ -131,25 +124,23 @@ def pdf_to_pngs_soffice(soffice_path: str, pdf_path: str,
     cmd = [
         soffice_path,
         "--headless",
-        "--convert-to", "png",
-        "--outdir", output_dir,
+        "--convert-to",
+        "png",
+        "--outdir",
+        output_dir,
         pdf_path,
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
 
     if result.returncode != 0:
-        raise RuntimeError(
-            f"LibreOffice PNG conversion failed:\n"
-            f"stderr: {result.stderr}"
-        )
+        raise RuntimeError(f"LibreOffice PNG conversion failed:\nstderr: {result.stderr}")
 
     pngs = sorted(Path(output_dir).glob("*.png"))
     return [str(p) for p in pngs]
 
 
-def convert(pptx_path: str, output_dir: str, dpi: int = 150,
-            keep_pdf: bool = False) -> dict:
+def convert(pptx_path: str, output_dir: str, dpi: int = 150, keep_pdf: bool = False) -> dict:
     """Full conversion pipeline: PPTX -> PDF -> PNGs.
 
     Returns dict with 'pdf_path', 'png_paths', and 'slide_count'.
@@ -177,7 +168,7 @@ def convert(pptx_path: str, output_dir: str, dpi: int = 150,
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     # Step 1: PPTX -> PDF
-    print(f"Converting PPTX to PDF...")
+    print("Converting PPTX to PDF...")
     with tempfile.TemporaryDirectory() as tmpdir:
         pdf_path = pptx_to_pdf(soffice_path, pptx_path, tmpdir)
 
@@ -188,10 +179,10 @@ def convert(pptx_path: str, output_dir: str, dpi: int = 150,
     # Step 2: PDF -> PNGs
     print(f"Converting PDF to slide images (DPI={dpi})...")
     if pdftoppm_path:
-        print(f"  Using pdftoppm for high-quality conversion")
+        print("  Using pdftoppm for high-quality conversion")
         png_paths = pdf_to_pngs_pdftoppm(pdftoppm_path, final_pdf, output_dir, dpi)
     else:
-        print(f"  Using LibreOffice for PNG conversion (pdftoppm not available)")
+        print("  Using LibreOffice for PNG conversion (pdftoppm not available)")
         png_paths = pdf_to_pngs_soffice(soffice_path, final_pdf, output_dir)
 
     # Clean up PDF if not keeping
@@ -206,23 +197,26 @@ def convert(pptx_path: str, output_dir: str, dpi: int = 150,
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Convert PPTX to PDF and per-slide PNG images."
-    )
+    parser = argparse.ArgumentParser(description="Convert PPTX to PDF and per-slide PNG images.")
     parser.add_argument(
-        "--input", required=True,
+        "--input",
+        required=True,
         help="Path to input .pptx file",
     )
     parser.add_argument(
-        "--output-dir", required=True,
+        "--output-dir",
+        required=True,
         help="Directory for output PNG files",
     )
     parser.add_argument(
-        "--dpi", type=int, default=150,
+        "--dpi",
+        type=int,
+        default=150,
         help="PNG resolution in DPI (default: 150)",
     )
     parser.add_argument(
-        "--keep-pdf", action="store_true",
+        "--keep-pdf",
+        action="store_true",
         help="Keep intermediate PDF file",
     )
     args = parser.parse_args()

@@ -775,7 +775,9 @@ def main() -> int:
     parser.add_argument("--category", action="append", help="Category name to look up (repeatable)")
     parser.add_argument("--tag", action="append", help="Tag name to look up or create (repeatable)")
     parser.add_argument("--author", type=int, help="Author user ID")
-    parser.add_argument("--update", type=int, metavar="POST_ID", help="Update existing post instead of creating new (pass post ID)")
+    parser.add_argument(
+        "--update", type=int, metavar="POST_ID", help="Update existing post instead of creating new (pass post ID)"
+    )
     parser.add_argument("--classic", action="store_true", help="Use classic HTML format instead of Gutenberg blocks")
     parser.add_argument("--human", action="store_true", help="Output human-readable format instead of JSON")
 

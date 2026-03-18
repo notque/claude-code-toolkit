@@ -23,7 +23,6 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 # ─── Configuration ─────────────────────────────────────────────
 
@@ -73,6 +72,7 @@ DEFAULT_FIX_ACTIONS = {
 
 
 # ─── Database Connection ───────────────────────────────────────
+
 
 def _get_db_dir() -> Path:
     env_dir = os.environ.get("CLAUDE_LEARNING_DIR")
@@ -218,6 +218,7 @@ END;
 
 # ─── Error Classification (from learning_db.py) ───────────────
 
+
 def classify_error(message: str) -> str:
     message_lower = message.lower()
     for error_type, patterns in ERROR_TYPES.items():
@@ -242,6 +243,7 @@ def generate_signature(error_message: str, error_type: str) -> str:
 
 
 # ─── Core API ──────────────────────────────────────────────────
+
 
 def record_learning(
     topic: str,
@@ -298,18 +300,30 @@ def record_learning(
                 WHERE topic = ? AND key = ?
                 """,
                 (
-                    new_value, new_confidence, new_tags,
-                    obs, now,
-                    source, source_detail,
-                    error_signature, error_type, fix_type, fix_action,
-                    topic, key,
+                    new_value,
+                    new_confidence,
+                    new_tags,
+                    obs,
+                    now,
+                    source,
+                    source_detail,
+                    error_signature,
+                    error_type,
+                    fix_type,
+                    fix_action,
+                    topic,
+                    key,
                 ),
             )
             conn.commit()
             return {
-                "topic": topic, "key": key, "value": new_value,
-                "category": category, "confidence": new_confidence,
-                "observation_count": obs, "is_new": False,
+                "topic": topic,
+                "key": key,
+                "value": new_value,
+                "category": category,
+                "confidence": new_confidence,
+                "observation_count": obs,
+                "is_new": False,
             }
         else:
             conn.execute(
@@ -322,17 +336,33 @@ def record_learning(
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    topic, key, value, category, confidence, tags_str,
-                    source, source_detail, project_path, session_id,
-                    now, now,
-                    error_signature, error_type, fix_type, fix_action,
+                    topic,
+                    key,
+                    value,
+                    category,
+                    confidence,
+                    tags_str,
+                    source,
+                    source_detail,
+                    project_path,
+                    session_id,
+                    now,
+                    now,
+                    error_signature,
+                    error_type,
+                    fix_type,
+                    fix_action,
                 ),
             )
             conn.commit()
             return {
-                "topic": topic, "key": key, "value": value,
-                "category": category, "confidence": confidence,
-                "observation_count": 1, "is_new": True,
+                "topic": topic,
+                "key": key,
+                "value": value,
+                "category": category,
+                "confidence": confidence,
+                "observation_count": 1,
+                "is_new": True,
             }
 
 
@@ -378,10 +408,14 @@ def query_learnings(
 
     # Whitelist valid ORDER BY to prevent injection
     valid_orders = {
-        "confidence DESC", "confidence ASC",
-        "last_seen DESC", "last_seen ASC",
-        "observation_count DESC", "observation_count ASC",
-        "first_seen DESC", "first_seen ASC",
+        "confidence DESC",
+        "confidence ASC",
+        "last_seen DESC",
+        "last_seen ASC",
+        "observation_count DESC",
+        "observation_count ASC",
+        "first_seen DESC",
+        "first_seen ASC",
     }
     if order_by not in valid_orders:
         order_by = "confidence DESC"
@@ -546,9 +580,7 @@ def record_session(
     now = datetime.now().isoformat()
 
     with get_connection() as conn:
-        row = conn.execute(
-            "SELECT * FROM sessions WHERE session_id = ?", (session_id,)
-        ).fetchone()
+        row = conn.execute("SELECT * FROM sessions WHERE session_id = ?", (session_id,)).fetchone()
 
         if row:
             conn.execute(
@@ -564,10 +596,13 @@ def record_session(
                 WHERE session_id = ?
                 """,
                 (
-                    files_modified, tools_used,
-                    errors_encountered, errors_resolved,
+                    files_modified,
+                    tools_used,
+                    errors_encountered,
+                    errors_resolved,
                     learnings_captured,
-                    end_session, now if end_session else None,
+                    end_session,
+                    now if end_session else None,
                     summary,
                     session_id,
                 ),
@@ -583,10 +618,15 @@ def record_session(
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    session_id, now, project_path,
-                    files_modified, tools_used,
-                    errors_encountered, errors_resolved,
-                    learnings_captured, summary,
+                    session_id,
+                    now,
+                    project_path,
+                    files_modified,
+                    tools_used,
+                    errors_encountered,
+                    errors_resolved,
+                    learnings_captured,
+                    summary,
                 ),
             )
         conn.commit()
@@ -598,17 +638,11 @@ def get_stats() -> dict:
 
     with get_connection() as conn:
         total = conn.execute("SELECT COUNT(*) FROM learnings").fetchone()[0]
-        high_conf = conn.execute(
-            "SELECT COUNT(*) FROM learnings WHERE confidence >= 0.7"
-        ).fetchone()[0]
-        graduated = conn.execute(
-            "SELECT COUNT(*) FROM learnings WHERE graduated_to IS NOT NULL"
-        ).fetchone()[0]
+        high_conf = conn.execute("SELECT COUNT(*) FROM learnings WHERE confidence >= 0.7").fetchone()[0]
+        graduated = conn.execute("SELECT COUNT(*) FROM learnings WHERE graduated_to IS NOT NULL").fetchone()[0]
 
         by_category = {}
-        for row in conn.execute(
-            "SELECT category, COUNT(*) as cnt FROM learnings GROUP BY category"
-        ).fetchall():
+        for row in conn.execute("SELECT category, COUNT(*) as cnt FROM learnings GROUP BY category").fetchall():
             by_category[row["category"]] = row["cnt"]
 
         by_topic = {}
@@ -645,6 +679,7 @@ def prune(min_confidence: float = 0.3, older_than_days: int = 90) -> int:
 
 
 # ─── Import / Export ───────────────────────────────────────────
+
 
 def import_from_retro(retro_dir: str) -> dict:
     """Import existing retro L2 markdown files into learning.db."""
@@ -696,7 +731,7 @@ def import_from_retro(retro_dir: str) -> dict:
                 raw_key = re.sub(r"\s*\[\d+x\]", "", raw_key).strip()
 
                 key = raw_key.lower().replace(" ", "-")
-                value = part[len(heading_match.group(0)):].strip()
+                value = part[len(heading_match.group(0)) :].strip()
 
                 if not value:
                     skipped += 1
@@ -782,9 +817,11 @@ def import_from_patterns_db(db_path: str) -> dict:
                         WHERE topic = ? AND key = ?
                         """,
                         (
-                            row["success_count"], row["failure_count"],
+                            row["success_count"],
+                            row["failure_count"],
                             row["success_count"] + row["failure_count"],
-                            error_type, signature,
+                            error_type,
+                            signature,
                         ),
                     )
                     conn.commit()
@@ -893,7 +930,7 @@ def _export_l2(output_dir: str | None) -> str:
 
         lines = [
             f"# Retro: {topic.replace('-', ' ').title()}",
-            f"**Source**: learning.db",
+            "**Source**: learning.db",
             f"**Tags**: {', '.join(sorted(all_tags)) if all_tags else topic}",
             "",
         ]

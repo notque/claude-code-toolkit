@@ -13,7 +13,6 @@ Design Principles:
 - Runs after session-summary.py in the Stop chain
 """
 
-import json
 import os
 import sys
 from datetime import datetime, timedelta

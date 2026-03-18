@@ -14,12 +14,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 
 from learning_db import (
     classify_error,
-    normalize_error,
     generate_signature,
-    record_error,
-    lookup_solution,
     get_stats,
     init_db,
+    lookup_solution,
+    normalize_error,
+    record_error,
 )
 
 
@@ -139,22 +139,16 @@ def test_confidence_updates():
     error_msg = f"Confidence test error {unique_id}"
 
     # Initial failure
-    result = record_error(
-        error_msg, solution="Fix it", success=False, project_path="/test"
-    )
+    result = record_error(error_msg, solution="Fix it", success=False, project_path="/test")
     initial_conf = result["confidence"]
 
     # Success should increase confidence
-    result = record_error(
-        error_msg, solution="Fix it", success=True, project_path="/test"
-    )
+    result = record_error(error_msg, solution="Fix it", success=True, project_path="/test")
     assert result["confidence"] > initial_conf
 
     # Multiple failures should decrease confidence
     for _ in range(5):
-        result = record_error(
-            error_msg, solution="Fix it", success=False, project_path="/test"
-        )
+        result = record_error(error_msg, solution="Fix it", success=False, project_path="/test")
 
     # Confidence should be lower but bounded at 0
     assert result["confidence"] >= 0.0

@@ -160,7 +160,7 @@ def validate_routing_table_target(target_path: Path = None) -> List[Tuple[str, b
     lines = content.split("\n")
     table_errors = 0
 
-    for line_num, line in enumerate(lines, 1):
+    for _line_num, line in enumerate(lines, 1):
         stripped = line.strip()
         if stripped.startswith("|"):
             # Check for basic pipe structure

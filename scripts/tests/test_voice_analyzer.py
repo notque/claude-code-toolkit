@@ -201,9 +201,7 @@ class TestProfileGeneration:
     def test_profile_from_file(self, fixtures_dir):
         """Profile generation should work with file input."""
         file_path = fixtures_dir / "sample_voice_good.md"
-        returncode, stdout, stderr = run_analyzer(
-            ["analyze", "--format", "json", "--samples", str(file_path)]
-        )
+        returncode, stdout, stderr = run_analyzer(["analyze", "--format", "json", "--samples", str(file_path)])
 
         assert returncode == 0
         result = json.loads(stdout)
@@ -325,9 +323,9 @@ class TestCompareProfiles:
         tmp2.write(stdout2)
         tmp2.close()
 
-        returncode, stdout, stderr = run_analyzer([
-            "compare", "--profile1", tmp1.name, "--profile2", tmp2.name, "--format", "json"
-        ])
+        returncode, stdout, stderr = run_analyzer(
+            ["compare", "--profile1", tmp1.name, "--profile2", tmp2.name, "--format", "json"]
+        )
 
         assert returncode == 0
         result = json.loads(stdout)
@@ -342,9 +340,9 @@ class TestCompareProfiles:
         tmp1.write(stdout1)
         tmp1.close()
 
-        returncode, stdout, stderr = run_analyzer([
-            "compare", "--profile1", tmp1.name, "--profile2", tmp1.name, "--format", "json"
-        ])
+        returncode, stdout, stderr = run_analyzer(
+            ["compare", "--profile1", tmp1.name, "--profile2", tmp1.name, "--format", "json"]
+        )
 
         assert returncode == 0
         result = json.loads(stdout)
@@ -372,9 +370,7 @@ class TestCLIInterface:
     def test_file_input(self, fixtures_dir):
         """Should accept file path as input."""
         file_path = fixtures_dir / "sample_voice_good.md"
-        returncode, stdout, stderr = run_analyzer(
-            ["analyze", "--format", "json", "--samples", str(file_path)]
-        )
+        returncode, stdout, stderr = run_analyzer(["analyze", "--format", "json", "--samples", str(file_path)])
 
         assert returncode == 0
         result = json.loads(stdout)
@@ -382,9 +378,7 @@ class TestCLIInterface:
 
     def test_human_readable_output(self, sample_text_short):
         """With --format text, should output human-readable format."""
-        returncode, stdout, stderr = run_analyzer(
-            ["analyze", "--format", "text"], sample_text_short
-        )
+        returncode, stdout, stderr = run_analyzer(["analyze", "--format", "text"], sample_text_short)
 
         assert returncode == 0
         with pytest.raises(json.JSONDecodeError):
@@ -398,9 +392,7 @@ class TestGoldenFileValidation:
     def test_voice_a_profile_matches_expected(self, fixtures_dir, expected_voice_profile):
         """Voice A sample analysis should match expected profile structure."""
         file_path = fixtures_dir / "sample_voice_good.md"
-        returncode, stdout, stderr = run_analyzer(
-            ["analyze", "--format", "json", "--samples", str(file_path)]
-        )
+        returncode, stdout, stderr = run_analyzer(["analyze", "--format", "json", "--samples", str(file_path)])
 
         assert returncode == 0
         result = json.loads(stdout)

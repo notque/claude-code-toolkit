@@ -23,10 +23,9 @@ import ast
 import json
 import re
 import sys
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
 
 # =============================================================================
 # Data Structures
@@ -251,8 +250,7 @@ def _parse_class(node: ast.ClassDef) -> ClassInfo:
             methods.append(func)
 
     is_dataclass = any(
-        (isinstance(d, ast.Name) and d.id == "dataclass")
-        or (isinstance(d, ast.Attribute) and d.attr == "dataclass")
+        (isinstance(d, ast.Name) and d.id == "dataclass") or (isinstance(d, ast.Attribute) and d.attr == "dataclass")
         for d in node.decorator_list
     )
 
@@ -295,22 +293,26 @@ def verify_documentation(source_path: Path, doc_path: Path) -> VerificationResul
         mentioned = func.name.lower() in doc_lower or func.name in doc_content
         if not mentioned:
             missing_functions.append(func.name)
-        checks.append({
-            "check": f"function_{func.name}_mentioned",
-            "passed": mentioned,
-            "detail": f"Public function '{func.name}' {'found' if mentioned else 'MISSING'} in docs",
-        })
+        checks.append(
+            {
+                "check": f"function_{func.name}_mentioned",
+                "passed": mentioned,
+                "detail": f"Public function '{func.name}' {'found' if mentioned else 'MISSING'} in docs",
+            }
+        )
 
     # --- Check 2: All classes mentioned ---
     for cls in module.classes:
         mentioned = cls.name.lower() in doc_lower or cls.name in doc_content
         if not mentioned:
             missing_classes.append(cls.name)
-        checks.append({
-            "check": f"class_{cls.name}_mentioned",
-            "passed": mentioned,
-            "detail": f"Class '{cls.name}' {'found' if mentioned else 'MISSING'} in docs",
-        })
+        checks.append(
+            {
+                "check": f"class_{cls.name}_mentioned",
+                "passed": mentioned,
+                "detail": f"Class '{cls.name}' {'found' if mentioned else 'MISSING'} in docs",
+            }
+        )
 
     # --- Check 3: Public class methods mentioned ---
     for cls in module.classes:
@@ -318,22 +320,26 @@ def verify_documentation(source_path: Path, doc_path: Path) -> VerificationResul
             mentioned = method.name.lower() in doc_lower or method.name in doc_content
             if not mentioned:
                 missing_functions.append(f"{cls.name}.{method.name}")
-            checks.append({
-                "check": f"method_{cls.name}_{method.name}_mentioned",
-                "passed": mentioned,
-                "detail": f"Method '{cls.name}.{method.name}' {'found' if mentioned else 'MISSING'} in docs",
-            })
+            checks.append(
+                {
+                    "check": f"method_{cls.name}_{method.name}_mentioned",
+                    "passed": mentioned,
+                    "detail": f"Method '{cls.name}.{method.name}' {'found' if mentioned else 'MISSING'} in docs",
+                }
+            )
 
     # --- Check 4: Module-level constants mentioned ---
     for const in module.global_constants:
         mentioned = const in doc_content
         if not mentioned:
             missing_constants.append(const)
-        checks.append({
-            "check": f"constant_{const}_mentioned",
-            "passed": mentioned,
-            "detail": f"Constant '{const}' {'found' if mentioned else 'MISSING'} in docs",
-        })
+        checks.append(
+            {
+                "check": f"constant_{const}_mentioned",
+                "passed": mentioned,
+                "detail": f"Constant '{const}' {'found' if mentioned else 'MISSING'} in docs",
+            }
+        )
 
     # --- Check 5: Function arguments documented ---
     for func in module.public_functions:
@@ -344,34 +350,31 @@ def verify_documentation(source_path: Path, doc_path: Path) -> VerificationResul
                 mentioned = arg in doc_content
                 if not mentioned:
                     undocumented_args.append(f"{func.name}({arg})")
-                checks.append({
-                    "check": f"arg_{func.name}_{arg}",
-                    "passed": mentioned,
-                    "detail": f"Arg '{arg}' of '{func.name}' {'found' if mentioned else 'MISSING'} in docs",
-                })
+                checks.append(
+                    {
+                        "check": f"arg_{func.name}_{arg}",
+                        "passed": mentioned,
+                        "detail": f"Arg '{arg}' of '{func.name}' {'found' if mentioned else 'MISSING'} in docs",
+                    }
+                )
 
     # --- Check 6: CLI usage documented (if applicable) ---
     if module.has_cli_entry:
-        has_usage = any(
-            kw in doc_lower
-            for kw in ["usage", "command", "cli", "arguments", "python3 scripts/"]
+        has_usage = any(kw in doc_lower for kw in ["usage", "command", "cli", "arguments", "python3 scripts/"])
+        checks.append(
+            {
+                "check": "cli_usage_documented",
+                "passed": has_usage,
+                "detail": "CLI usage section " + ("found" if has_usage else "MISSING"),
+            }
         )
-        checks.append({
-            "check": "cli_usage_documented",
-            "passed": has_usage,
-            "detail": "CLI usage section " + ("found" if has_usage else "MISSING"),
-        })
         if not has_usage:
             structure_issues.append("Script has CLI entry point but docs lack usage section")
 
     # --- Check 7: Structure quality ---
     has_headers = bool(re.findall(r"^#{1,3}\s+\w", doc_content, re.MULTILINE))
-    has_overview = any(
-        kw in doc_lower for kw in ["overview", "purpose", "summary", "description"]
-    )
-    has_examples = any(
-        kw in doc_lower for kw in ["example", "```", "usage"]
-    )
+    has_overview = any(kw in doc_lower for kw in ["overview", "purpose", "summary", "description"])
+    has_examples = any(kw in doc_lower for kw in ["example", "```", "usage"])
 
     if not has_headers:
         structure_issues.append("No markdown headers found")
@@ -380,29 +383,33 @@ def verify_documentation(source_path: Path, doc_path: Path) -> VerificationResul
     if not has_examples:
         structure_issues.append("No examples or code blocks")
 
-    checks.append({
-        "check": "has_headers",
-        "passed": has_headers,
-        "detail": "Markdown headers " + ("present" if has_headers else "MISSING"),
-    })
-    checks.append({
-        "check": "has_overview",
-        "passed": has_overview,
-        "detail": "Overview section " + ("present" if has_overview else "MISSING"),
-    })
-    checks.append({
-        "check": "has_examples",
-        "passed": has_examples,
-        "detail": "Examples/code blocks " + ("present" if has_examples else "MISSING"),
-    })
+    checks.append(
+        {
+            "check": "has_headers",
+            "passed": has_headers,
+            "detail": "Markdown headers " + ("present" if has_headers else "MISSING"),
+        }
+    )
+    checks.append(
+        {
+            "check": "has_overview",
+            "passed": has_overview,
+            "detail": "Overview section " + ("present" if has_overview else "MISSING"),
+        }
+    )
+    checks.append(
+        {
+            "check": "has_examples",
+            "passed": has_examples,
+            "detail": "Examples/code blocks " + ("present" if has_examples else "MISSING"),
+        }
+    )
 
     # --- Check 8: Accuracy spot-checks ---
     # Verify function signatures mentioned in docs actually match source
     for func in module.public_functions:
         # Look for the function signature pattern in docs
-        sig_pattern = re.compile(
-            rf"{func.name}\s*\([^)]*\)", re.IGNORECASE
-        )
+        sig_pattern = re.compile(rf"{func.name}\s*\([^)]*\)", re.IGNORECASE)
         matches = sig_pattern.findall(doc_content)
         for match in matches:
             # Extract arg names from doc signature
@@ -412,7 +419,11 @@ def verify_documentation(source_path: Path, doc_path: Path) -> VerificationResul
             for da in doc_args:
                 if da not in func.args and da not in ("self", "cls", "args", "kwargs"):
                     # Only flag if it looks like a parameter name
-                    if da.islower() and len(da) > 1 and da not in ("str", "int", "bool", "list", "dict", "none", "true", "false", "optional"):
+                    if (
+                        da.islower()
+                        and len(da) > 1
+                        and da not in ("str", "int", "bool", "list", "dict", "none", "true", "false", "optional")
+                    ):
                         accuracy_issues.append(
                             f"Doc mentions arg '{da}' for {func.name} but it's not in source signature"
                         )
@@ -475,10 +486,7 @@ def check_doc_structure(doc_path: Path) -> dict[str, Any]:
     ]
 
     for section_name, keywords in expected_sections:
-        found = any(
-            any(kw in h.lower() for kw in keywords)
-            for h in headers
-        )
+        found = any(any(kw in h.lower() for kw in keywords) for h in headers)
         if not found:
             found = any(kw in content_lower for kw in keywords)
         if not found:
@@ -681,7 +689,7 @@ def cmd_check_structure(args: argparse.Namespace) -> int:
         print(f"Code blocks: {result['code_blocks']}")
         print(f"Word count: {result['word_count']}")
         if result["issues"]:
-            print(f"Issues:")
+            print("Issues:")
             for issue in result["issues"]:
                 print(f"  - {issue}")
     else:
@@ -691,9 +699,7 @@ def cmd_check_structure(args: argparse.Namespace) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Verify Python documentation against source code"
-    )
+    parser = argparse.ArgumentParser(description="Verify Python documentation against source code")
 
     subparsers = parser.add_subparsers(dest="command", required=True)
 

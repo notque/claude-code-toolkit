@@ -28,7 +28,7 @@ if str(EVALS_DIR) not in sys.path:
 import yaml
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    pass
 
 
 @dataclass
@@ -337,18 +337,19 @@ def format_eval_result(result: EvalResult) -> str:
     ]
 
     if result.tasks:
-        lines.extend([
-            "## Task Results",
-            "",
-            "| Task | pass@k | Pass Rate | Avg Score |",
-            "|------|--------|-----------|-----------|",
-        ])
+        lines.extend(
+            [
+                "## Task Results",
+                "",
+                "| Task | pass@k | Pass Rate | Avg Score |",
+                "|------|--------|-----------|-----------|",
+            ]
+        )
 
         for task in result.tasks:
             pass_status = "PASS" if task.pass_at_k else "FAIL"
             lines.append(
-                f"| {task.task_name or task.task_id} | {pass_status} | "
-                f"{task.pass_rate:.1%} | {task.avg_score:.2f} |"
+                f"| {task.task_name or task.task_id} | {pass_status} | {task.pass_rate:.1%} | {task.avg_score:.2f} |"
             )
 
         lines.append("")
@@ -361,13 +362,15 @@ def format_eval_result(result: EvalResult) -> str:
     else:
         verdict = "NEEDS MAJOR FIXES"
 
-    lines.extend([
-        "## Verdict",
-        "",
-        f"**{verdict}**",
-        "",
-        f"_Evaluated at {result.timestamp}_",
-    ])
+    lines.extend(
+        [
+            "## Verdict",
+            "",
+            f"**{verdict}**",
+            "",
+            f"_Evaluated at {result.timestamp}_",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -383,7 +386,7 @@ def format_skill_test_report(result: EvalResult) -> str:
         f"# Agent Test Report: {result.agent_name}",
         "",
         f"**Date:** {result.timestamp}",
-        f"**Tester:** Eval Harness (testing-agents-with-subagents skill)",
+        "**Tester:** Eval Harness (testing-agents-with-subagents skill)",
         f"**Trials per Task:** {result.num_trials}",
         "",
         "## Summary",
@@ -404,19 +407,21 @@ def format_skill_test_report(result: EvalResult) -> str:
 
         for task in result.tasks:
             task_status = "PASS" if task.pass_at_k else "FAIL"
-            lines.extend([
-                f"### {task.task_id}: {task.task_name}",
-                f"- Status: {task_status}",
-                f"- pass@{result.num_trials}: {task.pass_at_k}",
-                f"- pass^{result.num_trials}: {task.pass_power_k}",
-                f"- Pass Rate: {task.pass_rate:.1%}",
-                f"- Avg Score: {task.avg_score:.2f}",
-                "",
-                "**Trial Results:**",
-                "",
-                "| Trial | Passed | Score |",
-                "|-------|--------|-------|",
-            ])
+            lines.extend(
+                [
+                    f"### {task.task_id}: {task.task_name}",
+                    f"- Status: {task_status}",
+                    f"- pass@{result.num_trials}: {task.pass_at_k}",
+                    f"- pass^{result.num_trials}: {task.pass_power_k}",
+                    f"- Pass Rate: {task.pass_rate:.1%}",
+                    f"- Avg Score: {task.avg_score:.2f}",
+                    "",
+                    "**Trial Results:**",
+                    "",
+                    "| Trial | Passed | Score |",
+                    "|-------|--------|-------|",
+                ]
+            )
 
             for trial in task.trials:
                 trial_status = "PASS" if trial.passed else "FAIL"

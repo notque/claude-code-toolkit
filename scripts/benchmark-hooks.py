@@ -31,27 +31,37 @@ ITERATIONS = 5
 
 # Synthetic inputs for different hook event types
 INPUTS: dict[str, str] = {
-    "UserPromptSubmit": json.dumps({
-        "type": "UserPromptSubmit",
-        "prompt": "implement a feature with testing and documentation",
-    }),
-    "PostToolUse": json.dumps({
-        "type": "PostToolUse",
-        "hook_event_name": "PostToolUse",
-        "tool_name": "Write",
-        "tool_input": {"file_path": "/tmp/test.py"},
-        "tool_result": "File written successfully",
-    }),
-    "SessionStart": json.dumps({
-        "type": "SessionStart",
-    }),
-    "PreCompact": json.dumps({
-        "type": "PreCompact",
-        "summary": "Working on feature implementation",
-    }),
-    "Stop": json.dumps({
-        "type": "Stop",
-    }),
+    "UserPromptSubmit": json.dumps(
+        {
+            "type": "UserPromptSubmit",
+            "prompt": "implement a feature with testing and documentation",
+        }
+    ),
+    "PostToolUse": json.dumps(
+        {
+            "type": "PostToolUse",
+            "hook_event_name": "PostToolUse",
+            "tool_name": "Write",
+            "tool_input": {"file_path": "/tmp/test.py"},
+            "tool_result": "File written successfully",
+        }
+    ),
+    "SessionStart": json.dumps(
+        {
+            "type": "SessionStart",
+        }
+    ),
+    "PreCompact": json.dumps(
+        {
+            "type": "PreCompact",
+            "summary": "Working on feature implementation",
+        }
+    ),
+    "Stop": json.dumps(
+        {
+            "type": "Stop",
+        }
+    ),
 }
 
 # Map hooks to their expected event types based on common patterns
@@ -65,7 +75,6 @@ HOOK_EVENT_MAP: dict[str, str] = {
     "fish-shell-detector": "UserPromptSubmit",
     "adr-context-injector": "UserPromptSubmit",
     "adr-enforcement": "UserPromptSubmit",
-    "operator-context-detector": "UserPromptSubmit",
     "pipeline-context-detector": "UserPromptSubmit",
     "confidence-decay": "UserPromptSubmit",
     "auto-graduation-scanner": "UserPromptSubmit",
@@ -196,8 +205,10 @@ def main() -> int:
         )
 
     print()
-    print(f"Threshold: {args.threshold}ms | Hooks: {len(results)} | "
-          f"Pass: {len(results) - violations} | Fail: {violations}")
+    print(
+        f"Threshold: {args.threshold}ms | Hooks: {len(results)} | "
+        f"Pass: {len(results) - violations} | Fail: {violations}"
+    )
 
     if args.ci and violations > 0:
         print(f"\nCI FAILURE: {violations} hook(s) exceeded {args.threshold}ms threshold")

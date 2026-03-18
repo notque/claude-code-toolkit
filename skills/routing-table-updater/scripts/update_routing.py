@@ -244,7 +244,7 @@ def generate_diff(original: str, updated: str) -> str:
     diff_lines.append("+++ commands/do.md (updated)")
 
     # Simple line-by-line diff
-    for idx, (orig, upd) in enumerate(zip(orig_lines, updated_lines), 1):
+    for idx, (orig, upd) in enumerate(zip(orig_lines, updated_lines, strict=False), 1):
         if orig != upd:
             diff_lines.append(f"@@ Line {idx} @@")
             diff_lines.append(f"-{orig}")

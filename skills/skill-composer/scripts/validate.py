@@ -8,7 +8,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Dict, List, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
 
 class ValidationError(Exception):
@@ -56,9 +56,7 @@ def validate_dag_structure(dag: Dict[str, Any]) -> List[Tuple[str, bool, str]]:
                     (
                         f"Phase {i} numbered correctly",
                         is_correct,
-                        f"Expected phase {expected_num}, got {actual_num}"
-                        if not is_correct
-                        else "OK",
+                        f"Expected phase {expected_num}, got {actual_num}" if not is_correct else "OK",
                     )
                 )
 
@@ -95,7 +93,7 @@ def validate_acyclic(dependencies: Dict[str, List[str]]) -> List[Tuple[str, bool
             rec_stack.pop()
             return False, []
 
-        for node in dependencies.keys():
+        for node in dependencies:
             if node not in visited:
                 has_cycle_result, cycle = dfs(node)
                 if has_cycle_result:
@@ -107,18 +105,14 @@ def validate_acyclic(dependencies: Dict[str, List[str]]) -> List[Tuple[str, bool
 
     if has_cycle_result:
         cycle_str = " → ".join(cycle)
-        results.append(
-            ("DAG is acyclic", False, f"Circular dependency detected: {cycle_str}")
-        )
+        results.append(("DAG is acyclic", False, f"Circular dependency detected: {cycle_str}"))
     else:
         results.append(("DAG is acyclic (no circular dependencies)", True, "OK"))
 
     return results
 
 
-def validate_skill_existence(
-    dag: Dict[str, Any], skill_index: Dict[str, Any]
-) -> List[Tuple[str, bool, str]]:
+def validate_skill_existence(dag: Dict[str, Any], skill_index: Dict[str, Any]) -> List[Tuple[str, bool, str]]:
     """Validate all referenced skills exist in index."""
     results = []
 
@@ -138,9 +132,7 @@ def validate_skill_existence(
     return results
 
 
-def validate_compatibility(
-    dag: Dict[str, Any], skill_index: Dict[str, Any]
-) -> List[Tuple[str, bool, str]]:
+def validate_compatibility(dag: Dict[str, Any], skill_index: Dict[str, Any]) -> List[Tuple[str, bool, str]]:
     """Validate skill input/output compatibility."""
     results = []
 
@@ -162,14 +154,10 @@ def validate_compatibility(
             dep_outputs = set(dep.get("outputs", []))
 
             # Check if any outputs match inputs
-            compatible = (
-                bool(skill_inputs & dep_outputs) or not skill_inputs or not dep_outputs
-            )
+            compatible = bool(skill_inputs & dep_outputs) or not skill_inputs or not dep_outputs
 
             if compatible:
-                results.append(
-                    (f"Compatibility: {dep_name} → {skill_name}", True, "OK")
-                )
+                results.append((f"Compatibility: {dep_name} → {skill_name}", True, "OK"))
             else:
                 results.append(
                     (
@@ -341,9 +329,7 @@ def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Validate skill composition and DAG")
     parser.add_argument("--dag", type=Path, help="Path to DAG JSON file")
-    parser.add_argument(
-        "--skill-index", type=Path, help="Path to skill index JSON file"
-    )
+    parser.add_argument("--skill-index", type=Path, help="Path to skill index JSON file")
     parser.add_argument(
         "--self-validate",
         action="store_true",

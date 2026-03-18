@@ -58,9 +58,23 @@ def main():
         # Derive tags from task subject keywords
         tags = []
         subject_lower = task_subject.lower()
-        for keyword in ["go", "python", "typescript", "test", "review", "debug",
-                        "fix", "implement", "refactor", "deploy", "hook", "skill",
-                        "agent", "security", "performance"]:
+        for keyword in [
+            "go",
+            "python",
+            "typescript",
+            "test",
+            "review",
+            "debug",
+            "fix",
+            "implement",
+            "refactor",
+            "deploy",
+            "hook",
+            "skill",
+            "agent",
+            "security",
+            "performance",
+        ]:
             if keyword in subject_lower:
                 tags.append(keyword)
 

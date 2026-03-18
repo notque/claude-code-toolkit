@@ -88,19 +88,23 @@ def scan_agents(base_dir: Path) -> list[dict]:
 
             routing = frontmatter.get("routing", {})
             if isinstance(routing, dict):
-                agents.append({
-                    "name": frontmatter.get("name", md_file.stem),
-                    "triggers": routing.get("triggers", []),
-                    "pairs_with": routing.get("pairs_with", []),
-                    "category": routing.get("category", "unknown"),
-                })
+                agents.append(
+                    {
+                        "name": frontmatter.get("name", md_file.stem),
+                        "triggers": routing.get("triggers", []),
+                        "pairs_with": routing.get("pairs_with", []),
+                        "category": routing.get("category", "unknown"),
+                    }
+                )
             else:
-                agents.append({
-                    "name": frontmatter.get("name", md_file.stem),
-                    "triggers": [],
-                    "pairs_with": [],
-                    "category": "unknown",
-                })
+                agents.append(
+                    {
+                        "name": frontmatter.get("name", md_file.stem),
+                        "triggers": [],
+                        "pairs_with": [],
+                        "category": "unknown",
+                    }
+                )
         except OSError:
             continue
 
@@ -131,11 +135,13 @@ def scan_skills(base_dir: Path) -> list[dict]:
             if not frontmatter:
                 continue
 
-            skills.append({
-                "name": frontmatter.get("name", skill_dir.name),
-                "user_invocable": frontmatter.get("user-invocable", True),
-                "agent": frontmatter.get("agent", None),
-            })
+            skills.append(
+                {
+                    "name": frontmatter.get("name", skill_dir.name),
+                    "user_invocable": frontmatter.get("user-invocable", True),
+                    "agent": frontmatter.get("agent", None),
+                }
+            )
         except OSError:
             continue
 
@@ -157,14 +163,14 @@ def scan_hooks(base_dir: Path) -> list[dict]:
         try:
             content = py_file.read_text(encoding="utf-8", errors="replace")
             # Extract EVENT_NAME from the hook
-            event_match = re.search(
-                r'EVENT_NAME\s*=\s*["\'](\w+)["\']', content
-            )
+            event_match = re.search(r'EVENT_NAME\s*=\s*["\'](\w+)["\']', content)
             event = event_match.group(1) if event_match else "unknown"
-            hooks.append({
-                "name": py_file.stem,
-                "event": event,
-            })
+            hooks.append(
+                {
+                    "name": py_file.stem,
+                    "event": event,
+                }
+            )
         except OSError:
             continue
 
@@ -179,17 +185,51 @@ def find_related(prompt: str, agents: list[dict], skills: list[dict]) -> dict:
     """
     # Extract meaningful words from prompt (skip common words)
     stop_words = {
-        "a", "an", "the", "for", "to", "in", "on", "with", "and", "or",
-        "create", "new", "build", "scaffold", "pipeline", "that", "which",
-        "is", "are", "was", "were", "be", "been", "being", "have", "has",
-        "do", "does", "did", "will", "would", "could", "should", "may",
-        "might", "shall", "can", "need", "must", "i", "we", "you", "it",
+        "a",
+        "an",
+        "the",
+        "for",
+        "to",
+        "in",
+        "on",
+        "with",
+        "and",
+        "or",
+        "create",
+        "new",
+        "build",
+        "scaffold",
+        "pipeline",
+        "that",
+        "which",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+        "may",
+        "might",
+        "shall",
+        "can",
+        "need",
+        "must",
+        "i",
+        "we",
+        "you",
+        "it",
     }
-    keywords = {
-        w.lower()
-        for w in re.findall(r"\b\w+\b", prompt)
-        if w.lower() not in stop_words and len(w) > 2
-    }
+    keywords = {w.lower() for w in re.findall(r"\b\w+\b", prompt) if w.lower() not in stop_words and len(w) > 2}
 
     related_agents = []
     for agent in agents:
@@ -209,9 +249,7 @@ def find_related(prompt: str, agents: list[dict], skills: list[dict]) -> dict:
     }
 
 
-def build_environmental_state(
-    prompt: str, base_dir: Path
-) -> dict:
+def build_environmental_state(prompt: str, base_dir: Path) -> dict:
     """Build the complete environmental state JSON."""
     agents = scan_agents(base_dir)
     skills = scan_skills(base_dir)
@@ -271,13 +309,13 @@ identify existing components that can be reused and to prevent duplication.
 ```
 
 ### Related Components
-- Related agents: {', '.join(state['related_agents']) or 'none found'}
-- Related skills: {', '.join(state['related_skills']) or 'none found'}
+- Related agents: {", ".join(state["related_agents"]) or "none found"}
+- Related skills: {", ".join(state["related_skills"]) or "none found"}
 
 ### Inventory
-- Total agents: {state['agent_count']}
-- Total skills: {state['skill_count']}
-- Total hooks: {state['hook_count']}
+- Total agents: {state["agent_count"]}
+- Total skills: {state["skill_count"]}
+- Total hooks: {state["hook_count"]}
 """
 
         context_output(EVENT_NAME, injection).print_and_exit()

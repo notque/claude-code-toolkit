@@ -78,7 +78,7 @@ def remove_watermark(img, bg_color: tuple[int, int, int]):
         for y in range(y1, y2):
             for x in range(x1, x2):
                 if 0 <= x < width and 0 <= y < height:
-                    r, g, b, a = pixels[x, y]
+                    r, g, b, _a = pixels[x, y]
                     brightness = (r + g + b) / 3
                     if brightness > 180:
                         pixels[x, y] = (bg_color[0], bg_color[1], bg_color[2], 255)
@@ -98,7 +98,7 @@ def make_background_transparent(img, bg_color: tuple[int, int, int], tolerance: 
     transparent_count = 0
     for y in range(height):
         for x in range(width):
-            r, g, b, a = pixels[x, y]
+            r, g, b, _a = pixels[x, y]
             if (
                 abs(r - bg_color[0]) <= tolerance
                 and abs(g - bg_color[1]) <= tolerance

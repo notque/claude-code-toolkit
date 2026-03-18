@@ -188,7 +188,9 @@ class TestEmDashAlwaysCaught:
 
     def test_em_dash_unicode_is_error(self, sample_text_with_em_dashes):
         """Unicode em-dashes should be flagged as errors."""
-        returncode, stdout, stderr = run_validator(["validate", "--voice", "voice_a", "--json"], sample_text_with_em_dashes)
+        returncode, stdout, stderr = run_validator(
+            ["validate", "--voice", "voice_a", "--json"], sample_text_with_em_dashes
+        )
 
         result = parse_result(stdout)
         errors = result["violations"]["errors"]
@@ -209,7 +211,9 @@ class TestEmDashAlwaysCaught:
 
     def test_em_dash_message_is_clear(self, sample_text_with_em_dashes):
         """Em-dash error message should be emphatic about prohibition."""
-        returncode, stdout, stderr = run_validator(["validate", "--voice", "voice_a", "--json"], sample_text_with_em_dashes)
+        returncode, stdout, stderr = run_validator(
+            ["validate", "--voice", "voice_a", "--json"], sample_text_with_em_dashes
+        )
 
         result = parse_result(stdout)
         errors = result["violations"]["errors"]
@@ -218,8 +222,7 @@ class TestEmDashAlwaysCaught:
             if error.get("type") == "em_dash":
                 message = error.get("message", "").lower()
                 assert (
-                    "forbidden" in message or "never" in message
-                    or "prohibited" in message or "absolutely" in message
+                    "forbidden" in message or "never" in message or "prohibited" in message or "absolutely" in message
                 )
 
 
@@ -323,18 +326,14 @@ class TestMetricDeviation:
 
     def test_comma_density_deviation_calculated(self, sample_voice_bad):
         """Should calculate and include metrics in output."""
-        returncode, stdout, stderr = run_validator(
-            ["validate", "--voice", "voice_a", "--json"], sample_voice_bad
-        )
+        returncode, stdout, stderr = run_validator(["validate", "--voice", "voice_a", "--json"], sample_voice_bad)
 
         result = parse_result(stdout)
         assert "metrics" in result or "summary" in result
 
     def test_fragment_rate_deviation_calculated(self, sample_voice_bad):
         """Should include fragment-related information in output."""
-        returncode, stdout, stderr = run_validator(
-            ["validate", "--voice", "voice_a", "--json"], sample_voice_bad
-        )
+        returncode, stdout, stderr = run_validator(["validate", "--voice", "voice_a", "--json"], sample_voice_bad)
 
         result = parse_result(stdout)
         assert "metrics" in result or "summary" in result
@@ -353,7 +352,9 @@ class TestScoreCalculation:
 
     def test_error_reduces_score(self, sample_text_with_em_dashes):
         """Errors should reduce the score."""
-        returncode, stdout, stderr = run_validator(["validate", "--voice", "voice_a", "--json"], sample_text_with_em_dashes)
+        returncode, stdout, stderr = run_validator(
+            ["validate", "--voice", "voice_a", "--json"], sample_text_with_em_dashes
+        )
 
         result = parse_result(stdout)
         error_count = len(result["violations"]["errors"])
@@ -445,19 +446,14 @@ class TestVoiceSpecificPatterns:
 
     def test_voice_a_its_not_x_its_y_pattern(self):
         """Should detect banned rhetorical pivot pattern."""
-        text = (
-            "This wasn't just a competition. It was the culmination.\n"
-            "This isn't just a list. This is a love letter."
-        )
+        text = "This wasn't just a competition. It was the culmination.\nThis isn't just a list. This is a love letter."
 
         returncode, stdout, stderr = run_validator(["validate", "--voice", "voice_a", "--json"], text)
 
         result = parse_result(stdout)
         all_violations = result["violations"]["errors"] + result["violations"]["warnings"]
 
-        pattern_violations = [
-            e for e in all_violations if e.get("type") in ("banned_pattern", "rhetorical_pivot")
-        ]
+        pattern_violations = [e for e in all_violations if e.get("type") in ("banned_pattern", "rhetorical_pivot")]
         assert len(pattern_violations) >= 1
 
     def test_voice_b_essay_bleed_in_chat(self):
@@ -600,18 +596,14 @@ class TestVoiceProfileIntegration:
 
     def test_voice_a_profile_loaded(self, sample_voice_good):
         """Should use Voice A for validation."""
-        returncode, stdout, stderr = run_validator(
-            ["validate", "--voice", "voice_a", "--json"], sample_voice_good
-        )
+        returncode, stdout, stderr = run_validator(["validate", "--voice", "voice_a", "--json"], sample_voice_good)
 
         result = json.loads(stdout)
         assert result.get("pass") is True
 
     def test_voice_b_profile_loaded(self, sample_voice_good):
         """Should use Voice B for validation."""
-        returncode, stdout, stderr = run_validator(
-            ["validate", "--voice", "voice_b", "--json"], sample_voice_good
-        )
+        returncode, stdout, stderr = run_validator(["validate", "--voice", "voice_b", "--json"], sample_voice_good)
 
         result = json.loads(stdout)
         assert result.get("pass") is True

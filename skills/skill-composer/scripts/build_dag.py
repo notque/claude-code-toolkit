@@ -8,7 +8,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class DAGBuildError(Exception):
@@ -40,10 +40,7 @@ class SkillDAGBuilder:
             analysis["primary_goals"].append("implementation")
         if any(word in task_lower for word in ["fix", "debug", "resolve", "repair"]):
             analysis["primary_goals"].append("debugging")
-        if any(
-            word in task_lower
-            for word in ["analyze", "review", "examine", "investigate"]
-        ):
+        if any(word in task_lower for word in ["analyze", "review", "examine", "investigate"]):
             analysis["primary_goals"].append("analysis")
         if any(word in task_lower for word in ["document", "comment", "explain"]):
             analysis["primary_goals"].append("documentation")
@@ -112,9 +109,7 @@ class SkillDAGBuilder:
 
         return unique_selected
 
-    def build_dependency_graph(
-        self, selected_skills: List[str]
-    ) -> Dict[str, List[str]]:
+    def build_dependency_graph(self, selected_skills: List[str]) -> Dict[str, List[str]]:
         """Build dependency graph from selected skills."""
         graph = {}
 
@@ -132,9 +127,7 @@ class SkillDAGBuilder:
 
         return graph
 
-    def topological_sort(
-        self, skills: List[str], dependencies: Dict[str, List[str]]
-    ) -> List[str]:
+    def topological_sort(self, skills: List[str], dependencies: Dict[str, List[str]]) -> List[str]:
         """Perform topological sort on skills."""
         # Build in-degree map
         in_degree = {skill: 0 for skill in skills}
@@ -162,9 +155,7 @@ class SkillDAGBuilder:
         # Check if all skills were processed (DAG is valid)
         if len(result) != len(skills):
             unprocessed = set(skills) - set(result)
-            raise DAGBuildError(
-                f"Circular dependency detected. Unprocessed skills: {unprocessed}"
-            )
+            raise DAGBuildError(f"Circular dependency detected. Unprocessed skills: {unprocessed}")
 
         return result
 
@@ -185,9 +176,7 @@ class SkillDAGBuilder:
                     ready.append(skill)
 
             if not ready:
-                raise DAGBuildError(
-                    f"Cannot determine next phase. Remaining: {remaining}"
-                )
+                raise DAGBuildError(f"Cannot determine next phase. Remaining: {remaining}")
 
             # Create phase
             phase = {
@@ -212,9 +201,7 @@ class SkillDAGBuilder:
         selected_skills = self.select_skills(task_analysis)
 
         if not selected_skills:
-            raise DAGBuildError(
-                f"No applicable skills found for task: {task_description}"
-            )
+            raise DAGBuildError(f"No applicable skills found for task: {task_description}")
 
         # Step 3: Build dependency graph
         dependencies = self.build_dependency_graph(selected_skills)
@@ -265,7 +252,7 @@ def detect_cycles(graph: Dict[str, List[str]]) -> List[List[str]]:
 
         rec_stack.pop()
 
-    for node in graph.keys():
+    for node in graph:
         if node not in visited:
             dfs(node, [node])
 
@@ -313,16 +300,10 @@ def format_dag_output(dag: Dict[str, Any]) -> str:
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Build execution DAG from task and skill index"
-    )
+    parser = argparse.ArgumentParser(description="Build execution DAG from task and skill index")
     parser.add_argument("--task", type=str, required=True, help="Task description")
-    parser.add_argument(
-        "--skill-index", type=Path, required=True, help="Path to skill index JSON"
-    )
-    parser.add_argument(
-        "--output", type=Path, required=True, help="Output DAG JSON file"
-    )
+    parser.add_argument("--skill-index", type=Path, required=True, help="Path to skill index JSON")
+    parser.add_argument("--output", type=Path, required=True, help="Output DAG JSON file")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
 
     args = parser.parse_args()
@@ -344,9 +325,7 @@ def main():
         cycles = detect_cycles(dag["dependencies"])
         if cycles:
             cycle_strs = [" → ".join(cycle) for cycle in cycles]
-            raise DAGBuildError(
-                "Circular dependencies detected:\n" + "\n".join(cycle_strs)
-            )
+            raise DAGBuildError("Circular dependencies detected:\n" + "\n".join(cycle_strs))
 
         # Write output
         args.output.parent.mkdir(parents=True, exist_ok=True)

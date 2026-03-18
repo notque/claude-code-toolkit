@@ -97,9 +97,7 @@ def validate_reference_files() -> List[Tuple[str, bool, str]]:
             # Check file is not empty
             size = ref_path.stat().st_size
             if size > 0:
-                results.append(
-                    (f"Reference file {ref_file}", True, f"OK ({size} bytes)")
-                )
+                results.append((f"Reference file {ref_file}", True, f"OK ({size} bytes)"))
             else:
                 results.append((f"Reference file {ref_file}", False, "File is empty"))
         else:
@@ -142,9 +140,7 @@ def validate_content_patterns() -> List[Tuple[str, bool, str]]:
         if indicator in content:
             results.append((f"Status indicator: {indicator}", True, "OK"))
         else:
-            results.append(
-                (f"Status indicator: {indicator}", False, "Missing indicator")
-            )
+            results.append((f"Status indicator: {indicator}", False, "Missing indicator"))
 
     return results
 

@@ -223,7 +223,7 @@ def resolve_image_path(target: str, site_root: Path) -> Optional[Path]:
 def validate_external_link(url: str, timeout: int = 10) -> Tuple[bool, str]:
     """Validate external URL via HTTP HEAD request."""
     # Check for known false positives
-    for domain, reason in FALSE_POSITIVE_DOMAINS.items():
+    for domain, _reason in FALSE_POSITIVE_DOMAINS.items():
         if domain in url:
             return True, f"blocked ({domain} - expected)"
 

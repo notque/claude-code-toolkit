@@ -158,9 +158,7 @@ def validate_4_phase_workflow() -> List[Tuple[str, bool, str]]:
         if behavior.lower() in content.lower():
             results.append((f"Critical behavior: {behavior}", True, "OK"))
         else:
-            results.append(
-                (f"Critical behavior: {behavior}", False, f"Missing {behavior}")
-            )
+            results.append((f"Critical behavior: {behavior}", False, f"Missing {behavior}"))
 
     return results
 
@@ -197,13 +195,9 @@ def validate_reference_files() -> List[Tuple[str, bool, str]]:
             if pattern in content:
                 results.append((f"Pattern documented: {pattern}", True, "OK"))
             else:
-                results.append(
-                    (f"Pattern documented: {pattern}", False, f"Missing {pattern}")
-                )
+                results.append((f"Pattern documented: {pattern}", False, f"Missing {pattern}"))
     else:
-        results.append(
-            ("debugging-patterns.md exists", False, "Missing patterns reference")
-        )
+        results.append(("debugging-patterns.md exists", False, "Missing patterns reference"))
 
     # Check tools.md
     tools_file = references_dir / "tools.md"
@@ -298,9 +292,7 @@ def validate_skill_content_quality() -> List[Tuple[str, bool, str]]:
         if section in content:
             results.append((f"Essential section: {section}", True, "OK"))
         else:
-            results.append(
-                (f"Essential section: {section}", False, f"Missing {section}")
-            )
+            results.append((f"Essential section: {section}", False, f"Missing {section}"))
 
     # Check for code examples (bash and python)
     if "```bash" in content:
@@ -309,9 +301,7 @@ def validate_skill_content_quality() -> List[Tuple[str, bool, str]]:
             (
                 f"Bash examples present: {bash_count}",
                 bash_count >= 5,
-                "OK"
-                if bash_count >= 5
-                else f"Only {bash_count} bash examples (expected 5+)",
+                "OK" if bash_count >= 5 else f"Only {bash_count} bash examples (expected 5+)",
             )
         )
     else:
@@ -328,9 +318,7 @@ def validate_skill_content_quality() -> List[Tuple[str, bool, str]]:
         (
             f"Skill length: {line_count} lines",
             line_count >= 400,
-            "OK"
-            if line_count >= 400
-            else "Skill may be too brief (expected 400+ lines)",
+            "OK" if line_count >= 400 else "Skill may be too brief (expected 400+ lines)",
         )
     )
 

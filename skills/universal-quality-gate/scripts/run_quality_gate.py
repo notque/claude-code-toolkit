@@ -19,9 +19,7 @@ from quality_gate import format_report, run_quality_gate
 
 def main():
     """Run quality gate with CLI arguments."""
-    parser = argparse.ArgumentParser(
-        description="Universal Quality Gate - Multi-language code quality checking"
-    )
+    parser = argparse.ArgumentParser(description="Universal Quality Gate - Multi-language code quality checking")
     parser.add_argument(
         "--fix",
         action="store_true",

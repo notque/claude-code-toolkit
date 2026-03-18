@@ -22,8 +22,6 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from pathlib import Path
-
 
 GITHUB_API_BASE = "https://api.github.com"
 
@@ -51,12 +49,9 @@ def make_request(url: str, token: str | None = None) -> tuple[dict | list | None
             try:
                 if remaining != "unknown" and int(remaining) < 10:
                     reset_time = resp_headers.get("X-RateLimit-Reset", "0")
-                    reset_dt = time.strftime(
-                        "%H:%M:%S", time.localtime(int(reset_time))
-                    )
+                    reset_dt = time.strftime("%H:%M:%S", time.localtime(int(reset_time)))
                     print(
-                        f"WARNING: Rate limit low ({remaining} remaining). "
-                        f"Resets at {reset_dt}",
+                        f"WARNING: Rate limit low ({remaining} remaining). Resets at {reset_dt}",
                         file=sys.stderr,
                     )
             except (ValueError, TypeError):
@@ -71,12 +66,9 @@ def make_request(url: str, token: str | None = None) -> tuple[dict | list | None
             remaining = resp_headers.get("X-RateLimit-Remaining", "0")
             if remaining == "0":
                 reset_time = resp_headers.get("X-RateLimit-Reset", "0")
-                reset_dt = time.strftime(
-                    "%H:%M:%S", time.localtime(int(reset_time))
-                )
+                reset_dt = time.strftime("%H:%M:%S", time.localtime(int(reset_time)))
                 print(
-                    f"ERROR: Rate limit exceeded. Resets at {reset_dt}. "
-                    f"Use --token for higher limits (5000 req/hr).",
+                    f"ERROR: Rate limit exceeded. Resets at {reset_dt}. Use --token for higher limits (5000 req/hr).",
                     file=sys.stderr,
                 )
             return None, resp_headers
@@ -115,9 +107,7 @@ def cmd_repos(args: argparse.Namespace) -> int:
     output_dir = args.output_dir
 
     # Verify user exists
-    user_data, _ = make_request(
-        f"{GITHUB_API_BASE}/users/{username}", token
-    )
+    user_data, _ = make_request(f"{GITHUB_API_BASE}/users/{username}", token)
     if user_data is None:
         print(f"ERROR: User '{username}' not found.", file=sys.stderr)
         return 1
@@ -133,10 +123,7 @@ def cmd_repos(args: argparse.Namespace) -> int:
     per_page = min(max_repos, 100)
 
     while len(repos) < max_repos:
-        url = (
-            f"{GITHUB_API_BASE}/users/{username}/repos"
-            f"?sort=stars&direction=desc&per_page={per_page}&page={page}"
-        )
+        url = f"{GITHUB_API_BASE}/users/{username}/repos?sort=stars&direction=desc&per_page={per_page}&page={page}"
         data, _ = make_request(url, token)
         if not data:
             break
@@ -191,9 +178,7 @@ def cmd_repos(args: argparse.Namespace) -> int:
         lang = r.get("language")
         if lang:
             lang_counts[lang] = lang_counts.get(lang, 0) + 1
-    result["language_distribution"] = dict(
-        sorted(lang_counts.items(), key=lambda x: x[1], reverse=True)
-    )
+    result["language_distribution"] = dict(sorted(lang_counts.items(), key=lambda x: x[1], reverse=True))
 
     # Output
     output_json = json.dumps(result, indent=2)
@@ -219,9 +204,7 @@ def cmd_sample_files(args: argparse.Namespace) -> int:
 
     # Get file tree
     # First get default branch
-    repo_data, _ = make_request(
-        f"{GITHUB_API_BASE}/repos/{username}/{repo}", token
-    )
+    repo_data, _ = make_request(f"{GITHUB_API_BASE}/repos/{username}/{repo}", token)
     if repo_data is None:
         print(f"ERROR: Repo '{username}/{repo}' not found.", file=sys.stderr)
         return 1
@@ -241,14 +224,44 @@ def cmd_sample_files(args: argparse.Namespace) -> int:
 
     # Filter for code files (skip binaries, vendor, node_modules, etc.)
     skip_dirs = {
-        "vendor", "node_modules", ".git", "dist", "build",
-        "__pycache__", ".tox", ".eggs", "venv", ".venv",
+        "vendor",
+        "node_modules",
+        ".git",
+        "dist",
+        "build",
+        "__pycache__",
+        ".tox",
+        ".eggs",
+        "venv",
+        ".venv",
     }
     code_extensions = {
-        ".go", ".py", ".js", ".ts", ".jsx", ".tsx", ".rb", ".rs",
-        ".java", ".kt", ".swift", ".c", ".cpp", ".h", ".hpp",
-        ".cs", ".php", ".sh", ".bash", ".zsh", ".fish",
-        ".yml", ".yaml", ".toml", ".json", ".md",
+        ".go",
+        ".py",
+        ".js",
+        ".ts",
+        ".jsx",
+        ".tsx",
+        ".rb",
+        ".rs",
+        ".java",
+        ".kt",
+        ".swift",
+        ".c",
+        ".cpp",
+        ".h",
+        ".hpp",
+        ".cs",
+        ".php",
+        ".sh",
+        ".bash",
+        ".zsh",
+        ".fish",
+        ".yml",
+        ".yaml",
+        ".toml",
+        ".json",
+        ".md",
     }
 
     candidate_files = []
@@ -265,11 +278,13 @@ def cmd_sample_files(args: argparse.Namespace) -> int:
         # Check extension
         _, ext = os.path.splitext(path)
         if ext.lower() in code_extensions:
-            candidate_files.append({
-                "path": path,
-                "size": item.get("size", 0),
-                "sha": item.get("sha", ""),
-            })
+            candidate_files.append(
+                {
+                    "path": path,
+                    "size": item.get("size", 0),
+                    "sha": item.get("sha", ""),
+                }
+            )
 
     # Sort by size (prefer smaller, more readable files) and sample
     candidate_files.sort(key=lambda x: x["size"])
@@ -310,13 +325,15 @@ def cmd_sample_files(args: argparse.Namespace) -> int:
         if truncated:
             content = content[:max_content_len] + "\n... [truncated]"
 
-        result["files"].append({
-            "path": path,
-            "size": file_info["size"],
-            "content": content,
-            "truncated": truncated,
-            "language": os.path.splitext(path)[1].lstrip("."),
-        })
+        result["files"].append(
+            {
+                "path": path,
+                "size": file_info["size"],
+                "content": content,
+                "truncated": truncated,
+                "language": os.path.splitext(path)[1].lstrip("."),
+            }
+        )
 
     output_json = json.dumps(result, indent=2)
 
@@ -349,9 +366,7 @@ def cmd_pr_reviews(args: argparse.Namespace) -> int:
     # Strategy: Search for PRs where user has commented/reviewed
     # Use the search API to find review comments by user
     search_url = (
-        f"{GITHUB_API_BASE}/search/issues"
-        f"?q=reviewed-by:{username}+is:pr+is:public"
-        f"&sort=updated&order=desc&per_page=30"
+        f"{GITHUB_API_BASE}/search/issues?q=reviewed-by:{username}+is:pr+is:public&sort=updated&order=desc&per_page=30"
     )
 
     search_data, _ = make_request(search_url, token)
@@ -374,44 +389,40 @@ def cmd_pr_reviews(args: argparse.Namespace) -> int:
             continue
 
         # Filter for reviews by this user
-        user_reviews = [
-            r for r in reviews_data
-            if (r.get("user") or {}).get("login", "").lower() == username.lower()
-        ]
+        user_reviews = [r for r in reviews_data if (r.get("user") or {}).get("login", "").lower() == username.lower()]
 
         for review in user_reviews:
-            result["reviews"].append({
-                "pr_title": pr.get("title", ""),
-                "pr_url": pr.get("html_url", ""),
-                "repo": pr.get("repository_url", "").replace(
-                    f"{GITHUB_API_BASE}/repos/", ""
-                ),
-                "state": review.get("state", ""),
-                "body": review.get("body", "") or "",
-                "submitted_at": review.get("submitted_at", ""),
-            })
+            result["reviews"].append(
+                {
+                    "pr_title": pr.get("title", ""),
+                    "pr_url": pr.get("html_url", ""),
+                    "repo": pr.get("repository_url", "").replace(f"{GITHUB_API_BASE}/repos/", ""),
+                    "state": review.get("state", ""),
+                    "body": review.get("body", "") or "",
+                    "submitted_at": review.get("submitted_at", ""),
+                }
+            )
 
         # Also fetch review comments (inline comments)
         comments_url = f"{pr_url}/comments"
         comments_data, _ = make_request(comments_url, token)
         if comments_data:
             user_comments = [
-                c for c in comments_data
-                if (c.get("user") or {}).get("login", "").lower() == username.lower()
+                c for c in comments_data if (c.get("user") or {}).get("login", "").lower() == username.lower()
             ]
             for comment in user_comments:
-                result["reviews"].append({
-                    "pr_title": pr.get("title", ""),
-                    "pr_url": pr.get("html_url", ""),
-                    "repo": pr.get("repository_url", "").replace(
-                        f"{GITHUB_API_BASE}/repos/", ""
-                    ),
-                    "state": "COMMENT",
-                    "body": comment.get("body", "") or "",
-                    "path": comment.get("path", ""),
-                    "diff_hunk": comment.get("diff_hunk", ""),
-                    "submitted_at": comment.get("created_at", ""),
-                })
+                result["reviews"].append(
+                    {
+                        "pr_title": pr.get("title", ""),
+                        "pr_url": pr.get("html_url", ""),
+                        "repo": pr.get("repository_url", "").replace(f"{GITHUB_API_BASE}/repos/", ""),
+                        "state": "COMMENT",
+                        "body": comment.get("body", "") or "",
+                        "path": comment.get("path", ""),
+                        "diff_hunk": comment.get("diff_hunk", ""),
+                        "submitted_at": comment.get("created_at", ""),
+                    }
+                )
 
         result["repos_checked"] += 1
 
@@ -441,58 +452,30 @@ def main() -> int:
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # repos command
-    repos_parser = subparsers.add_parser(
-        "repos", help="List public repos for a user, sorted by stars"
-    )
-    repos_parser.add_argument(
-        "--username", required=True, help="GitHub username to analyze"
-    )
+    repos_parser = subparsers.add_parser("repos", help="List public repos for a user, sorted by stars")
+    repos_parser.add_argument("--username", required=True, help="GitHub username to analyze")
     repos_parser.add_argument(
         "--token", default=None, help="GitHub personal access token (optional, for higher rate limits)"
     )
-    repos_parser.add_argument(
-        "--max-repos", type=int, default=10, help="Maximum repos to fetch (default: 10)"
-    )
-    repos_parser.add_argument(
-        "--output-dir", default=None, help="Directory to save output files"
-    )
+    repos_parser.add_argument("--max-repos", type=int, default=10, help="Maximum repos to fetch (default: 10)")
+    repos_parser.add_argument("--output-dir", default=None, help="Directory to save output files")
 
     # sample-files command
-    files_parser = subparsers.add_parser(
-        "sample-files", help="Sample code files from a repo via API"
-    )
-    files_parser.add_argument(
-        "--username", required=True, help="GitHub username (repo owner)"
-    )
-    files_parser.add_argument(
-        "--repo", required=True, help="Repository name"
-    )
-    files_parser.add_argument(
-        "--token", default=None, help="GitHub personal access token"
-    )
-    files_parser.add_argument(
-        "--max-files", type=int, default=10, help="Maximum files to sample (default: 10)"
-    )
-    files_parser.add_argument(
-        "--output-dir", default=None, help="Directory to save output files"
-    )
+    files_parser = subparsers.add_parser("sample-files", help="Sample code files from a repo via API")
+    files_parser.add_argument("--username", required=True, help="GitHub username (repo owner)")
+    files_parser.add_argument("--repo", required=True, help="Repository name")
+    files_parser.add_argument("--token", default=None, help="GitHub personal access token")
+    files_parser.add_argument("--max-files", type=int, default=10, help="Maximum files to sample (default: 10)")
+    files_parser.add_argument("--output-dir", default=None, help="Directory to save output files")
 
     # pr-reviews command
-    reviews_parser = subparsers.add_parser(
-        "pr-reviews", help="Fetch PR reviews given by a user"
-    )
-    reviews_parser.add_argument(
-        "--username", required=True, help="GitHub username"
-    )
-    reviews_parser.add_argument(
-        "--token", default=None, help="GitHub personal access token"
-    )
+    reviews_parser = subparsers.add_parser("pr-reviews", help="Fetch PR reviews given by a user")
+    reviews_parser.add_argument("--username", required=True, help="GitHub username")
+    reviews_parser.add_argument("--token", default=None, help="GitHub personal access token")
     reviews_parser.add_argument(
         "--max-reviews", type=int, default=20, help="Maximum PRs to check for reviews (default: 20)"
     )
-    reviews_parser.add_argument(
-        "--output-dir", default=None, help="Directory to save output files"
-    )
+    reviews_parser.add_argument("--output-dir", default=None, help="Directory to save output files")
 
     args = parser.parse_args()
 

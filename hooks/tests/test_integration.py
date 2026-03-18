@@ -36,9 +36,7 @@ def test_end_to_end_learning():
 
     # Classify error
     error_type = classify_error(error_message)
-    assert error_type == "multiple_matches", (
-        f"Expected 'multiple_matches', got '{error_type}'"
-    )
+    assert error_type == "multiple_matches", f"Expected 'multiple_matches', got '{error_type}'"
 
     # Record initial error (low confidence)
     result = record_error(
@@ -61,9 +59,7 @@ def test_end_to_end_learning():
     # Check confidence increased
     solution = lookup_solution(error_message)
     assert solution is not None, "Solution should not be None after recording"
-    assert solution["confidence"] >= 0.7, (
-        f"Expected confidence >= 0.7, got {solution['confidence']}"
-    )
+    assert solution["confidence"] >= 0.7, f"Expected confidence >= 0.7, got {solution['confidence']}"
 
     print("  ✓ Pattern learned and reached high confidence")
 
@@ -87,9 +83,7 @@ def test_multiple_error_types():
     for error_msg, expected_type in error_scenarios:
         # Classify
         error_type = classify_error(error_msg)
-        assert error_type == expected_type, (
-            f"Expected {expected_type}, got {error_type}"
-        )
+        assert error_type == expected_type, f"Expected {expected_type}, got {error_type}"
 
     print("  ✓ Multiple error types classified correctly")
 
@@ -99,11 +93,11 @@ def test_confidence_bounds():
     print("Testing confidence bounds...")
 
     from learning_db import (
+        classify_error,
+        generate_signature,
+        get_connection,
         init_db,
         record_error,
-        get_connection,
-        generate_signature,
-        classify_error,
     )
 
     init_db()
@@ -117,21 +111,15 @@ def test_confidence_bounds():
         error_type = classify_error(msg)
         sig = generate_signature(msg, error_type)
         with get_connection() as conn:
-            row = conn.execute(
-                "SELECT confidence FROM patterns WHERE signature = ?", (sig,)
-            ).fetchone()
+            row = conn.execute("SELECT confidence FROM patterns WHERE signature = ?", (sig,)).fetchone()
             return row["confidence"] if row else None
 
     # Start with failure
-    record_error(
-        error_msg, solution="Test solution", success=False, project_path="/test"
-    )
+    record_error(error_msg, solution="Test solution", success=False, project_path="/test")
 
     # Many failures should drive confidence down
     for _ in range(15):
-        record_error(
-            error_msg, solution="Test solution", success=False, project_path="/test"
-        )
+        record_error(error_msg, solution="Test solution", success=False, project_path="/test")
 
     confidence = get_confidence(error_msg)
     assert confidence is not None, "Should find pattern after recording"
@@ -139,15 +127,11 @@ def test_confidence_bounds():
 
     # Many successes should drive confidence up but not above 1
     for _ in range(25):
-        record_error(
-            error_msg, solution="Test solution", success=True, project_path="/test"
-        )
+        record_error(error_msg, solution="Test solution", success=True, project_path="/test")
 
     confidence = get_confidence(error_msg)
     assert confidence <= 1.0, f"Confidence went above 1: {confidence}"
-    assert confidence > 0.5, (
-        f"Confidence should be high after many successes: {confidence}"
-    )
+    assert confidence > 0.5, f"Confidence should be high after many successes: {confidence}"
 
     print("  ✓ Confidence bounds enforced correctly")
 

@@ -135,9 +135,7 @@ def main() -> None:
         if adr_path_str:
             adr_file = base_dir / adr_path_str
             if not adr_file.is_file():
-                log_warning(
-                    f"[adr-context-injector] ADR file not found: {adr_file} — skipping injection"
-                )
+                log_warning(f"[adr-context-injector] ADR file not found: {adr_file} — skipping injection")
                 empty_output(EVENT_NAME).print_and_exit()
 
         # Check prompt relevance

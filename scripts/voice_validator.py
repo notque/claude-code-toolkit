@@ -416,7 +416,7 @@ def check_rhythm(content: str, profile: dict[str, Any] | None = None) -> list[Vi
             if consecutive_similar >= MONOTONY_THRESHOLD:
                 # Find the line number for this sentence
                 line = 1
-                for j, s in enumerate(sentences[: i + 1]):
+                for _j, s in enumerate(sentences[: i + 1]):
                     pos = content.find(s)
                     if pos >= 0:
                         line = content[:pos].count("\n") + 1

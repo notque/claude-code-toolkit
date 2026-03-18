@@ -171,9 +171,7 @@ def print_json_report(days: int, show_dormant: bool) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Usage report for Claude Code skills and agents"
-    )
+    parser = argparse.ArgumentParser(description="Usage report for Claude Code skills and agents")
     parser.add_argument(
         "--days",
         type=int,

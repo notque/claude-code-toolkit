@@ -69,9 +69,7 @@ def validate_yaml_frontmatter() -> List[Tuple[str, bool, str]]:
             results.append((f"YAML field {field}", False, f"Missing {field}"))
 
     # Validate skill name matches directory
-    skill_name_line = [
-        line for line in frontmatter.split("\n") if line.startswith("name:")
-    ]
+    skill_name_line = [line for line in frontmatter.split("\n") if line.startswith("name:")]
     if skill_name_line:
         skill_name = skill_name_line[0].split(":", 1)[1].strip()
         expected_name = "test-driven-development"
@@ -87,9 +85,7 @@ def validate_yaml_frontmatter() -> List[Tuple[str, bool, str]]:
             )
 
     # Check allowed-tools field
-    allowed_tools_line = [
-        line for line in frontmatter.split("\n") if line.startswith("allowed-tools:")
-    ]
+    allowed_tools_line = [line for line in frontmatter.split("\n") if line.startswith("allowed-tools:")]
     if allowed_tools_line:
         tools = allowed_tools_line[0].split(":", 1)[1].strip()
         required_tools = ["Read", "Write", "Bash", "Grep"]
@@ -138,9 +134,7 @@ def validate_operator_context() -> List[Tuple[str, bool, str]]:
         if subsection in content:
             results.append((f"Subsection: {subsection[:30]}...", True, "OK"))
         else:
-            results.append(
-                (f"Subsection: {subsection[:30]}...", False, f"Missing: {subsection}")
-            )
+            results.append((f"Subsection: {subsection[:30]}...", False, f"Missing: {subsection}"))
 
     return results
 
@@ -168,9 +162,7 @@ def validate_tdd_workflow() -> List[Tuple[str, bool, str]]:
         if step in content:
             results.append((f"Workflow step: {step[:40]}...", True, "OK"))
         else:
-            results.append(
-                (f"Workflow step: {step[:40]}...", False, f"Missing: {step}")
-            )
+            results.append((f"Workflow step: {step[:40]}...", False, f"Missing: {step}"))
 
     return results
 
@@ -194,9 +186,7 @@ def validate_reference_files() -> List[Tuple[str, bool, str]]:
             word_count = len(content.split())
 
         if word_count > 500:
-            results.append(
-                (f"examples.md has content ({word_count} words)", True, "OK")
-            )
+            results.append((f"examples.md has content ({word_count} words)", True, "OK"))
         else:
             results.append(
                 (
@@ -212,9 +202,7 @@ def validate_reference_files() -> List[Tuple[str, bool, str]]:
             if lang in content:
                 results.append((f"Examples include {lang}", True, "OK"))
             else:
-                results.append(
-                    (f"Examples include {lang}", False, f"Missing {lang} examples")
-                )
+                results.append((f"Examples include {lang}", False, f"Missing {lang} examples"))
 
     else:
         results.append(("examples.md exists", False, "Missing examples.md"))
@@ -259,9 +247,7 @@ def validate_content_quality() -> List[Tuple[str, bool, str]]:
     if "## Error Handling" in content:
         results.append(("Error Handling section exists", True, "OK"))
     else:
-        results.append(
-            ("Error Handling section exists", False, "Missing Error Handling section")
-        )
+        results.append(("Error Handling section exists", False, "Missing Error Handling section"))
 
     # Check for language-specific commands
     languages = ["Go", "Python", "JavaScript"]
@@ -269,9 +255,7 @@ def validate_content_quality() -> List[Tuple[str, bool, str]]:
         if lang in content or lang.lower() in content:
             results.append((f"Language support: {lang}", True, "OK"))
         else:
-            results.append(
-                (f"Language support: {lang}", False, f"Missing {lang} support")
-            )
+            results.append((f"Language support: {lang}", False, f"Missing {lang} support"))
 
     # Check for command examples
     if "```bash" in content:

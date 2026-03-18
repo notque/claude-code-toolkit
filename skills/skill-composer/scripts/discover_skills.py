@@ -9,7 +9,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class SkillDiscoveryError(Exception):
@@ -100,9 +100,7 @@ def extract_operator_context(content: str) -> Dict[str, List[str]]:
     context = {"hardcoded": [], "default_on": [], "optional": []}
 
     # Find operator context section
-    operator_match = re.search(
-        r"## Operator Context.*?(?=\n## |\Z)", content, re.DOTALL
-    )
+    operator_match = re.search(r"## Operator Context.*?(?=\n## |\Z)", content, re.DOTALL)
 
     if not operator_match:
         return context
@@ -110,23 +108,17 @@ def extract_operator_context(content: str) -> Dict[str, List[str]]:
     operator_section = operator_match.group(0)
 
     # Extract hardcoded behaviors
-    hardcoded_match = re.search(
-        r"### Hardcoded Behaviors.*?(?=\n### |\Z)", operator_section, re.DOTALL
-    )
+    hardcoded_match = re.search(r"### Hardcoded Behaviors.*?(?=\n### |\Z)", operator_section, re.DOTALL)
     if hardcoded_match:
         context["hardcoded"] = extract_bullet_points(hardcoded_match.group(0))
 
     # Extract default behaviors
-    default_match = re.search(
-        r"### Default Behaviors.*?(?=\n### |\Z)", operator_section, re.DOTALL
-    )
+    default_match = re.search(r"### Default Behaviors.*?(?=\n### |\Z)", operator_section, re.DOTALL)
     if default_match:
         context["default_on"] = extract_bullet_points(default_match.group(0))
 
     # Extract optional behaviors
-    optional_match = re.search(
-        r"### Optional Behaviors.*?(?=\n### |\Z)", operator_section, re.DOTALL
-    )
+    optional_match = re.search(r"### Optional Behaviors.*?(?=\n### |\Z)", operator_section, re.DOTALL)
     if optional_match:
         context["optional"] = extract_bullet_points(optional_match.group(0))
 
@@ -286,9 +278,7 @@ def build_dependency_graph(skills: List[Dict[str, Any]]) -> Dict[str, List[str]]
         dependencies = skill.get("dependencies", [])
 
         # Only include dependencies that reference known skills
-        valid_deps = [
-            dep for dep in dependencies if any(s["name"] == dep for s in skills)
-        ]
+        valid_deps = [dep for dep in dependencies if any(s["name"] == dep for s in skills)]
 
         if valid_deps:
             graph[skill_name] = valid_deps
@@ -298,15 +288,9 @@ def build_dependency_graph(skills: List[Dict[str, Any]]) -> Dict[str, List[str]]
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Discover skills and build metadata index"
-    )
-    parser.add_argument(
-        "--skills-dir", type=Path, required=True, help="Directory containing skills"
-    )
-    parser.add_argument(
-        "--output", type=Path, required=True, help="Output JSON file path"
-    )
+    parser = argparse.ArgumentParser(description="Discover skills and build metadata index")
+    parser.add_argument("--skills-dir", type=Path, required=True, help="Directory containing skills")
+    parser.add_argument("--output", type=Path, required=True, help="Output JSON file path")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
 
     args = parser.parse_args()

@@ -72,9 +72,7 @@ def validate_yaml_frontmatter() -> list[tuple[str, bool, str]]:
     if "name: comment-quality" in frontmatter:
         results.append(("Skill name correct", True, "OK"))
     else:
-        results.append(
-            ("Skill name correct", False, "Name should be 'comment-quality'")
-        )
+        results.append(("Skill name correct", False, "Name should be 'comment-quality'"))
 
     return results
 
@@ -109,9 +107,7 @@ def validate_reference_files() -> list[tuple[str, bool, str]]:
                     )
                 )
     else:
-        results.append(
-            ("temporal-keywords.txt exists", False, "Missing temporal-keywords.txt")
-        )
+        results.append(("temporal-keywords.txt exists", False, "Missing temporal-keywords.txt"))
 
     # Validate examples.md content
     examples_file = references_dir / "examples.md"

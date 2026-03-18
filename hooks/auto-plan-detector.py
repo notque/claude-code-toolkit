@@ -148,10 +148,7 @@ def get_user_prompt() -> str:
 
 def is_trivial_task(prompt: str) -> bool:
     """Check if the task is trivial and doesn't need planning."""
-    for pattern in TRIVIAL_PATTERNS:
-        if pattern.search(prompt):
-            return True
-    return False
+    return any(pattern.search(prompt) for pattern in TRIVIAL_PATTERNS)
 
 
 def has_code_modification_intent(prompt: str) -> bool:
@@ -168,10 +165,7 @@ def has_research_intent(prompt: str) -> bool:
 
 def has_multi_step_indicators(prompt: str) -> bool:
     """Check if the prompt contains multi-step indicators."""
-    for pattern in MULTI_STEP_PATTERNS:
-        if pattern.search(prompt):
-            return True
-    return False
+    return any(pattern.search(prompt) for pattern in MULTI_STEP_PATTERNS)
 
 
 def has_agent_triggers(prompt: str) -> bool:

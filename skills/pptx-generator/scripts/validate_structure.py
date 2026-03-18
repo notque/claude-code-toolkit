@@ -61,9 +61,7 @@ def validate_slide_count(slides_info: list, expected: int) -> list[str]:
     issues = []
     actual = len(slides_info)
     if actual != expected:
-        issues.append(
-            f"Slide count mismatch: expected {expected}, got {actual}"
-        )
+        issues.append(f"Slide count mismatch: expected {expected}, got {actual}")
     return issues
 
 
@@ -80,26 +78,19 @@ def validate_against_slide_map(slides_info: list, slide_map: list) -> list[str]:
     # Check count
     if len(slides_info) != len(slide_map):
         issues.append(
-            f"Slide count mismatch: slide map has {len(slide_map)} slides, "
-            f"PPTX has {len(slides_info)} slides"
+            f"Slide count mismatch: slide map has {len(slide_map)} slides, PPTX has {len(slides_info)} slides"
         )
 
     # Check each slide has content
-    for i, (actual, expected) in enumerate(zip(slides_info, slide_map)):
+    for i, (actual, expected) in enumerate(zip(slides_info, slide_map, strict=False)):
         slide_num = i + 1
         expected_title = expected.get("title", "")
 
         if not actual["text_content"]:
             issues.append(f"Slide {slide_num}: no text content found")
 
-        if expected_title and not any(
-            expected_title.lower() in text.lower()
-            for text in actual["text_content"]
-        ):
-            issues.append(
-                f"Slide {slide_num}: expected title '{expected_title}' "
-                f"not found in slide text"
-            )
+        if expected_title and not any(expected_title.lower() in text.lower() for text in actual["text_content"]):
+            issues.append(f"Slide {slide_num}: expected title '{expected_title}' not found in slide text")
 
     return issues
 
@@ -130,15 +121,12 @@ def validate_file_integrity(pptx_path: str) -> list[str]:
         return issues
 
     if path.stat().st_size < 1000:
-        issues.append(
-            f"File suspiciously small ({path.stat().st_size} bytes): {pptx_path}"
-        )
+        issues.append(f"File suspiciously small ({path.stat().st_size} bytes): {pptx_path}")
 
     return issues
 
 
-def validate(pptx_path: str, expected_slides: int | None = None,
-             slide_map: list | None = None) -> dict:
+def validate(pptx_path: str, expected_slides: int | None = None, slide_map: list | None = None) -> dict:
     """Run all validations and return results.
 
     Returns dict with 'passed', 'issues', and 'slides_info'.
@@ -187,23 +175,26 @@ def validate(pptx_path: str, expected_slides: int | None = None,
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Validate PPTX structure and content."
-    )
+    parser = argparse.ArgumentParser(description="Validate PPTX structure and content.")
     parser.add_argument(
-        "--input", required=True,
+        "--input",
+        required=True,
         help="Path to .pptx file to validate",
     )
     parser.add_argument(
-        "--expected-slides", type=int, default=None,
+        "--expected-slides",
+        type=int,
+        default=None,
         help="Expected number of slides",
     )
     parser.add_argument(
-        "--slide-map", default=None,
+        "--slide-map",
+        default=None,
         help="Path to slide map JSON for content validation",
     )
     parser.add_argument(
-        "--json", action="store_true",
+        "--json",
+        action="store_true",
         help="Output results as JSON",
     )
     args = parser.parse_args()
@@ -224,13 +215,17 @@ def main():
         print(json.dumps(result, indent=2))
     else:
         if result["passed"]:
-            print(f"PASS: PPTX validation passed")
+            print("PASS: PPTX validation passed")
             print(f"  Slides: {len(result['slides_info'])}")
             for slide in result["slides_info"]:
-                title = slide["title"][:50] + "..." if len(slide.get("title", "")) > 50 else slide.get("title", "(no title)")
+                title = (
+                    slide["title"][:50] + "..."
+                    if len(slide.get("title", "")) > 50
+                    else slide.get("title", "(no title)")
+                )
                 print(f"  Slide {slide['index']}: {title} ({slide['shape_count']} shapes)")
         else:
-            print(f"FAIL: PPTX validation failed")
+            print("FAIL: PPTX validation failed")
             print(f"  Issues: {len(result['issues'])}")
             for issue in result["issues"]:
                 print(f"  - {issue}")

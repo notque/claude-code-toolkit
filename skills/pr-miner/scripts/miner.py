@@ -8,13 +8,13 @@ USAGE:
     python3 miner.py repo1,repo2,repo3 output.json --limit 50
 """
 
+import argparse
+import json
 import os
 import sys
-import json
-import argparse
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 try:
     from github import Github, GithubException
@@ -25,11 +25,27 @@ except ImportError:
 
 # Imperative keywords that indicate coding standards
 IMPERATIVE_KEYWORDS = [
-    "should", "must", "please", "always", "never", "avoid",
-    "use", "prefer", "instead", "don't", "do not",
-    "violates", "breaks", "needs to", "has to",
-    "requirement", "required", "mandatory",
-    "better to", "consider", "recommend"
+    "should",
+    "must",
+    "please",
+    "always",
+    "never",
+    "avoid",
+    "use",
+    "prefer",
+    "instead",
+    "don't",
+    "do not",
+    "violates",
+    "breaks",
+    "needs to",
+    "has to",
+    "requirement",
+    "required",
+    "mandatory",
+    "better to",
+    "consider",
+    "recommend",
 ]
 
 
@@ -39,27 +55,29 @@ class PRMiner:
     def __init__(self, github_token: str):
         self.github = Github(github_token)
         self.interactions = []
-        self.stats = {
-            'prs_analyzed': 0,
-            'comments_found': 0,
-            'interactions_extracted': 0,
-            'api_calls': 0
-        }
+        self.stats = {"prs_analyzed": 0, "comments_found": 0, "interactions_extracted": 0, "api_calls": 0}
 
-    def mine_repo(self, repo_name: str, limit: int = 50, since: Optional[str] = None, reviewer_filter: Optional[str] = None, all_comments: bool = False):
+    def mine_repo(
+        self,
+        repo_name: str,
+        limit: int = 50,
+        since: Optional[str] = None,
+        reviewer_filter: Optional[str] = None,
+        all_comments: bool = False,
+    ):
         """Mine a single repository for tribal knowledge"""
         print(f"\n⛏️  Mining {repo_name}...")
 
         try:
             repo = self.github.get_repo(repo_name)
-            self.stats['api_calls'] += 1
+            self.stats["api_calls"] += 1
         except GithubException as e:
             print(f"Error accessing repo {repo_name}: {e}")
             return
 
         # Get merged PRs
-        pulls = repo.get_pulls(state='closed', sort='updated', direction='desc')
-        self.stats['api_calls'] += 1
+        pulls = repo.get_pulls(state="closed", sort="updated", direction="desc")
+        self.stats["api_calls"] += 1
 
         count = 0
         for pr in pulls:
@@ -74,15 +92,15 @@ class PRMiner:
             if since and pr.updated_at < datetime.fromisoformat(since).replace(tzinfo=timezone.utc):
                 continue
 
-            self.stats['prs_analyzed'] += 1
+            self.stats["prs_analyzed"] += 1
 
             # Mine review comments
             try:
                 comments = pr.get_review_comments()
-                self.stats['api_calls'] += 1
+                self.stats["api_calls"] += 1
 
                 for comment in comments:
-                    self.stats['comments_found'] += 1
+                    self.stats["comments_found"] += 1
 
                     # Reviewer filter
                     if reviewer_filter and comment.user.login != reviewer_filter:
@@ -96,12 +114,10 @@ class PRMiner:
                     interaction = self._extract_interaction(pr, comment)
                     if interaction:
                         self.interactions.append(interaction)
-                        self.stats['interactions_extracted'] += 1
+                        self.stats["interactions_extracted"] += 1
 
                 # Show progress
-                sys.stdout.write(
-                    f"\r  PR #{pr.number}: {self.stats['interactions_extracted']} interactions found"
-                )
+                sys.stdout.write(f"\r  PR #{pr.number}: {self.stats['interactions_extracted']} interactions found")
                 sys.stdout.flush()
 
             except GithubException as e:
@@ -127,22 +143,22 @@ class PRMiner:
             resolution = self._determine_resolution(pr, comment)
 
             return {
-                'source': 'pr_review',
-                'pr_number': pr.number,
-                'pr_title': pr.title,
-                'pr_url': pr.html_url,
-                'author': pr.user.login,
-                'reviewer': comment.user.login,
-                'file': comment.path,
-                'line': comment.original_line or comment.line,
-                'comment_text': comment.body,
-                'diff_hunk': comment.diff_hunk,
-                'code_before': code_before,
-                'code_after': code_after,
-                'resolution': resolution,
-                'comment_url': comment.html_url,
-                'created_at': comment.created_at.isoformat(),
-                'pr_merged_at': pr.merged_at.isoformat() if pr.merged_at else None
+                "source": "pr_review",
+                "pr_number": pr.number,
+                "pr_title": pr.title,
+                "pr_url": pr.html_url,
+                "author": pr.user.login,
+                "reviewer": comment.user.login,
+                "file": comment.path,
+                "line": comment.original_line or comment.line,
+                "comment_text": comment.body,
+                "diff_hunk": comment.diff_hunk,
+                "code_before": code_before,
+                "code_after": code_after,
+                "resolution": resolution,
+                "comment_url": comment.html_url,
+                "created_at": comment.created_at.isoformat(),
+                "pr_merged_at": pr.merged_at.isoformat() if pr.merged_at else None,
             }
         except Exception as e:
             print(f"\n  Warning: Failed to extract interaction: {e}")
@@ -162,23 +178,23 @@ class PRMiner:
         if not diff_hunk:
             return "", ""
 
-        lines = diff_hunk.split('\n')
+        lines = diff_hunk.split("\n")
         before_lines = []
         after_lines = []
 
         for line in lines[1:]:  # Skip header line
-            if line.startswith('-') and not line.startswith('---'):
+            if line.startswith("-") and not line.startswith("---"):
                 before_lines.append(line[1:])  # Remove '-' prefix
-            elif line.startswith('+') and not line.startswith('+++'):
+            elif line.startswith("+") and not line.startswith("+++"):
                 after_lines.append(line[1:])  # Remove '+' prefix
-            elif not line.startswith('@'):
+            elif not line.startswith("@"):
                 # Context line - include in both
                 before_lines.append(line[1:] if line else line)
                 after_lines.append(line[1:] if line else line)
 
-        return '\n'.join(before_lines).strip(), '\n'.join(after_lines).strip()
+        return "\n".join(before_lines).strip(), "\n".join(after_lines).strip()
 
-    def _determine_resolution(self, pr, comment) -> str:
+    def _determine_resolution(self, pr, comment) -> str:  # noqa: ARG002
         """
         Determine if comment led to code change
 
@@ -201,21 +217,21 @@ class PRMiner:
     def save_results(self, output_file: str, repos: List[str]):
         """Save mined interactions to JSON"""
         data = {
-            'metadata': {
-                'repos': repos,
-                'mined_at': datetime.now(timezone.utc).isoformat(),
-                'pr_count': self.stats['prs_analyzed'],
-                'comment_count': self.stats['comments_found'],
-                'interaction_count': self.stats['interactions_extracted'],
-                'api_calls': self.stats['api_calls']
+            "metadata": {
+                "repos": repos,
+                "mined_at": datetime.now(timezone.utc).isoformat(),
+                "pr_count": self.stats["prs_analyzed"],
+                "comment_count": self.stats["comments_found"],
+                "interaction_count": self.stats["interactions_extracted"],
+                "api_calls": self.stats["api_calls"],
             },
-            'interactions': self.interactions
+            "interactions": self.interactions,
         }
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(data, f, indent=2)
 
-        print(f"\n✅ Mining complete!")
+        print("\n✅ Mining complete!")
         print(f"   PRs analyzed: {self.stats['prs_analyzed']}")
         print(f"   Comments found: {self.stats['comments_found']}")
         print(f"   Interactions extracted: {self.stats['interactions_extracted']}")
@@ -227,14 +243,14 @@ class PRMiner:
             print("No interactions found")
             return
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("MINING SUMMARY")
-        print("="*80)
+        print("=" * 80)
 
         # Top reviewers
         reviewer_counts = {}
         for interaction in self.interactions:
-            reviewer = interaction['reviewer']
+            reviewer = interaction["reviewer"]
             reviewer_counts[reviewer] = reviewer_counts.get(reviewer, 0) + 1
 
         print("\nTop Reviewers:")
@@ -244,7 +260,7 @@ class PRMiner:
         # Top files
         file_counts = {}
         for interaction in self.interactions:
-            file = interaction['file']
+            file = interaction["file"]
             file_counts[file] = file_counts.get(file, 0) + 1
 
         print("\nMost Commented Files:")
@@ -254,7 +270,7 @@ class PRMiner:
         # Keyword frequency
         keyword_counts = {}
         for interaction in self.interactions:
-            text = interaction['comment_text'].lower()
+            text = interaction["comment_text"].lower()
             for keyword in IMPERATIVE_KEYWORDS:
                 if keyword in text:
                     keyword_counts[keyword] = keyword_counts.get(keyword, 0) + 1
@@ -267,12 +283,12 @@ class PRMiner:
 def get_github_token() -> Optional[str]:
     """Get GitHub token from environment or file"""
     # Try environment variable
-    token = os.environ.get('GITHUB_TOKEN')
+    token = os.environ.get("GITHUB_TOKEN")
     if token:
         return token
 
     # Try ~/.github-token file
-    token_file = Path.home() / '.github-token'
+    token_file = Path.home() / ".github-token"
     if token_file.exists():
         return token_file.read_text().strip()
 
@@ -281,7 +297,7 @@ def get_github_token() -> Optional[str]:
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Mine GitHub PRs for tribal knowledge',
+        description="Mine GitHub PRs for tribal knowledge",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -290,17 +306,17 @@ Examples:
   python3 miner.py your-org/your-repo,your-org/metrics-service output.json --limit 50
   python3 miner.py your-org/your-repo output.json --reviewer senior-reviewer
   python3 miner.py your-org/your-repo output.json --since 2024-06-01
-        """
+        """,
     )
 
-    parser.add_argument('repos', help='Repository name(s) (owner/repo or repo1,repo2)')
-    parser.add_argument('output', help='Output JSON file')
-    parser.add_argument('--limit', type=int, default=50, help='Max PRs per repo (default: 50)')
-    parser.add_argument('--since', help='Only PRs updated since date (YYYY-MM-DD)')
-    parser.add_argument('--reviewer', help='Filter by specific reviewer')
-    parser.add_argument('--all-comments', action='store_true', help='Capture ALL comments (skip keyword filter)')
-    parser.add_argument('--summary', action='store_true', help='Show summary after mining')
-    parser.add_argument('--check-auth', action='store_true', help='Check GitHub authentication')
+    parser.add_argument("repos", help="Repository name(s) (owner/repo or repo1,repo2)")
+    parser.add_argument("output", help="Output JSON file")
+    parser.add_argument("--limit", type=int, default=50, help="Max PRs per repo (default: 50)")
+    parser.add_argument("--since", help="Only PRs updated since date (YYYY-MM-DD)")
+    parser.add_argument("--reviewer", help="Filter by specific reviewer")
+    parser.add_argument("--all-comments", action="store_true", help="Capture ALL comments (skip keyword filter)")
+    parser.add_argument("--summary", action="store_true", help="Show summary after mining")
+    parser.add_argument("--check-auth", action="store_true", help="Check GitHub authentication")
 
     args = parser.parse_args()
 
@@ -324,14 +340,16 @@ Examples:
             sys.exit(1)
 
     # Parse repos
-    repos = [r.strip() for r in args.repos.split(',')]
+    repos = [r.strip() for r in args.repos.split(",")]
 
     # Create miner
     miner = PRMiner(token)
 
     # Mine each repo
     for repo in repos:
-        miner.mine_repo(repo, limit=args.limit, since=args.since, reviewer_filter=args.reviewer, all_comments=args.all_comments)
+        miner.mine_repo(
+            repo, limit=args.limit, since=args.since, reviewer_filter=args.reviewer, all_comments=args.all_comments
+        )
 
     # Save results
     miner.save_results(args.output, repos)
@@ -341,5 +359,5 @@ Examples:
         miner.show_summary()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
