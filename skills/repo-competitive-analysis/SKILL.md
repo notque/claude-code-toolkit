@@ -9,6 +9,7 @@ description: |
   Do NOT use for general codebase exploration (use explore-pipeline instead).
 version: 1.0.0
 user-invocable: true
+agent: research-coordinator-engineer
 model: opus
 allowed-tools:
   - Agent
@@ -17,7 +18,6 @@ allowed-tools:
   - Bash
   - Grep
   - Glob
-  - Edit
 routing:
   triggers:
     - competitive analysis
@@ -132,7 +132,7 @@ If any zone exceeds ~100 files:
 
 **Goal**: Read every file in every zone of the external repository.
 
-Dispatch 1 Agent per analysis zone using `run_in_background`. Each agent receives:
+Dispatch 1 Agent per analysis zone (background). Each agent receives:
 - The zone name and file list
 - Instructions to read EVERY file (not sample, not skim)
 - A structured output template
