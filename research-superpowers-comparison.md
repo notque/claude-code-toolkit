@@ -93,18 +93,18 @@ Pressure tests combine multiple psychological pressures (time + authority + exha
 
 **Adoption difficulty:** Low-Medium. Could enhance our existing skill-eval and testing-agents-with-subagents skills.
 
-### 5. Two-Stage Review (Spec Compliance + Code Quality)
+### 5. Two-Stage Review (ADR Compliance + Code Quality)
 **Value: MEDIUM**
 
 Their subagent-driven-development separates review into two distinct stages:
-1. **Spec compliance**: Did you build what was asked? Nothing more, nothing less?
+1. **ADR compliance**: Did you build what was asked? Nothing more, nothing less?
 2. **Code quality**: Is what you built well-constructed?
 
-The spec reviewer uses adversarial framing: "The implementer finished suspiciously quickly. Their report may be incomplete, inaccurate, or optimistic. You MUST verify everything independently."
+The ADR compliance reviewer uses adversarial framing: "The implementer finished suspiciously quickly. Their report may be incomplete, inaccurate, or optimistic. You MUST verify everything independently."
 
-**Our gap:** We have 26 review agents but they focus on different dimensions (security, performance, type design, etc.), not the spec-compliance-vs-quality distinction. Our `comprehensive-review` dispatches 10+ agents but none specifically ask "did you build the right thing?"
+**Our gap:** We have 27 review agents but they focus on different dimensions (security, performance, type design, etc.), not the ADR-compliance-vs-quality distinction. Our `comprehensive-review` dispatches 11 foundation agents including `reviewer-adr-compliance` which now fills this gap.
 
-**Adoption difficulty:** Low. Add a spec-compliance reviewer agent to our review lineup.
+**Adoption difficulty:** Low. Already implemented as `reviewer-adr-compliance` (Wave 1 Agent #11).
 
 ### 6. Multi-Platform Skill Portability
 **Value: MEDIUM (strategic, not immediate)**
@@ -170,7 +170,7 @@ They discovered that when a YAML description summarizes the workflow, Claude fol
 
 1. **Skill triggering test harness** — Build automated tests that run Claude headlessly, parse session transcripts, and detect premature action. Adapt their `run-test.sh` pattern to our skill set.
 
-2. **Spec compliance reviewer agent** — Add `reviewer-spec-compliance` to our 26 review agents. Focus: "Did the implementation match the spec? Nothing more, nothing less?" Include adversarial framing.
+2. **ADR compliance reviewer agent** — Added `reviewer-adr-compliance` as Wave 1 Agent #11 in comprehensive-review. Focus: "Did the implementation match the ADR? Nothing more, nothing less?" Includes adversarial framing. **DONE.**
 
 3. **Persuasion-aware skill design guide** — Document the Cialdini-based framework as a reference for skill authors. Add to our `writing-skills` equivalent or AGENT_TEMPLATE_V2.
 
