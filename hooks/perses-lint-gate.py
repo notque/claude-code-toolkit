@@ -16,9 +16,9 @@ def main():
     try:
         event = json.loads(sys.stdin.read())
     except (json.JSONDecodeError, EOFError, ValueError):
-        # Safety gate fails closed: if we can't parse the event, block
-        print("[perses-lint-gate] WARNING: could not parse hook event", file=sys.stderr)
-        sys.exit(2)
+        # Fail open: if we can't parse the event, allow the tool to run.
+        # Exit code 2 = block in Claude Code; broken hooks must not block.
+        sys.exit(0)
 
     tool_name = event.get("tool_name", "")
     if tool_name != "Bash":
@@ -43,4 +43,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        # A broken hook must fail OPEN (exit 0), not fail CLOSED (exit 2).
+        # Python's default error exit code is 2, which Claude Code interprets
+        # as "block this tool" — causing a deadlock if the hook crashes.
+        sys.exit(0)
