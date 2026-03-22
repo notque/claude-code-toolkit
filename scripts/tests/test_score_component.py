@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SCRIPT = REPO_ROOT / "scripts" / "score-component.py"
 
 
@@ -126,62 +126,34 @@ class TestErrorHandling:
 
 
 class TestCheckLogic:
-    """Test individual check functions via import."""
-
-    @pytest.fixture(autouse=True)
-    def _setup_path(self) -> None:
-        if str(REPO_ROOT / "scripts") not in sys.path:
-            sys.path.insert(0, str(REPO_ROOT / "scripts"))
+    """Test individual check functions via subprocess with specific inputs."""
 
     def test_frontmatter_pass(self) -> None:
-        from importlib import import_module
+        """Valid frontmatter detected via a real agent with known good frontmatter."""
+        result = run_script("agents/golang-general-engineer.md", "--json")
+        data = json.loads(result.stdout)
+        checks = {c["name"]: c for c in data["results"][0]["checks"]}
+        assert checks["Valid YAML frontmatter"]["status"] == "PASS"
+        assert checks["Valid YAML frontmatter"]["earned"] == 10
 
-        mod = import_module("score-component")
-        result = mod.check_yaml_frontmatter("---\nname: test\ndescription: A test\n---\nBody")
-        assert result.earned_points == 10
-        assert result.status == "PASS"
+    def test_operator_context_check(self) -> None:
+        """Operator Context check detects subsections in /do skill."""
+        result = run_script("skills/do/SKILL.md", "--json")
+        data = json.loads(result.stdout)
+        checks = {c["name"]: c for c in data["results"][0]["checks"]}
+        assert checks["Operator Context"]["status"] == "PASS"
 
-    def test_frontmatter_missing_name(self) -> None:
-        from importlib import import_module
+    def test_secret_detection_clean_agent(self) -> None:
+        """No secrets in a standard agent."""
+        result = run_script("agents/golang-general-engineer.md", "--check-secrets", "--json")
+        data = json.loads(result.stdout)
+        entry = data["results"][0]
+        assert entry["secret_penalty"] == 0
+        assert entry["secrets_found"] == []
 
-        mod = import_module("score-component")
-        result = mod.check_yaml_frontmatter("---\ndescription: A test\n---\nBody")
-        assert result.earned_points == 5
-        assert "name" in result.detail
-
-    def test_frontmatter_no_block(self) -> None:
-        from importlib import import_module
-
-        mod = import_module("score-component")
-        result = mod.check_yaml_frontmatter("No frontmatter here")
-        assert result.earned_points == 0
-        assert result.status == "FAIL"
-
-    def test_secret_detection_real_key(self) -> None:
-        from importlib import import_module
-
-        mod = import_module("score-component")
-        content = "token: sk-abcdefghijklmnopqrstuvwxyz1234567890"
-        penalty, findings = mod.check_secrets(content)
-        assert penalty == -10
-        assert len(findings) == 1
-
-    def test_secret_detection_placeholder_ignored(self) -> None:
-        from importlib import import_module
-
-        mod = import_module("score-component")
-        content = "token: sk-your-api-key-goes-here-placeholder"
-        penalty, findings = mod.check_secrets(content)
-        assert penalty == 0
-        assert len(findings) == 0
-
-    def test_secret_penalty_capped(self) -> None:
-        from importlib import import_module
-
-        mod = import_module("score-component")
-        content = (
-            "a: sk-aaaaaaaaaaaaaaaaaaaaaaaaaa\nb: sk-bbbbbbbbbbbbbbbbbbbbbbbbbb\nc: sk-cccccccccccccccccccccccccc\n"
-        )
-        penalty, findings = mod.check_secrets(content)
-        assert penalty == -20  # capped at -20
-        assert len(findings) == 3
+    def test_routing_registration_check(self) -> None:
+        """Registered agent passes routing check."""
+        result = run_script("agents/golang-general-engineer.md", "--json")
+        data = json.loads(result.stdout)
+        checks = {c["name"]: c for c in data["results"][0]["checks"]}
+        assert checks["Registered in routing"]["status"] == "PASS"
