@@ -34,10 +34,12 @@ def main() -> None:
             sys.exit(0)
 
         # Block 1: .gitignore modification attempts
-        # Catches: sed/awk on .gitignore, redirects to .gitignore, tee to .gitignore
-        if re.search(r'(>|>>)\s*\.gitignore', command) or \
-           re.search(r'(sed|awk|tee)\s.*\.gitignore', command) or \
-           re.search(r'mv\s+\S+\s+\.gitignore', command):
+        # Only match direct file operations, not .gitignore mentioned in strings/heredocs
+        # Split on heredoc boundaries — only check the command part, not body content
+        cmd_part = command.split("<<")[0] if "<<" in command else command
+        if re.search(r'(>|>>)\s*\.gitignore', cmd_part) or \
+           re.search(r'(sed|awk|tee)\s+\S*\s*\.gitignore', cmd_part) or \
+           re.search(r'mv\s+\S+\s+\.gitignore', cmd_part):
             print("[BLOCKED] Agents must not modify .gitignore.")
             print("This file controls repository safety boundaries.")
             sys.exit(2)
