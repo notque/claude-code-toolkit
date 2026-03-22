@@ -285,7 +285,10 @@ def cmd_show(*, as_json: bool = False, include_completed: bool = False, path: Pa
         for task in tasks:
             entry = asdict(task)
             if not task.completed:
-                entry["elapsed_seconds"] = _elapsed_seconds(task.started)
+                try:
+                    entry["elapsed_seconds"] = _elapsed_seconds(task.started)
+                except (ValueError, OSError):
+                    entry["elapsed_seconds"] = None
             output.append(entry)
         print(json.dumps({"tasks": output}, indent=2))
         return 0
@@ -301,7 +304,10 @@ def cmd_show(*, as_json: bool = False, include_completed: bool = False, path: Pa
         print("ACTIVE PIPELINES")
         name_width = max(len(t.name) for t in active)
         for task in active:
-            elapsed = _format_duration(_elapsed_seconds(task.started))
+            try:
+                elapsed = _format_duration(_elapsed_seconds(task.started))
+            except (ValueError, OSError):
+                elapsed = "unknown"
             print(f"  {task.name:<{name_width}}  {task.status:<40s} ({elapsed})")
 
     if include_completed and completed:

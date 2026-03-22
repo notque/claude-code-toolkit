@@ -437,8 +437,10 @@ def _compute_roi_data(db_path: Path) -> dict:
         ).fetchone()
         no_retro_failures = no_retro_failures_row[0]
 
-        # Average waste tokens across all sessions
-        avg_waste_row = conn.execute("SELECT COALESCE(AVG(waste_tokens), 0) FROM session_stats").fetchone()
+        # Average waste tokens for non-retro cohort only (counterfactual baseline)
+        avg_waste_row = conn.execute(
+            "SELECT COALESCE(AVG(waste_tokens), 0) FROM session_stats WHERE had_retro_knowledge = 0"
+        ).fetchone()
         avg_waste = avg_waste_row[0]
 
         # Top activated learnings
@@ -522,15 +524,15 @@ def cmd_roi(args: argparse.Namespace) -> None:
         print(f"  With retro knowledge:    {data['rate_with_retro']:.2f} failures/session")
         print(f"  Without retro knowledge: {data['rate_without_retro']:.2f} failures/session")
         if data["improvement_pct"] is not None:
-            print(f"  Improvement:             {data['improvement_pct']:.1f}%")
+            if data["improvement_pct"] < 0:
+                print(f"  WARNING: Retro cohort shows REGRESSION: {data['improvement_pct']:.1f}%")
+                print(f"  Estimated waste increase: ~{abs(data['estimated_savings']):,} tokens")
+            else:
+                print(f"  Improvement:             {data['improvement_pct']:.1f}%")
+                print(f"  Estimated Savings:       ~{data['estimated_savings']:,} tokens saved")
         else:
             print("  Improvement:             N/A (no failures in baseline cohort)")
         print()
-        if data["estimated_savings"] is not None:
-            print(
-                f"Estimated Savings: ~{data['estimated_savings']:,} tokens saved across {data['with_retro']} sessions"
-            )
-            print()
 
     if data["top_activations"]:
         print("Top Activated Learnings:")
@@ -565,7 +567,7 @@ def cmd_learn(args):
         topic=topic,
         key=key,
         value=value,
-        category="learned",
+        category="gotcha",
         confidence=0.7,
         tags=[args.skill or args.agent or "general"],
         source="manual:learn",
@@ -629,6 +631,24 @@ def cmd_migrate(args):
         f"{stats['high_confidence']} high confidence, "
         f"{stats['sessions_tracked']} sessions"
     )
+
+
+def _non_negative_int(value: str) -> int:
+    """Validate that an argparse integer value is non-negative.
+
+    Args:
+        value: String value from argparse to convert and validate.
+
+    Returns:
+        The parsed non-negative integer.
+
+    Raises:
+        argparse.ArgumentTypeError: If the value is negative.
+    """
+    n = int(value)
+    if n < 0:
+        raise argparse.ArgumentTypeError(f"Value must be >= 0, got {n}")
+    return n
 
 
 def main():
@@ -761,15 +781,15 @@ def main():
     # record-waste
     p_rec_waste = subparsers.add_parser("record-waste", help="Record wasted tokens from a failure")
     p_rec_waste.add_argument("--session", required=True, help="Session ID")
-    p_rec_waste.add_argument("--tokens", type=int, required=True, help="Number of wasted tokens")
+    p_rec_waste.add_argument("--tokens", type=_non_negative_int, required=True, help="Number of wasted tokens")
     p_rec_waste.set_defaults(func=cmd_record_waste)
 
     # record-session
     p_rec_sess = subparsers.add_parser("record-session", help="Create or update a session_stats entry")
     p_rec_sess.add_argument("--session", required=True, help="Session ID")
     p_rec_sess.add_argument("--had-retro", action="store_true", help="Session had retro knowledge injected")
-    p_rec_sess.add_argument("--failures", type=int, default=0, help="Number of failures")
-    p_rec_sess.add_argument("--waste-tokens", type=int, default=0, help="Wasted tokens")
+    p_rec_sess.add_argument("--failures", type=_non_negative_int, default=0, help="Number of failures")
+    p_rec_sess.add_argument("--waste-tokens", type=_non_negative_int, default=0, help="Wasted tokens")
     p_rec_sess.set_defaults(func=cmd_record_session_stats)
 
     # roi

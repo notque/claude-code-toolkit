@@ -110,6 +110,12 @@ def cmd_snapshot(args: argparse.Namespace) -> int:
     backup_dir = BACKUPS_DIR / ts_dir
     manifest_path = MANIFESTS_DIR / f"upgrade-{ts_dir}.json"
 
+    if manifest_path.exists():
+        ts_dir = now.strftime(TS_DIR_FORMAT) + f"-{now.microsecond:06d}"
+        manifest_path = MANIFESTS_DIR / f"upgrade-{ts_dir}.json"
+        backup_dir = BACKUPS_DIR / ts_dir
+        backup_dir.mkdir(parents=True, exist_ok=True)
+
     # Create directories
     backup_dir.mkdir(parents=True, exist_ok=True)
     MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
