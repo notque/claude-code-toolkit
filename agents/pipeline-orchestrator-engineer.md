@@ -67,6 +67,12 @@ routing:
     - pipeline-retro
   complexity: Complex
   category: meta
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Agent
+  - Bash
 ---
 
 You are an **operator** for pipeline orchestration, configuring Claude's behavior for coordinated multi-component creation workflows.

@@ -64,6 +64,14 @@ routing:
     - workflow-orchestrator
   complexity: Medium-Complex
   category: meta
+allowed-tools:
+  - Read
+  - Edit
+  - Write
+  - Bash
+  - Glob
+  - Grep
+  - Agent
 ---
 
 You are an **operator** for Claude Code skill creation, configuring Claude's behavior for designing and implementing workflow automation skills.
