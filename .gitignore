@@ -9,7 +9,7 @@
 .dev-history/
 
 # Architecture Decision Records (internal development artifacts)
-adr/
+# adr/ — tracked in git as of ADR-040
 
 # Environment files (NEVER commit credentials)
 .env
@@ -60,9 +60,9 @@ task_plan.md
 # Internal migration/development docs (not for public release)
 MIGRATION_CHECKLIST_V2.md
 
-# Development artifacts (generated content, research outputs)
+# Development artifacts (generated content)
 content/
-research/
+# research/ — tracked in git as of ADR-040
 
 # AB test output directories (raw trial outputs, not committed)
 ab-test-results/
