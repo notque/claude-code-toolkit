@@ -20,6 +20,23 @@ TypeScript CLI that fingerprints projects and generates AI configs for Claude, C
 - Multi-platform config generation (Claude + Cursor + Codex writers). We're Claude Code focused.
 - Session event JSONL format for learning capture. Our SQLite + FTS5 approach serves better for search and graduation.
 
+### msitarzewski/agency-agents
+https://github.com/msitarzewski/agency-agents
+
+Community-driven collection of Claude Code agents organized into divisions (engineering, design, marketing, sales, product, testing, etc.). Analyzed for agent coverage gaps and novel patterns (ADR-061).
+
+**Patterns noted:**
+- Personality-driven agent design with strong character voices. Each agent has Identity, Core Mission, Critical Rules, Deliverables, and Communication Style sections. Emphasizes breadth over depth.
+- NEXUS operating model: a seven-phase multi-agent orchestration doctrine (Discover, Strategize, Scaffold, Build, Harden, Launch, Operate) with quality gates and activation modes (Full/Sprint/Micro). Documentation-as-strategy vs. our infrastructure-as-strategy approach.
+- Workflow Architect's four-view registry pattern (by Workflow, by Component, by User Journey, by State) for exhaustive system path mapping before implementation. The "Missing" status concept (workflow in code but not in spec = liability).
+- Reality Checker's anti-fantasy-approval stance with automatic fail triggers: perfect scores, zero-issues claims, or production-ready certifications without evidence all trigger automatic failure.
+- ZK Steward's Zettelkasten validation gate (Atomicity, Connectivity, Organic growth, Continued dialogue) applied to knowledge management.
+- Discovery Coach's SPIN questioning escalation (Situation -> Problem -> Implication -> Need-Payoff) applicable to debugging methodology design.
+- Low-context vs. high-context architectural difference: their agents lack routing metadata, hooks, version fields, retro-topic integration, and behavior classification (hardcoded/default/optional).
+
+**Patterns adopted:**
+- (pending -- accessibility reviewer agent and workflow registry pattern identified as candidates)
+
 ## Blog Posts
 
 ### vexjoy.com
