@@ -20,13 +20,33 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import sys
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
+from functools import wraps
 from pathlib import Path
+from typing import Any, Callable
 
 STATUS_FILE = Path("/tmp/claude-toolkit-tasks.json")
+
+
+def _with_lock(func: Callable[..., Any]) -> Callable[..., Any]:
+    """Decorator that acquires a file lock for task store mutations."""
+
+    @wraps(func)
+    def wrapper(*args: Any, path: Path = STATUS_FILE, **kwargs: Any) -> Any:
+        lock_path = path.with_suffix(".lock")
+        lock_path.touch(exist_ok=True)
+        with open(lock_path) as lock_fd:
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+            try:
+                return func(*args, path=path, **kwargs)
+            finally:
+                fcntl.flock(lock_fd, fcntl.LOCK_UN)
+
+    return wrapper
 
 
 # ---------------------------------------------------------------------------
@@ -92,7 +112,8 @@ def _load(path: Path) -> TaskStore:
         raw = json.loads(path.read_text(encoding="utf-8"))
         tasks = [Task(**t) for t in raw.get("tasks", [])]
         return TaskStore(tasks=tasks)
-    except (json.JSONDecodeError, TypeError, KeyError):
+    except (json.JSONDecodeError, TypeError, KeyError) as e:
+        print(f"Warning: corrupt task status file {path}, starting fresh: {e}", file=sys.stderr)
         return TaskStore()
 
 
@@ -161,6 +182,7 @@ def _format_duration(seconds: float) -> str:
 # ---------------------------------------------------------------------------
 
 
+@_with_lock
 def cmd_start(name: str, status: str, *, path: Path = STATUS_FILE) -> int:
     """Register a new task, overwriting if it already exists.
 
@@ -180,6 +202,7 @@ def cmd_start(name: str, status: str, *, path: Path = STATUS_FILE) -> int:
     return 0
 
 
+@_with_lock
 def cmd_update(name: str, status: str, *, path: Path = STATUS_FILE) -> int:
     """Update status text for a task, creating it if missing.
 
@@ -201,6 +224,7 @@ def cmd_update(name: str, status: str, *, path: Path = STATUS_FILE) -> int:
     return 0
 
 
+@_with_lock
 def cmd_done(name: str, status: str, *, path: Path = STATUS_FILE) -> int:
     """Mark a task as completed with final status and elapsed time.
 
@@ -277,6 +301,7 @@ def cmd_show(*, as_json: bool = False, include_completed: bool = False, path: Pa
     return 0
 
 
+@_with_lock
 def cmd_clear(*, path: Path = STATUS_FILE) -> int:
     """Remove all tracked tasks.
 

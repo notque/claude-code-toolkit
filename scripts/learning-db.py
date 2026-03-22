@@ -348,12 +348,17 @@ def cmd_record_activation(args: argparse.Namespace) -> None:
     now = datetime.now().isoformat()
     db_path = get_db_path()
     conn = sqlite3.connect(db_path)
-    conn.execute(
-        "INSERT INTO activations (topic, key, session_id, timestamp, outcome) VALUES (?, ?, ?, ?, ?)",
-        (args.topic, args.key, args.session, now, args.outcome),
-    )
-    conn.commit()
-    conn.close()
+    try:
+        conn.execute(
+            "INSERT INTO activations (topic, key, session_id, timestamp, outcome) VALUES (?, ?, ?, ?, ?)",
+            (args.topic, args.key, args.session, now, args.outcome),
+        )
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        conn.close()
     print(f"Recorded activation: {args.topic}/{args.key} (session: {args.session}, outcome: {args.outcome})")
 
 
@@ -363,21 +368,24 @@ def cmd_record_waste(args: argparse.Namespace) -> None:
     now = datetime.now().isoformat()
     db_path = get_db_path()
     conn = sqlite3.connect(db_path)
-
-    row = conn.execute("SELECT id FROM session_stats WHERE session_id = ?", (args.session,)).fetchone()
-    if row:
-        conn.execute(
-            "UPDATE session_stats SET failure_count = failure_count + 1, waste_tokens = waste_tokens + ? WHERE session_id = ?",
-            (args.tokens, args.session),
-        )
-    else:
-        conn.execute(
-            "INSERT INTO session_stats (session_id, failure_count, waste_tokens, created_at) VALUES (?, 1, ?, ?)",
-            (args.session, args.tokens, now),
-        )
-
-    conn.commit()
-    conn.close()
+    try:
+        row = conn.execute("SELECT id FROM session_stats WHERE session_id = ?", (args.session,)).fetchone()
+        if row:
+            conn.execute(
+                "UPDATE session_stats SET failure_count = failure_count + 1, waste_tokens = waste_tokens + ? WHERE session_id = ?",
+                (args.tokens, args.session),
+            )
+        else:
+            conn.execute(
+                "INSERT INTO session_stats (session_id, failure_count, waste_tokens, created_at) VALUES (?, 1, ?, ?)",
+                (args.session, args.tokens, now),
+            )
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        conn.close()
     print(f"Recorded waste: session={args.session}, tokens={args.tokens}")
 
 
@@ -390,22 +398,26 @@ def cmd_record_session_stats(args: argparse.Namespace) -> None:
 
     had_retro = 1 if args.had_retro else 0
 
-    row = conn.execute("SELECT id FROM session_stats WHERE session_id = ?", (args.session,)).fetchone()
-    if row:
-        conn.execute(
-            """UPDATE session_stats
-               SET had_retro_knowledge = ?, failure_count = ?, waste_tokens = ?
-               WHERE session_id = ?""",
-            (had_retro, args.failures, args.waste_tokens, args.session),
-        )
-    else:
-        conn.execute(
-            "INSERT INTO session_stats (session_id, had_retro_knowledge, failure_count, waste_tokens, created_at) VALUES (?, ?, ?, ?, ?)",
-            (args.session, had_retro, args.failures, args.waste_tokens, now),
-        )
-
-    conn.commit()
-    conn.close()
+    try:
+        row = conn.execute("SELECT id FROM session_stats WHERE session_id = ?", (args.session,)).fetchone()
+        if row:
+            conn.execute(
+                """UPDATE session_stats
+                   SET had_retro_knowledge = ?, failure_count = ?, waste_tokens = ?
+                   WHERE session_id = ?""",
+                (had_retro, args.failures, args.waste_tokens, args.session),
+            )
+        else:
+            conn.execute(
+                "INSERT INTO session_stats (session_id, had_retro_knowledge, failure_count, waste_tokens, created_at) VALUES (?, ?, ?, ?, ?)",
+                (args.session, had_retro, args.failures, args.waste_tokens, now),
+            )
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        conn.close()
     print(
         f"Recorded session: {args.session} (retro={bool(had_retro)}, failures={args.failures}, waste={args.waste_tokens})"
     )
@@ -419,52 +431,54 @@ def _compute_roi_data(db_path: Path) -> dict:
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
 
-    # Session cohort stats
-    total_sessions = conn.execute("SELECT COUNT(*) FROM session_stats").fetchone()[0]
-    with_retro = conn.execute("SELECT COUNT(*) FROM session_stats WHERE had_retro_knowledge = 1").fetchone()[0]
-    without_retro = conn.execute("SELECT COUNT(*) FROM session_stats WHERE had_retro_knowledge = 0").fetchone()[0]
+    try:
+        # Session cohort stats
+        total_sessions = conn.execute("SELECT COUNT(*) FROM session_stats").fetchone()[0]
+        with_retro = conn.execute("SELECT COUNT(*) FROM session_stats WHERE had_retro_knowledge = 1").fetchone()[0]
+        without_retro = conn.execute("SELECT COUNT(*) FROM session_stats WHERE had_retro_knowledge = 0").fetchone()[0]
 
-    # Failure totals per cohort
-    retro_failures_row = conn.execute(
-        "SELECT COALESCE(SUM(failure_count), 0) FROM session_stats WHERE had_retro_knowledge = 1"
-    ).fetchone()
-    retro_failures = retro_failures_row[0]
+        # Failure totals per cohort
+        retro_failures_row = conn.execute(
+            "SELECT COALESCE(SUM(failure_count), 0) FROM session_stats WHERE had_retro_knowledge = 1"
+        ).fetchone()
+        retro_failures = retro_failures_row[0]
 
-    no_retro_failures_row = conn.execute(
-        "SELECT COALESCE(SUM(failure_count), 0) FROM session_stats WHERE had_retro_knowledge = 0"
-    ).fetchone()
-    no_retro_failures = no_retro_failures_row[0]
+        no_retro_failures_row = conn.execute(
+            "SELECT COALESCE(SUM(failure_count), 0) FROM session_stats WHERE had_retro_knowledge = 0"
+        ).fetchone()
+        no_retro_failures = no_retro_failures_row[0]
 
-    # Average waste tokens across all sessions
-    avg_waste_row = conn.execute("SELECT COALESCE(AVG(waste_tokens), 0) FROM session_stats").fetchone()
-    avg_waste = avg_waste_row[0]
+        # Average waste tokens across all sessions
+        avg_waste_row = conn.execute("SELECT COALESCE(AVG(waste_tokens), 0) FROM session_stats").fetchone()
+        avg_waste = avg_waste_row[0]
 
-    # Top activated learnings
-    top_activations = []
-    for row in conn.execute(
-        "SELECT topic, key, COUNT(*) as activation_count FROM activations GROUP BY topic, key ORDER BY activation_count DESC LIMIT 5"
-    ).fetchall():
-        top_activations.append({"topic": row["topic"], "key": row["key"], "count": row["activation_count"]})
+        # Top activated learnings
+        top_activations = []
+        for row in conn.execute(
+            "SELECT topic, key, COUNT(*) as activation_count FROM activations GROUP BY topic, key ORDER BY activation_count DESC LIMIT 5"
+        ).fetchall():
+            top_activations.append({"topic": row["topic"], "key": row["key"], "count": row["activation_count"]})
 
-    # Dead weight: learnings with 0 activations
-    dead_weight = []
-    for row in conn.execute(
-        """SELECT l.topic, l.key, l.first_seen
-           FROM learnings l
-           LEFT JOIN activations a ON l.topic = a.topic AND l.key = a.key
-           WHERE a.id IS NULL
-           ORDER BY l.first_seen ASC"""
-    ).fetchall():
-        age_days = 0
-        if row["first_seen"]:
-            try:
-                first_seen_dt = datetime.fromisoformat(row["first_seen"])
-                age_days = (datetime.now() - first_seen_dt).days
-            except (ValueError, TypeError):
-                pass
-        dead_weight.append({"topic": row["topic"], "key": row["key"], "age_days": age_days})
-
-    conn.close()
+        # Dead weight: learnings with 0 activations
+        dead_weight = []
+        for row in conn.execute(
+            """SELECT l.topic, l.key, l.first_seen
+               FROM learnings l
+               LEFT JOIN activations a ON l.topic = a.topic AND l.key = a.key
+               WHERE a.id IS NULL
+               ORDER BY l.first_seen ASC"""
+        ).fetchall():
+            age_days = -1
+            if row["first_seen"]:
+                try:
+                    first_seen_dt = datetime.fromisoformat(row["first_seen"])
+                    age_days = (datetime.now() - first_seen_dt).days
+                except (ValueError, TypeError) as e:
+                    print(f"Warning: cannot parse first_seen for {row['topic']}/{row['key']}: {e}", file=sys.stderr)
+                    age_days = -1
+            dead_weight.append({"topic": row["topic"], "key": row["key"], "age_days": age_days})
+    finally:
+        conn.close()
 
     # Compute rates and improvement
     sufficient_data = with_retro >= 3 and without_retro >= 3

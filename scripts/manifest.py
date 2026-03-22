@@ -91,7 +91,13 @@ def cmd_snapshot(args: argparse.Namespace) -> int:
         for f in args.files:
             p = Path(f)
             if not p.is_absolute():
-                p = REPO_ROOT / p
+                p = REPO_ROOT / f
+            p = p.resolve()
+            try:
+                p.relative_to(REPO_ROOT.resolve())
+            except ValueError:
+                print(f"Error: Path outside repo root: {f}", file=sys.stderr)
+                return 2
             if not p.exists():
                 print(f"Error: File not found: {f}", file=sys.stderr)
                 return 2
@@ -168,16 +174,29 @@ def cmd_undo(args: argparse.Namespace) -> int:
 
     restored_count = 0
     for entry in files:
-        backup_path = REPO_ROOT / entry["backup_path"]
-        target_path = REPO_ROOT / entry["path"]
+        try:
+            rel_path = entry["path"]
+            backup_rel = entry["backup_path"]
+        except KeyError as e:
+            print(f"Warning: manifest entry missing field {e}", file=sys.stderr)
+            continue
+
+        backup_path = (REPO_ROOT / backup_rel).resolve()
+        target_path = (REPO_ROOT / rel_path).resolve()
+        try:
+            backup_path.relative_to(REPO_ROOT.resolve())
+            target_path.relative_to(REPO_ROOT.resolve())
+        except ValueError:
+            print(f"Error: Path escapes repo root: {rel_path}", file=sys.stderr)
+            continue
 
         if not backup_path.exists():
-            print(f"Warning: Backup missing, cannot restore: {entry['path']}", file=sys.stderr)
+            print(f"Warning: Backup missing, cannot restore: {rel_path}", file=sys.stderr)
             continue
 
         target_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(str(backup_path), str(target_path))
-        print(f"Restored: {entry['path']}")
+        print(f"Restored: {rel_path}")
         restored_count += 1
 
     print(f"Restored {restored_count} files from manifest")
@@ -208,11 +227,16 @@ def cmd_list(args: argparse.Namespace) -> int:
             data = json.loads(mf.read_text(encoding="utf-8"))
             file_count = len(data.get("files", []))
             ts_display = data.get("timestamp", "unknown")
-        except (json.JSONDecodeError, OSError):
+        except (json.JSONDecodeError, OSError) as e:
+            print(f"Warning: cannot read manifest {mf.name}: {e}", file=sys.stderr)
             file_count = 0
             ts_display = "error"
 
-        size_bytes = mf.stat().st_size
+        try:
+            size_bytes = mf.stat().st_size
+        except OSError as e:
+            print(f"Warning: cannot stat manifest {mf.name}: {e}", file=sys.stderr)
+            continue
         if size_bytes >= 1024:
             size_str = f"{size_bytes / 1024:.1f}KB"
         else:
@@ -249,8 +273,8 @@ def _run_scorer(file_path: str) -> int | None:
         results = data.get("results", [])
         if results:
             return results[0].get("total")
-    except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError):
-        pass
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError) as e:
+        print(f"Warning: scoring failed for {file_path}: {e}", file=sys.stderr)
     return None
 
 
@@ -290,9 +314,19 @@ def cmd_verify(args: argparse.Namespace) -> int:
     regressions: list[str] = []
 
     for entry in files:
-        rel_path = entry["path"]
-        target = REPO_ROOT / rel_path
-        original_sha = entry["sha256"]
+        try:
+            rel_path = entry["path"]
+            original_sha = entry["sha256"]
+        except KeyError as e:
+            print(f"Warning: manifest entry missing field {e}", file=sys.stderr)
+            continue
+
+        target = (REPO_ROOT / rel_path).resolve()
+        try:
+            target.relative_to(REPO_ROOT.resolve())
+        except ValueError:
+            print(f"Error: Path escapes repo root: {rel_path}", file=sys.stderr)
+            continue
 
         if not target.exists():
             print(f"  DELETED: {rel_path}")
