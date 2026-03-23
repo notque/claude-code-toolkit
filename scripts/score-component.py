@@ -589,11 +589,13 @@ def find_all_agents() -> list[Path]:
 
 
 def find_all_skills() -> list[Path]:
-    """Find all skill SKILL.md files."""
-    skills_dir = REPO_ROOT / "skills"
-    if not skills_dir.is_dir():
-        return []
-    return sorted(skills_dir.glob("*/SKILL.md"))
+    """Find all skill SKILL.md files (from skills/ and pipelines/)."""
+    results = []
+    for dirname in ("skills", "pipelines"):
+        d = REPO_ROOT / dirname
+        if d.is_dir():
+            results.extend(d.glob("*/SKILL.md"))
+    return sorted(results)
 
 
 # ---------------------------------------------------------------------------
