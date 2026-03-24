@@ -17,6 +17,9 @@ allowed-tools:
   - Glob
 routing:
   triggers:
+    - "fix PR comments"
+    - "resolve PR feedback"
+    - "pr-fix"
   category: git-workflow
 ---
 

@@ -29,7 +29,7 @@ routing:
     - "extract function"
     - "refactor"
     - "simplify this"
-    - "clean up code"
+    - "restructure code"
     - "reduce complexity"
     - "split this file"
     - "restructure"
