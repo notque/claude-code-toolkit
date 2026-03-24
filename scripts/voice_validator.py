@@ -807,10 +807,20 @@ def _classify_paragraph_move(text: str) -> str:
     if len(words) <= 6 and not first_sentence.rstrip().endswith((".", "!", "?")):
         return "fragment"
 
+    # Reframe: signals a perspective shift — checked before provocation because
+    # "the real question" is reframe, not provocation
+    if re.match(
+        r"^(?:what (?:this|that|it) (?:really|actually)|the (?:bigger|larger|real) (?:picture|question|point)|"
+        r"put (?:differently|another way)|in other words|(?:but )?(?:here'?s|there'?s) (?:the|what))\b",
+        text,
+        re.IGNORECASE,
+    ):
+        return "reframe"
+
     # Provocation: strong assertion or challenge (checked before call_to_action
     # because "stop pretending" is provocation, not imperative instruction)
     if re.match(
-        r"^(?:nobody|everyone|most people|the (?:real|biggest|worst)|stop \w+ing|forget (?:everything|what))",
+        r"^(?:nobody|everyone|most people|the (?:biggest|worst)|stop \w+ing|forget (?:everything|what))",
         text,
         re.IGNORECASE,
     ):
@@ -827,16 +837,6 @@ def _classify_paragraph_move(text: str) -> str:
         re.IGNORECASE,
     ):
         return "anecdote"
-
-    # Reframe: signals a perspective shift ("what this really means", "the bigger picture",
-    # "put differently", "in other words", "the real question")
-    if re.match(
-        r"^(?:what (?:this|that|it) (?:really|actually)|the (?:bigger|larger|real) (?:picture|question|point)|"
-        r"put (?:differently|another way)|in other words|(?:but )?(?:here'?s|there'?s) (?:the|what))\b",
-        text,
-        re.IGNORECASE,
-    ):
-        return "reframe"
 
     # Default: claim (declarative statement)
     return "claim"
