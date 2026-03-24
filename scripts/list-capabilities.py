@@ -91,10 +91,10 @@ def check_staleness(index_path: Path, generated: str | None, glob_pattern: str, 
     # Count files newer than the index
     newer_count = sum(1 for p in base.glob(glob_pattern) if p.is_file() and p.stat().st_mtime > index_mtime)
     if newer_count > 0:
-        if "skill" in label.lower():
-            regen_script = "scripts/generate-skill-index.py"
-        else:
+        if "agent" in label.lower():
             regen_script = "scripts/generate-agent-index.py"
+        else:
+            regen_script = "scripts/generate-skill-index.py"
         print(
             f"⚠ {index_path.relative_to(REPO_ROOT)} may be stale ({newer_count} files newer). "
             f"Run: python3 {regen_script}",

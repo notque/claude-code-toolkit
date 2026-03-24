@@ -20,15 +20,6 @@ allowed-tools:
   - Task
   - Skill
 agent: python-general-engineer
-triggers:
-  - "run quality checks"
-  - "verify code quality"
-  - "check PR quality"
-  - "python lint"
-  - "run linters"
-  - "check python"
-  - "quality gate"
-  - "pre-commit check"
 routing:
   force_route: true
   triggers:
@@ -36,6 +27,10 @@ routing:
     - "ruff check"
     - "bandit scan"
     - "mypy check"
+    - "python lint"
+    - "quality gate"
+    - "check python"
+    - "pre-commit check"
   category: code-quality
 ---
 

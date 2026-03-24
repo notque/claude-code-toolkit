@@ -442,10 +442,13 @@ def main() -> int:
     if not write_index(skills_index, skills_index_path):
         return 1
 
-    # Write pipelines/INDEX.json
-    pipelines_index_path = pipelines_dir / "INDEX.json"
-    if not write_index(pipelines_index, pipelines_index_path):
-        return 1
+    # Write pipelines/INDEX.json (only if pipelines directory exists)
+    if pipelines_dir.exists():
+        pipelines_index_path = pipelines_dir / "INDEX.json"
+        if not write_index(pipelines_index, pipelines_index_path):
+            return 1
+    else:
+        pipelines_index_path = None
 
     # Check for trigger collisions among force-routed entries
     collisions = check_trigger_collisions(skills_index, pipelines_index)
@@ -485,10 +488,9 @@ def main() -> int:
             print(f"    {cat}: {count}")
 
     # Trigger stats across both indexes
-    all_entries = list(skills_index["skills"].values()) + list(pipelines_index["pipelines"].values())
-    with_explicit = sum(1 for e in all_entries if e.get("triggers", [None])[0] != e.get("name"))
-    # For dict-keyed format, first trigger != key name means explicit triggers
-    force_routed = sum(1 for e in all_entries if e.get("force_route"))
+    all_named = list(skills_index["skills"].items()) + list(pipelines_index["pipelines"].items())
+    with_explicit = sum(1 for name, e in all_named if e.get("triggers", [name])[0] != name)
+    force_routed = sum(1 for _, e in all_named if e.get("force_route"))
     print(f"\nWith explicit triggers: {with_explicit}")
     print(f"Force-routed: {force_routed}")
 
