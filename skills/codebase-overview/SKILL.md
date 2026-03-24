@@ -24,6 +24,11 @@ routing:
     - "explore codebase"
     - "onboard to codebase"
     - "codebase structure"
+    - "what does this do"
+    - "explain this code"
+    - "how does this work"
+    - "show me the architecture"
+    - "understand this codebase"
   category: analysis
 ---
 

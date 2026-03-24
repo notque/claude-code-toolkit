@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "generated": "2026-03-24T05:07:28Z",
+  "generated": "2026-03-24T06:42:15Z",
   "generated_by": "scripts/generate-skill-index.py",
   "skills": {
     "agent-comparison": {
@@ -56,9 +56,7 @@
       "file": "skills/blog-post-writer/SKILL.md",
       "description": "Voice-integrated blog post creation with 4-phase workflow: Assess, Decide, Draft, Preview.",
       "triggers": [
-        "write blog post",
-        "draft article",
-        "create content"
+        "write blog post"
       ],
       "category": "content-creation",
       "user_invocable": false,
@@ -94,7 +92,11 @@
       "triggers": [
         "find dead code",
         "stale TODOs",
-        "unused imports"
+        "unused imports",
+        "clean up",
+        "tidy code",
+        "remove dead code",
+        "find unused"
       ],
       "category": "code-quality",
       "user_invocable": true,
@@ -131,7 +133,12 @@
       "triggers": [
         "explore codebase",
         "onboard to codebase",
-        "codebase structure"
+        "codebase structure",
+        "what does this do",
+        "explain this code",
+        "how does this work",
+        "show me the architecture",
+        "understand this codebase"
       ],
       "category": "analysis",
       "user_invocable": false,
@@ -155,7 +162,11 @@
       "triggers": [
         "exponential backoff",
         "health check polling",
-        "retry pattern"
+        "retry pattern",
+        "wait for",
+        "keep trying until",
+        "poll until ready",
+        "retry until success"
       ],
       "category": "process",
       "user_invocable": false,
@@ -223,7 +234,11 @@
         "correlation",
         "KPI",
         "funnel",
-        "experiment results"
+        "experiment results",
+        "data insights",
+        "statistical analysis",
+        "CSV analysis",
+        "explore dataset"
       ],
       "category": "analysis",
       "user_invocable": false,
@@ -240,7 +255,13 @@
       "triggers": [
         "weigh options",
         "decision matrix",
-        "compare approaches"
+        "compare approaches",
+        "help me decide",
+        "pros and cons",
+        "trade-offs",
+        "which is better",
+        "should I use",
+        "evaluate options"
       ],
       "category": "process",
       "user_invocable": false,
@@ -252,7 +273,11 @@
       "triggers": [
         "parallel agents",
         "independent failures",
-        "fan-out dispatch"
+        "fan-out dispatch",
+        "do these simultaneously",
+        "handle all at once",
+        "run in parallel",
+        "split into tasks"
       ],
       "category": "process",
       "user_invocable": false,
@@ -311,7 +336,10 @@
       "triggers": [
         "validate endpoints",
         "smoke test API",
-        "health check endpoints"
+        "health check endpoints",
+        "test endpoint",
+        "check API",
+        "smoke test"
       ],
       "category": "infrastructure",
       "user_invocable": false,
@@ -472,7 +500,9 @@
         "workflow failure",
         "session crashed",
         "why is this stuck",
-        "investigate failure"
+        "investigate failure",
+        "why did this break",
+        "incident review"
       ],
       "category": "process",
       "user_invocable": true,
@@ -570,14 +600,15 @@
       "file": "skills/go-anti-patterns/SKILL.md",
       "description": "Detect and remediate Go anti-patterns: premature interface abstraction, goroutine overkill, context soup, error wrapping mistakes, generic abuse, c...",
       "triggers": [
-        "anti-pattern",
         "Go mistake",
         "bad Go",
         "Go smell",
         "code smell",
         "premature abstraction",
         "over-engineering",
-        "unnecessary complexity"
+        "unnecessary complexity",
+        "Go anti-pattern",
+        "Go code smell"
       ],
       "force_route": true,
       "user_invocable": false,
@@ -620,14 +651,15 @@
         "sync.Mutex",
         "sync.WaitGroup",
         "worker pool",
-        "fan-out",
         "fan-in",
         "rate limit",
         "concurrent",
-        "parallel",
         "context.Context",
         "race condition",
-        "deadlock"
+        "deadlock",
+        "goroutine parallel",
+        "Go parallel",
+        "goroutine fan-out"
       ],
       "force_route": true,
       "user_invocable": false,
@@ -875,7 +907,12 @@
       "triggers": [
         "pair program",
         "collaborative coding",
-        "micro-steps"
+        "micro-steps",
+        "step by step coding",
+        "one change at a time",
+        "show each change",
+        "walk me through",
+        "interactive coding"
       ],
       "category": "process",
       "user_invocable": false,
@@ -1109,7 +1146,6 @@
       "triggers": [
         "list plans",
         "show plan",
-        "check plan",
         "complete plan"
       ],
       "category": "process",
@@ -1208,10 +1244,7 @@
     "pr-fix": {
       "file": "skills/pr-fix/SKILL.md",
       "description": "Validate-then-fix workflow for PR review comments: Fetch, Validate, Plan, Fix, Commit.",
-      "triggers": [
-        "fix PR feedback",
-        "address review comments"
-      ],
+      "triggers": null,
       "category": "git-workflow",
       "user_invocable": true,
       "version": "2.0.0"
@@ -1316,7 +1349,12 @@
       "triggers": [
         "business communication",
         "structured format",
-        "clear writing"
+        "clear writing",
+        "write email",
+        "draft memo",
+        "executive summary",
+        "summarize for management",
+        "status update"
       ],
       "category": "content-creation",
       "user_invocable": false,
@@ -1443,7 +1481,10 @@
       "triggers": [
         "roast code",
         "devil's advocate",
-        "stress test idea"
+        "stress test idea",
+        "roast this",
+        "stress test this idea",
+        "poke holes in this"
       ],
       "category": "analysis",
       "user_invocable": true,
@@ -1533,7 +1574,9 @@
       "triggers": [
         "service status",
         "process health",
-        "uptime check"
+        "uptime check",
+        "is service running",
+        "check health"
       ],
       "category": "infrastructure",
       "user_invocable": false,
@@ -1578,7 +1621,12 @@
       "triggers": [
         "guide debugging",
         "question-based",
-        "teach debugging"
+        "teach debugging",
+        "ask me questions",
+        "help me think through",
+        "guide me",
+        "coaching mode",
+        "teach me to find it"
       ],
       "category": "process",
       "user_invocable": false,
@@ -1635,7 +1683,14 @@
       "triggers": [
         "debug",
         "find root cause",
-        "reproduce bug"
+        "reproduce bug",
+        "fix this bug",
+        "this is broken",
+        "not working",
+        "why is this broken",
+        "getting an error",
+        "unexpected behavior",
+        "investigate error"
       ],
       "category": "process",
       "user_invocable": false,
@@ -1647,7 +1702,14 @@
       "triggers": [
         "refactor safely",
         "rename symbol",
-        "extract function"
+        "extract function",
+        "refactor",
+        "simplify this",
+        "clean up code",
+        "reduce complexity",
+        "split this file",
+        "restructure",
+        "move to separate file"
       ],
       "category": "process",
       "user_invocable": false,
@@ -1671,7 +1733,11 @@
       "triggers": [
         "TDD",
         "test first",
-        "red green refactor"
+        "red green refactor",
+        "write tests first",
+        "test-driven",
+        "start with failing test",
+        "tests before code"
       ],
       "category": "testing",
       "user_invocable": false,

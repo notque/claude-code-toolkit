@@ -17,8 +17,6 @@ allowed-tools:
   - Glob
 routing:
   triggers:
-    - "fix PR feedback"
-    - "address review comments"
   category: git-workflow
 ---
 
