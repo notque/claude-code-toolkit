@@ -564,9 +564,9 @@ def check_analogy_domains(
 ) -> list[Violation]:
     """Check that analogies draw from documented source domains (if profile specifies them).
 
-    This is the one architectural check that's deterministic enough for script-level
-    validation. Other architectural checks (argument direction, concession structure,
-    bookends) require AI-assisted analysis and belong in voice-orchestrator's validation.
+    One of four architectural conformance checks (alongside argument direction,
+    concession structure, and bookend patterns). Uses keyword matching on simile
+    markers to detect analogies from undocumented source domains.
 
     Profile key: architectural_patterns.analogy_domains (list of allowed domain keywords).
     """
@@ -657,7 +657,7 @@ def check_argument_direction(
                 type="argument_direction",
                 severity="warning",
                 text=f"claims cluster early ({early_claims} early vs {late_claims} late)",
-                message=f"Profile specifies inductive (evidence→claim) but claims appear early",
+                message="Profile specifies inductive (evidence\u2192claim) but claims appear early",
                 suggestion="Move main claims toward the end; lead with examples and evidence",
             )
         )
@@ -667,7 +667,7 @@ def check_argument_direction(
                 type="argument_direction",
                 severity="warning",
                 text=f"claims cluster late ({late_claims} late vs {early_claims} early)",
-                message=f"Profile specifies deductive (claim→evidence) but claims appear late",
+                message="Profile specifies deductive (claim\u2192evidence) but claims appear late",
                 suggestion="Lead with the main claim; follow with supporting evidence",
             )
         )
@@ -701,11 +701,12 @@ def check_concession_structure(
         "conversely", "in contrast", "notwithstanding",
     }
     # Remove any generic markers that ARE in the voice's documented set
-    undocumented_generic = generic_markers - {m.lower() for m in markers}
+    undocumented_generic = generic_markers - set(markers)
 
     violations: list[Violation] = []
     for generic in undocumented_generic:
-        matches = find_pattern_in_content(content, generic, is_regex=False)
+        # Use regex with word boundaries to avoid matching inside other words
+        matches = find_pattern_in_content(content, r"\b" + re.escape(generic) + r"\b", is_regex=True)
         for line, col, matched_text in matches:
             violations.append(
                 Violation(
@@ -749,7 +750,7 @@ def check_bookend_patterns(
 
     violations: list[Violation] = []
 
-    if expected_opening and paragraphs:
+    if expected_opening:
         first = paragraphs[0]
         detected_opening = _classify_paragraph_move(first)
         if detected_opening and expected_opening and detected_opening != expected_opening:
@@ -801,13 +802,22 @@ def _classify_paragraph_move(text: str) -> str:
     if first_sentence.rstrip().endswith("?"):
         return "question"
 
-    # Fragment: very short first sentence (under 8 words, no verb-like patterns)
+    # Fragment: very short first sentence (at most 6 words, no terminal punctuation)
     words = first_sentence.split()
     if len(words) <= 6 and not first_sentence.rstrip().endswith((".", "!", "?")):
         return "fragment"
 
+    # Provocation: strong assertion or challenge (checked before call_to_action
+    # because "stop pretending" is provocation, not imperative instruction)
+    if re.match(
+        r"^(?:nobody|everyone|most people|the (?:real|biggest|worst)|stop \w+ing|forget (?:everything|what))",
+        text,
+        re.IGNORECASE,
+    ):
+        return "provocation"
+
     # Call to action: imperative mood indicators
-    if re.match(r"^(?:try|start|stop|consider|imagine|think|look|go|read|check)\b", text, re.IGNORECASE):
+    if re.match(r"^(?:try|start|consider|imagine|think|look|go|read|check)\b", text, re.IGNORECASE):
         return "call_to_action"
 
     # Anecdote: starts with time/place/personal reference
@@ -818,13 +828,15 @@ def _classify_paragraph_move(text: str) -> str:
     ):
         return "anecdote"
 
-    # Provocation: strong assertion or challenge
+    # Reframe: signals a perspective shift ("what this really means", "the bigger picture",
+    # "put differently", "in other words", "the real question")
     if re.match(
-        r"^(?:nobody|everyone|most people|the (?:real|biggest|worst)|stop |forget )",
+        r"^(?:what (?:this|that|it) (?:really|actually)|the (?:bigger|larger|real) (?:picture|question|point)|"
+        r"put (?:differently|another way)|in other words|(?:but )?(?:here'?s|there'?s) (?:the|what))\b",
         text,
         re.IGNORECASE,
     ):
-        return "provocation"
+        return "reframe"
 
     # Default: claim (declarative statement)
     return "claim"
