@@ -42,10 +42,11 @@ import time
 from pathlib import Path
 
 try:
+    import io
+
     from google import genai
     from google.genai import types
     from PIL import Image
-    import io
 except ImportError as e:
     print(f"Missing dependency: {e}")
     print("Install with: pip install google-genai pillow")
