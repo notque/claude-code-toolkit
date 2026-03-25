@@ -294,6 +294,15 @@ def cmd_post(args: argparse.Namespace) -> int:
             if not os.path.isfile(args.media):
                 print(f"ERROR: Media file not found: {args.media}", file=sys.stderr)
                 return 2
+            size = os.path.getsize(args.media)
+            if args.media.lower().endswith(('.mp4', '.mov', '.avi')):
+                if size > 512 * 1024 * 1024:
+                    print(f"[x-api] Video {args.media} exceeds 512MB limit ({size / 1024 / 1024:.1f}MB)")
+                    sys.exit(1)
+            else:
+                if size > 5 * 1024 * 1024:
+                    print(f"[x-api] Image {args.media} exceeds 5MB limit ({size / 1024 / 1024:.1f}MB)")
+                    sys.exit(1)
             print(f"[dry-run] media file found: {args.media}")
         print("[dry-run] credentials present")
         print("[dry-run] no network calls made")
@@ -564,4 +573,10 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        main()
+    except SystemExit:
+        raise
+    except Exception as e:
+        print(f"[x-api-poster] unexpected error: {e}", file=sys.stderr)
+        sys.exit(0)
