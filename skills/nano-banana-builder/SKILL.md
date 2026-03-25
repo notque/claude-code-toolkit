@@ -1,13 +1,15 @@
 ---
 name: nano-banana-builder
 description: |
-  Build Next.js web applications with Google Gemini Nano Banana image generation
-  APIs (gemini-2.5-flash-image, gemini-3-pro-image-preview). Use when creating
-  image generators, editors, galleries, or any app integrating conversational
-  image generation with server actions, API routes, and storage. Use for "image
-  generation app", "nano banana", "text to image", "AI image generator", or
-  "gemini image". Do NOT use for non-Gemini models, Python/Go backends, model
-  fine-tuning, or image classification/input tasks.
+  Build image generation applications with Google Gemini Nano Banana APIs
+  (gemini-2.5-flash-image, gemini-3-pro-image-preview). Covers Next.js web apps
+  (server actions, API routes, storage) AND Python batch/CLI scripts (google-genai,
+  Pillow). Includes post-processing patterns: smart cropping, background removal,
+  watermark cleanup, format conversion, reference image style matching, and batch
+  generation with skip-existing and variants. Use for "image generation app",
+  "nano banana", "text to image", "AI image generator", "gemini image", "batch
+  image generation", or "image post-processing". Do NOT use for non-Gemini models,
+  model fine-tuning, or image classification/input tasks.
 version: 2.0.0
 user-invocable: false
 allowed-tools:
@@ -29,9 +31,14 @@ routing:
     - gemini-2.5-flash-image
     - gemini-3-pro-image-preview
     - web image generator
+    - batch image generation
+    - image post-processing
+    - sprite generation
+    - generate card art
   pairs_with:
     - typescript-frontend-engineer
     - nodejs-api-engineer
+    - python-general-engineer
     - universal-quality-gate
 ---
 
@@ -61,10 +68,12 @@ This skill operates as an operator for building production web applications powe
 
 ### Optional Behaviors (OFF unless enabled)
 
-- **Batch Generation**: Generate multiple images in parallel with queue management
+- **Batch Generation**: Generate multiple images with skip-existing, variant generation, and rate control
 - **Image Composition**: Combine multiple generated images into composites
-- **Style Transfer**: Apply reference styles across generations
+- **Style Transfer**: Pass reference images alongside prompts for style matching
 - **Gallery Persistence**: Save generation history with browsing and search
+- **Post-Processing Pipeline**: Crop, resize, remove backgrounds, convert formats after generation
+- **Python SDK Mode**: Use `google-genai` + Pillow for CLI scripts and batch pipelines instead of TypeScript
 
 ## What This Skill CAN Do
 
@@ -74,14 +83,17 @@ This skill operates as an operator for building production web applications powe
 - Configure object storage (Vercel Blob, S3/R2) for generated images
 - Implement rate limiting and quota management with Upstash Redis
 - Select the correct model based on speed, quality, and cost tradeoffs
+- Post-process generated images: smart crop, background removal, watermark cleanup, format conversion
+- Generate with reference images for style matching
+- Batch generate with skip-existing, variant support, and configurable delays
+- Guide Python `google-genai` + Pillow usage for CLI/batch scripts alongside the TypeScript web path
 
 ## What This Skill CANNOT Do
 
 - Use non-Gemini image models (DALL-E, Midjourney, Stable Diffusion)
-- Deploy to non-Node.js environments (Python, Go, etc.)
 - Implement custom model fine-tuning or training
 - Handle image input/classification (that is Gemini Vision, not Nano Banana)
-- Skip any of the 4 build phases
+- Skip any of the 4 build phases (for web apps)
 
 ---
 
@@ -286,5 +298,5 @@ This skill uses these shared patterns:
 | "Loading state is cosmetic" | 5-30s silence destroys user trust | Always show generation progress |
 
 ### Reference Files
-- `${CLAUDE_SKILL_DIR}/references/advanced-patterns.md`: Server actions, API routes, client components, multi-image composition
-- `${CLAUDE_SKILL_DIR}/references/configuration.md`: Provider options, storage setup, rate limiting, cost optimization
+- `${CLAUDE_SKILL_DIR}/references/advanced-patterns.md`: Server actions, API routes, client components, reference image style matching, image post-processing (crop, background removal, watermarks, format conversion), batch generation with variants
+- `${CLAUDE_SKILL_DIR}/references/configuration.md`: Provider options (all 10 aspect ratios, imageSize, thinking), output format selection (PNG/JPEG/WebP with sharp), Python SDK alternative (google-genai + Pillow), storage setup, rate limiting, cost optimization

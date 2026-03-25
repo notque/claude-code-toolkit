@@ -25,7 +25,7 @@ providerOptions: {
 providerOptions: {
   google: {
     imageConfig: {
-      aspectRatio: '1:1',   // 1:1, 16:9, 21:9, 4:3, 3:4, 9:16, etc.
+      aspectRatio: '1:1',   // 1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9, 21:9
       imageSize: '2K'      // Pro only: 1K, 2K (default for Pro is 2K)
     }
   }
@@ -36,11 +36,18 @@ providerOptions: {
 
 | Ratio | Resolution | Best For | Token Cost |
 |-------|-----------|----------|------------|
-| 1:1 | 1024×1024 | Icons, squares, Instagram | Lowest |
-| 16:9 | 1344×768 | YouTube thumbnails, widescreen | Medium |
-| 21:9 | 1536×672 | Cinematic, ultra-wide | Higher |
-| 4:3 | 1184×864 | Presentations, standard | Medium |
-| 9:16 | 768×1344 | TikTok, Reels, Stories | Medium |
+| 1:1 | 1024×1024 | Icons, squares, Instagram, profile images | Lowest |
+| 3:2 | 1152×768 | Classic landscape photography, cards | Medium |
+| 4:3 | 1184×864 | Presentations, standard monitors | Medium |
+| 16:9 | 1344×768 | YouTube thumbnails, widescreen, hero banners | Medium |
+| 21:9 | 1536×672 | Cinematic ultra-wide, panoramic headers | Higher |
+| 2:3 | 768×1152 | Portrait photography, book covers | Medium |
+| 3:4 | 864×1184 | Portrait standard, print photos | Medium |
+| 4:5 | 864×1080 | Instagram portrait, product cards | Medium |
+| 5:4 | 1080×864 | Large format landscape, print | Medium |
+| 9:16 | 768×1344 | TikTok, Reels, Stories, mobile wallpapers | Medium |
+
+**Choosing the right ratio**: Match your output container. Game card art at 1.83:1 → use `16:9` (1.78:1, closest match) then crop. Vertical scrolling backgrounds → use `9:16`. Instagram feed → `1:1` or `4:5`. When in doubt, generate in the closest standard ratio and crop to exact dimensions in post-processing.
 
 ### Thinking Configuration (Pro Only)
 
@@ -60,6 +67,126 @@ providerOptions: {
 - `8192` - Default balance
 - `16384` - Complex compositions, detailed edits
 - `32768` - Maximum reasoning for challenging requests
+
+### Image Size (Pro Only)
+
+```typescript
+providerOptions: {
+  google: {
+    imageConfig: {
+      imageSize: '2K'  // Pro default; Flash is fixed at 1K
+    }
+  }
+}
+```
+
+| Model | Default Resolution | Options |
+|-------|-------------------|---------|
+| Nano Banana (Flash) | 1K (~1024px) | Fixed — cannot override |
+| Nano Banana Pro | 2K (~2048px) | `'1K'`, `'2K'` |
+
+Use `'1K'` with Pro for faster generation when high resolution isn't needed (e.g., thumbnails, previews). Use `'2K'` for final output quality (character art, hero images, print assets).
+
+### Output Format Selection
+
+Choose output format based on your use case:
+
+| Format | When to Use | Quality Setting | File Size |
+|--------|------------|-----------------|-----------|
+| **PNG** | Transparency needed (sprites, overlays), lossless master copies | N/A (lossless) | Larger |
+| **JPEG** | Photos, card art, backgrounds — no transparency | `quality: 85-95` | Smaller |
+| **WebP** | Web delivery — best compression/quality ratio | `quality: 80-90` | Smallest |
+
+```typescript
+// Server action: convert and store in chosen format
+import sharp from 'sharp'
+
+export async function processAndStore(
+  imageBase64: string,
+  format: 'png' | 'jpeg' | 'webp' = 'png',
+  quality = 90
+) {
+  const buffer = Buffer.from(imageBase64, 'base64')
+
+  let processed: Buffer
+  switch (format) {
+    case 'jpeg':
+      processed = await sharp(buffer).jpeg({ quality }).toBuffer()
+      break
+    case 'webp':
+      processed = await sharp(buffer).webp({ quality }).toBuffer()
+      break
+    default:
+      processed = await sharp(buffer).png({ compressionLevel: 6 }).toBuffer()
+  }
+
+  const ext = format === 'jpeg' ? 'jpg' : format
+  const blob = await put(`images/${Date.now()}.${ext}`, processed, {
+    access: 'public',
+    contentType: `image/${format}`
+  })
+
+  return { url: blob.url, format, size: processed.length }
+}
+```
+
+**Install**: `npm install sharp` — runs natively, no wasm overhead.
+
+### Python SDK Alternative (CLI / Batch Scripts)
+
+For batch generation scripts, CLI tools, or non-web workflows, use the Python `google-genai` SDK directly instead of the Vercel AI SDK:
+
+```bash
+pip install google-genai pillow
+```
+
+```python
+from google import genai
+from google.genai import types
+from PIL import Image
+import io
+
+client = genai.Client()  # reads GEMINI_API_KEY from env
+
+response = client.models.generate_content(
+    model="gemini-2.5-flash-image",  # or "gemini-3-pro-image-preview"
+    contents=["Your prompt here"],
+    config=types.GenerateContentConfig(
+        response_modalities=["IMAGE", "TEXT"],
+        image_config=types.ImageConfig(
+            aspect_ratio="16:9",  # any supported ratio
+        ),
+    ),
+)
+
+# Extract image from response
+for part in response.candidates[0].content.parts:
+    if part.inline_data is not None:
+        img = Image.open(io.BytesIO(part.inline_data.data))
+        img.save("output.png", quality=95)
+```
+
+**Reference image** for style matching (Python):
+```python
+from PIL import Image
+
+ref_image = Image.open("reference.jpg")
+if ref_image.mode != "RGB":
+    ref_image = ref_image.convert("RGB")
+
+response = client.models.generate_content(
+    model="gemini-2.5-flash-image",
+    contents=["Recreate in this style: ...", ref_image],
+    config=types.GenerateContentConfig(
+        response_modalities=["IMAGE", "TEXT"],
+        image_config=types.ImageConfig(aspect_ratio="16:9"),
+    ),
+)
+```
+
+**When to use Python vs TypeScript**:
+- **TypeScript** (`@ai-sdk/google`): Web apps, server actions, API routes, streaming to clients
+- **Python** (`google-genai`): Batch scripts, CLI tools, pipelines, post-processing with PIL/OpenCV
 
 ---
 

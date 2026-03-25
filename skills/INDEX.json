@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "generated": "2026-03-24T07:05:42Z",
+  "generated": "2026-03-25T22:43:37Z",
   "generated_by": "scripts/generate-skill-index.py",
   "skills": {
     "agent-comparison": {
@@ -881,7 +881,7 @@
     },
     "nano-banana-builder": {
       "file": "skills/nano-banana-builder/SKILL.md",
-      "description": "Build Next.js web applications with Google Gemini Nano Banana image generation APIs (gemini-2.5-flash-image, gemini-3-pro-image-preview).",
+      "description": "Build image generation applications with Google Gemini Nano Banana APIs (gemini-2.5-flash-image, gemini-3-pro-image-preview).",
       "triggers": [
         "nano banana",
         "gemini image generation",
@@ -889,13 +889,18 @@
         "image generation app",
         "gemini-2.5-flash-image",
         "gemini-3-pro-image-preview",
-        "web image generator"
+        "web image generator",
+        "batch image generation",
+        "image post-processing",
+        "sprite generation",
+        "generate card art"
       ],
       "user_invocable": false,
       "version": "2.0.0",
       "pairs_with": [
         "typescript-frontend-engineer",
         "nodejs-api-engineer",
+        "python-general-engineer",
         "universal-quality-gate"
       ]
     },
