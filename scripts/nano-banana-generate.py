@@ -332,10 +332,13 @@ def main() -> int:
 
     # Common arguments
     def add_common_args(p: argparse.ArgumentParser) -> None:
-        p.add_argument("--model", choices=["flash", "pro"], default="flash",
-                       help="Model: flash (fast) or pro (quality). Default: flash")
-        p.add_argument("--aspect-ratio", choices=VALID_RATIOS,
-                       help="Aspect ratio for generation")
+        p.add_argument(
+            "--model",
+            choices=["flash", "pro"],
+            default="flash",
+            help="Model: flash (fast) or pro (quality). Default: flash",
+        )
+        p.add_argument("--aspect-ratio", choices=VALID_RATIOS, help="Aspect ratio for generation")
 
     # generate
     gen = subparsers.add_parser("generate", help="Generate a single image")

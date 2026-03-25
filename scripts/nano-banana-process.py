@@ -261,6 +261,7 @@ def process_single(
 
 # --- Subcommand handlers ---
 
+
 def _open_image(path: str) -> Image.Image:
     """Open an image file with user-friendly error messages."""
     p = Path(path)
@@ -371,12 +372,19 @@ def cmd_pipeline(args: argparse.Namespace) -> int:
         for f in files:
             out = output_path / f"{f.stem}.{out_ext}"
             if process_single(
-                f, out,
-                width=args.width, height=args.height, bias=args.bias,
-                do_remove_bg=args.remove_bg, bg_color=bg_color, bg_tolerance=args.tolerance,
+                f,
+                out,
+                width=args.width,
+                height=args.height,
+                bias=args.bias,
+                do_remove_bg=args.remove_bg,
+                bg_color=bg_color,
+                bg_tolerance=args.tolerance,
                 do_remove_watermarks=args.remove_watermarks,
-                wm_margin=args.margin, wm_threshold=args.threshold,
-                fmt=args.format, quality=args.quality,
+                wm_margin=args.margin,
+                wm_threshold=args.threshold,
+                fmt=args.format,
+                quality=args.quality,
             ):
                 success += 1
             else:
@@ -389,14 +397,25 @@ def cmd_pipeline(args: argparse.Namespace) -> int:
         return 0 if failed == 0 else 1
 
     # Single file mode
-    return 0 if process_single(
-        input_path, output_path,
-        width=args.width, height=args.height, bias=args.bias,
-        do_remove_bg=args.remove_bg, bg_color=bg_color, bg_tolerance=args.tolerance,
-        do_remove_watermarks=args.remove_watermarks,
-        wm_margin=args.margin, wm_threshold=args.threshold,
-        fmt=args.format, quality=args.quality,
-    ) else 1
+    return (
+        0
+        if process_single(
+            input_path,
+            output_path,
+            width=args.width,
+            height=args.height,
+            bias=args.bias,
+            do_remove_bg=args.remove_bg,
+            bg_color=bg_color,
+            bg_tolerance=args.tolerance,
+            do_remove_watermarks=args.remove_watermarks,
+            wm_margin=args.margin,
+            wm_threshold=args.threshold,
+            fmt=args.format,
+            quality=args.quality,
+        )
+        else 1
+    )
 
 
 def main() -> int:
@@ -412,8 +431,12 @@ def main() -> int:
     crop_p.add_argument("output", help="Output image")
     crop_p.add_argument("--width", type=int, required=True, help="Target width in pixels")
     crop_p.add_argument("--height", type=int, required=True, help="Target height in pixels")
-    crop_p.add_argument("--bias", type=float, default=0.5,
-                        help="Vertical crop bias: 0.0=anchor top, 0.35=keep top, 0.5=center, 1.0=anchor bottom (default: 0.5)")
+    crop_p.add_argument(
+        "--bias",
+        type=float,
+        default=0.5,
+        help="Vertical crop bias: 0.0=anchor top, 0.35=keep top, 0.5=center, 1.0=anchor bottom (default: 0.5)",
+    )
     crop_p.set_defaults(func=cmd_crop)
 
     # remove-bg
@@ -446,8 +469,7 @@ def main() -> int:
     pipe_p.add_argument("output", help="Output image or directory")
     pipe_p.add_argument("--width", type=int, help="Target width (skip crop if not set)")
     pipe_p.add_argument("--height", type=int, help="Target height (skip crop if not set)")
-    pipe_p.add_argument("--bias", type=float, default=0.5,
-                        help="Vertical crop bias (default: 0.5)")
+    pipe_p.add_argument("--bias", type=float, default=0.5, help="Vertical crop bias (default: 0.5)")
     pipe_p.add_argument("--remove-bg", action="store_true", help="Remove background color")
     pipe_p.add_argument("--bg-color", default="3a3a3a", help="Hex color to remove (default: 3a3a3a)")
     pipe_p.add_argument("--tolerance", type=int, default=30, help="BG color tolerance (default: 30)")
