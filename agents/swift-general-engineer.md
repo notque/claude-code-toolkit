@@ -103,7 +103,7 @@ routing:
     - swift-testing
     - swift actor
     - swift sendable
-    - combine
+    - swift-combine
     - swiftdata
     - coredata
   retro-topics:
@@ -115,8 +115,6 @@ routing:
     - systematic-debugging
     - verification-before-completion
     - systematic-code-review
-    - swift-actor-persistence
-    - swift-protocol-di-testing
   complexity: Medium-Complex
   category: language
 allowed-tools:
@@ -627,6 +625,6 @@ Deep-dive material for complex topics:
 
 | File | Contents |
 |------|----------|
-| `agents/references/swift-concurrency.md` | Actor isolation rules, Sendable requirements, `async let` vs. `TaskGroup` patterns, migration from DispatchQueue/Combine |
-| `agents/references/swift-security.md` | Keychain Services wrapper, ATS configuration examples, certificate pinning template, `.xcconfig` secret management |
-| `agents/references/swift-testing.md` | Swift Testing framework migration from XCTest, parameterized test patterns, protocol-based mock injection, coverage reporting |
+| `agents/references/swift-concurrency.md` (planned) | Actor isolation rules, Sendable requirements, `async let` vs. `TaskGroup` patterns, migration from DispatchQueue/Combine |
+| `agents/references/swift-security.md` (planned) | Keychain Services wrapper, ATS configuration examples, certificate pinning template, `.xcconfig` secret management |
+| `agents/references/swift-testing.md` (planned) | Swift Testing framework migration from XCTest, parameterized test patterns, protocol-based mock injection, coverage reporting |
