@@ -163,9 +163,9 @@ class TestIsProtected:
 class TestProtectedSetCompleteness:
     """Verify the protected set matches the ADR spec exactly."""
 
-    def test_protected_set_has_37_entries(self):
-        """Protected set: ESLint(12) + Prettier(9) + Biome(2) + Ruff(2) + Shell/Style/MD(7) + golangci(4) + setup.cfg(1) = 37."""
-        assert len(_PROTECTED_CONFIGS) == 37
+    def test_protected_set_has_38_entries(self):
+        """Protected set: ESLint(12) + Prettier(10) + Biome(2) + Ruff(2) + Shell/Style/MD(7) + golangci(4) + setup.cfg(1) = 38."""
+        assert len(_PROTECTED_CONFIGS) == 38
 
     def test_all_eslint_variants_present(self):
         eslint_files = [
@@ -190,6 +190,7 @@ class TestProtectedSetCompleteness:
             ".prettierrc",
             ".prettierrc.js",
             ".prettierrc.cjs",
+            ".prettierrc.mjs",
             ".prettierrc.json",
             ".prettierrc.yml",
             ".prettierrc.yaml",
@@ -199,6 +200,19 @@ class TestProtectedSetCompleteness:
         ]
         for f in prettier_files:
             assert f in _PROTECTED_CONFIGS, f"Missing Prettier config: {f}"
+
+    def test_all_shell_style_md_variants_present(self):
+        shell_style_md_files = [
+            ".shellcheckrc",
+            ".stylelintrc",
+            ".stylelintrc.json",
+            ".stylelintrc.yml",
+            ".markdownlint.json",
+            ".markdownlint.yaml",
+            ".markdownlintrc",
+        ]
+        for f in shell_style_md_files:
+            assert f in _PROTECTED_CONFIGS, f"Missing Shell/Style/MD config: {f}"
 
     def test_all_golangci_variants_present(self):
         go_files = [".golangci.yml", ".golangci.yaml", ".golangci.json", ".golangci.toml"]
@@ -392,6 +406,34 @@ class TestTruncationSafety:
         safe_payload = _make_event("Write", file_path="main.py")
         assert len(safe_payload.encode("utf-8")) < _MAX_STDIN_BYTES
         assert _run_main(safe_payload) == 0
+
+    def test_exactly_max_stdin_bytes_boundary(self):
+        """A payload of exactly _MAX_STDIN_BYTES UTF-8 bytes must not be blocked by the size check."""
+        # Build a string whose UTF-8 encoding is exactly _MAX_STDIN_BYTES bytes.
+        # All ASCII characters are 1 byte each, so we pad with 'x'.
+        base = _make_event("Write", file_path="main.py")
+        base_bytes = base.encode("utf-8")
+        padding_needed = _MAX_STDIN_BYTES - len(base_bytes)
+        assert padding_needed >= 0, "Base payload already exceeds _MAX_STDIN_BYTES"
+        # Wrap in a JSON string field that soaks up the padding so the total
+        # byte length is exactly _MAX_STDIN_BYTES. We construct the payload
+        # manually to hit the exact byte boundary.
+        exact_payload = "x" * _MAX_STDIN_BYTES
+        assert len(exact_payload.encode("utf-8")) == _MAX_STDIN_BYTES
+        # The size check is `> _MAX_STDIN_BYTES`, so exactly at the limit must
+        # NOT exit 2 due to the size guard (it will exit 0 because the string
+        # is not valid JSON for the hook's purposes).
+        with (
+            patch.dict(os.environ, {k: v for k, v in os.environ.items() if k != "CONFIG_PROTECTION_BYPASS"}, clear=True),
+            patch.object(mod, "read_stdin", return_value=exact_payload),
+        ):
+            try:
+                mod.main()
+                result = 0
+            except SystemExit as e:
+                result = int(e.code) if e.code is not None else 0
+        # Must fail open (0), not block (2) — size is at the limit, not over it.
+        assert result == 0
 
 
 class TestMalformedInput:

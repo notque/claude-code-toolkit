@@ -7,8 +7,8 @@ Blocks Write/Edit/MultiEdit calls that target linter and formatter config files.
 Claude tends to weaken linter rules rather than fixing the underlying source code.
 This hook intercepts those attempts and redirects the agent to fix the source instead.
 
-Protected set: ESLint (12 variants), Prettier (8), Biome (2), Ruff (2),
-               Shell/Style/Markdown (5), golangci-lint (4), setup.cfg — 34 files total.
+Protected set: ESLint (12 variants), Prettier (10), Biome (2), Ruff (2),
+               Shell/Style/Markdown (7), golangci-lint (4), setup.cfg — 38 files total.
 
 Exit 2 = block. Exit 0 = allow. Entire main() wrapped in try/except to fail OPEN.
 Bypass: CONFIG_PROTECTION_BYPASS=1 env var.
@@ -50,6 +50,7 @@ _PROTECTED_CONFIGS: frozenset[str] = frozenset(
         ".prettierrc",
         ".prettierrc.js",
         ".prettierrc.cjs",
+        ".prettierrc.mjs",
         ".prettierrc.json",
         ".prettierrc.yml",
         ".prettierrc.yaml",
