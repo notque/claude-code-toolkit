@@ -71,7 +71,7 @@ hooks:
             if tool == 'Bash':
                 cmd = data.get('input', {}).get('command', '')
                 if './gradlew' in cmd and 'compileKotlin' in cmd:
-                    result_text = data.get('result', '')
+                    result_text = str(data.get('result', ''))
                     if 'error:' in result_text.lower():
                         print('[kotlin-agent] Compilation errors detected -- review above output before proceeding')
         except Exception:
@@ -82,7 +82,6 @@ memory: project
 routing:
   triggers:
     - kotlin
-    - kts
     - ktor
     - koin
     - coroutine
@@ -96,7 +95,7 @@ routing:
     - ktlint
     - ktfmt
     - android kotlin
-    - multiplatform
+    - kotlin-multiplatform
   retro-topics:
     - kotlin-patterns
     - coroutines
@@ -683,8 +682,10 @@ koverReport {
 
 Deep reference material for Kotlin patterns. Consult these when questions exceed the scope of this agent file:
 
+> **Note**: Reference files below are planned for future implementation and do not exist yet.
+
 | Reference | Content |
 |-----------|---------|
-| `agents/references/kotlin-coroutines.md` | Structured concurrency patterns, dispatcher selection guide, Flow operators, `runTest` advanced usage, cancellation and timeout patterns |
-| `agents/references/kotlin-security.md` | Exposed DSL query examples, Ktor JWT setup templates, input validation patterns, secrets management |
-| `agents/references/kotlin-patterns.md` | Sealed class hierarchies with `when`, scope function decision matrix, extension function conventions, Koin module organization |
+| `agents/references/kotlin-coroutines.md` (planned) | Structured concurrency patterns, dispatcher selection guide, Flow operators, `runTest` advanced usage, cancellation and timeout patterns |
+| `agents/references/kotlin-security.md` (planned) | Exposed DSL query examples, Ktor JWT setup templates, input validation patterns, secrets management |
+| `agents/references/kotlin-patterns.md` (planned) | Sealed class hierarchies with `when`, scope function decision matrix, extension function conventions, Koin module organization |
