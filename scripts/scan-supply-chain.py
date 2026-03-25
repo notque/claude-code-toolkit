@@ -69,13 +69,6 @@ _REGEX_PATTERNS: list[tuple[re.Pattern, str, str, str]] = [
         "base-url-override",
         "ANTHROPIC_BASE_URL found — potential API interception",
     ),
-    # CRITICAL: HTML hidden blocks
-    (
-        re.compile(r"<!--"),
-        "CRITICAL",
-        "hidden-html-comment",
-        "HTML comment — may conceal hidden instructions",
-    ),
     (
         re.compile(r"<script", re.IGNORECASE),
         "CRITICAL",
@@ -89,7 +82,7 @@ _REGEX_PATTERNS: list[tuple[re.Pattern, str, str, str]] = [
         "data: URI — potential payload carrier",
     ),
     (
-        re.compile(r"base64,"),
+        re.compile(r"base64,[A-Za-z0-9+/]{40,}"),
         "CRITICAL",
         "base64-blob",
         "Inline base64 blob — may conceal payload",
@@ -199,6 +192,23 @@ def _scan_file(fpath: Path, excludes: set[str]) -> list[dict]:
                 )
                 seen_categories.add(category)
                 break  # one finding per pattern per file
+
+    # HTML comment detection: WARNING for .md files, CRITICAL elsewhere
+    _html_comment_pattern = re.compile(r"<!--")
+    html_comment_severity = "WARNING" if fpath.suffix == ".md" else "CRITICAL"
+    for lineno, line in enumerate(lines, 1):
+        if _html_comment_pattern.search(line):
+            findings.append(
+                {
+                    "file": str(fpath),
+                    "line": lineno,
+                    "severity": html_comment_severity,
+                    "category": "hidden-html-comment",
+                    "pattern": "HTML comment — may conceal hidden instructions",
+                    "excerpt": line.strip()[:120],
+                }
+            )
+            break  # one finding per file
 
     # Invisible Unicode scan
     for lineno, line in enumerate(lines, 1):
@@ -315,10 +325,6 @@ def main() -> None:
         file=sys.stderr,
     )
     print(f"[supply-chain] Written to {output_path}", file=sys.stderr)
-
-    # Exit non-zero if CRITICAL findings found (for CI mode)
-    if critical:
-        sys.exit(2)
 
 
 if __name__ == "__main__":

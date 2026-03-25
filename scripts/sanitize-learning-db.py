@@ -17,7 +17,7 @@ Output: security/learning-db-report.json
 Usage:
     python3 scripts/sanitize-learning-db.py --output security/learning-db-report.json
     python3 scripts/sanitize-learning-db.py --output security/learning-db-report.json --purge
-    python3 scripts/sanitize-learning-db.py --db /path/to/learning.db --dry-run
+    python3 scripts/sanitize-learning-db.py --db /path/to/learning.db
     python3 scripts/sanitize-learning-db.py --help
 """
 
@@ -273,12 +273,6 @@ def main() -> None:
         "--purge",
         action="store_true",
         help="Actually delete rows flagged with action=purge (default: dry-run only)",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        default=True,
-        help="Dry-run mode (default: True — use --purge to actually delete)",
     )
     parser.add_argument(
         "--verbose", action="store_true", help="Print progress to stderr"

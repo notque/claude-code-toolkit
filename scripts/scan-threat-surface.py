@@ -128,12 +128,23 @@ def _scan_skill_frontmatter(skill_file: Path, verbose: bool) -> dict | None:
     name = None
     allowed_tools = []
     unscoped = False
+    in_allowed_tools = False
 
     for line in frontmatter.splitlines():
-        stripped = stripped_line = line.strip()
+        stripped = line.strip()
+        # Detect the allowed-tools: key
+        if stripped.startswith("allowed-tools:") and not stripped.startswith("- "):
+            in_allowed_tools = True
+            continue
+        # Another YAML key at the same indentation level ends the block
+        if stripped and not stripped.startswith("- ") and ":" in stripped and in_allowed_tools:
+            in_allowed_tools = False
+        # End of frontmatter resets state
+        if stripped == "---":
+            in_allowed_tools = False
         if stripped.startswith("name:"):
             name = stripped[5:].strip().strip('"').strip("'")
-        if stripped.startswith("- ") and "allowed-tools" not in stripped:
+        if stripped.startswith("- ") and in_allowed_tools:
             tool = stripped[2:].strip()
             allowed_tools.append(tool)
             if _UNSCOPED_TOOL_PATTERN.search(tool):
