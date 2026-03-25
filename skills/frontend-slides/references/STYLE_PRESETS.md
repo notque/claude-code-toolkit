@@ -46,7 +46,6 @@ html, body {
   justify-content: center;
   align-items: center;
   padding: clamp(1.5rem, 5vw, 4rem);
-  env(safe-area-inset-top, 0px);
   padding-top: max(clamp(1.5rem, 5vw, 4rem), env(safe-area-inset-top, 0px));
   padding-bottom: max(clamp(1.5rem, 5vw, 4rem), env(safe-area-inset-bottom, 0px));
 }

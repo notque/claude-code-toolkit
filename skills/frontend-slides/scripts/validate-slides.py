@@ -124,9 +124,6 @@ def run_validation(html_path: Path, breakpoints: list[tuple[int, int, str]]) -> 
                 page = context.new_page()
                 page.goto(file_url, wait_until="networkidle")
 
-                # Allow fonts and layout to settle.
-                page.wait_for_timeout(300)
-
                 raw = page.evaluate(OVERFLOW_CHECK_JS)
                 results = json.loads(raw)
 
@@ -218,4 +215,10 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        main()
+    except SystemExit:
+        raise
+    except Exception as e:
+        print(f"[validate-slides] unexpected error: {e}", file=sys.stderr)
+        sys.exit(2)
