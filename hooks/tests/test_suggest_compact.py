@@ -45,7 +45,7 @@ def state_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
     sf = tmp_path / f"claude-compact-count-{session_id}.state"
 
-    monkeypatch.setattr(mod, "get_state_file", lambda prefix: sf)
+    monkeypatch.setattr(mod, "get_state_file", lambda prefix: sf)  # noqa: ARG005
     return sf
 
 
@@ -143,9 +143,7 @@ class TestThresholdSuggestion:
         context = data.get("hookSpecificOutput", {}).get("additionalContext")
         assert context is None
 
-    def test_custom_threshold_via_env(
-        self, state_file: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_custom_threshold_via_env(self, state_file: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("COMPACT_THRESHOLD", "10")
         _set_counter(state_file, 9)
         output = _capture_stdout(_make_event("Edit"))

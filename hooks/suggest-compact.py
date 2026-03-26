@@ -13,7 +13,7 @@ Exit 2 would block the tool call, which is wrong for an advisory signal.
 ADR: adr/ADR-103-strategic-compact.md
 
 Configuration:
-  COMPACT_THRESHOLD  env var — suggestion threshold (default: 50, clamped 1–10000)
+  COMPACT_THRESHOLD  env var - suggestion threshold (default: 50, clamped 1-10000)
 
 Output (to stdout as JSON hook response):
   At threshold:       [strategic-compact] {N} tool calls reached — consider
@@ -131,16 +131,10 @@ def _run() -> None:
 
     # Decide whether to emit a suggestion
     if count == threshold:
-        msg = (
-            f"[strategic-compact] {count} tool calls reached — "
-            "consider /compact if transitioning phases"
-        )
+        msg = f"[strategic-compact] {count} tool calls reached — consider /compact if transitioning phases"
         context_output(_EVENT_NAME, msg).print_and_exit(0)
     elif count > threshold and (count - threshold) % _REMINDER_INTERVAL == 0:
-        msg = (
-            f"[strategic-compact] {count} tool calls — "
-            "good checkpoint for /compact if context is stale"
-        )
+        msg = f"[strategic-compact] {count} tool calls — good checkpoint for /compact if context is stale"
         context_output(_EVENT_NAME, msg).print_and_exit(0)
     else:
         empty_output(_EVENT_NAME).print_and_exit(0)
