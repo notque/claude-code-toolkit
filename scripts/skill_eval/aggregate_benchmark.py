@@ -394,12 +394,8 @@ def generate_markdown(benchmark: dict) -> str:
         b_pat = b_summary.get("pass_at_k", 0.0)
         a_pak = a_summary.get("pass_all_k", 0.0)
         b_pak = b_summary.get("pass_all_k", 0.0)
-        lines.append(
-            f"| pass@{k_label} | {a_pat * 100:.1f}% | {b_pat * 100:.1f}% | {delta.get('pass_at_k', '—')} |"
-        )
-        lines.append(
-            f"| pass^{k_label} | {a_pak * 100:.1f}% | {b_pak * 100:.1f}% | {delta.get('pass_all_k', '—')} |"
-        )
+        lines.append(f"| pass@{k_label} | {a_pat * 100:.1f}% | {b_pat * 100:.1f}% | {delta.get('pass_at_k', '—')} |")
+        lines.append(f"| pass^{k_label} | {a_pak * 100:.1f}% | {b_pak * 100:.1f}% | {delta.get('pass_all_k', '—')} |")
 
     # Notes section
     if benchmark.get("notes"):

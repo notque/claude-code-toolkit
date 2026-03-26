@@ -34,8 +34,7 @@ def _run_baseline(*args: str, expect_rc: int = 0) -> subprocess.CompletedProcess
         cwd=str(REPO_ROOT),
     )
     assert result.returncode == expect_rc, (
-        f"Expected rc={expect_rc}, got {result.returncode}\n"
-        f"stdout: {result.stdout}\nstderr: {result.stderr}"
+        f"Expected rc={expect_rc}, got {result.returncode}\nstdout: {result.stdout}\nstderr: {result.stderr}"
     )
     return result
 
@@ -69,9 +68,13 @@ class TestRunVector:
 
         call_count: dict[str, int] = {}
 
-        with patch("scripts.skill_eval.run_eval.run_single_query",
-                   side_effect=lambda q, *a, **kw: _pop(trigger_map, q, call_count)), \
-             patch("scripts.skill_eval.run_eval.ProcessPoolExecutor", ThreadPoolExecutor):
+        with (
+            patch(
+                "scripts.skill_eval.run_eval.run_single_query",
+                side_effect=lambda q, *a, **kw: _pop(trigger_map, q, call_count),  # noqa: ARG005
+            ),
+            patch("scripts.skill_eval.run_eval.ProcessPoolExecutor", ThreadPoolExecutor),
+        ):
             return run_eval(
                 eval_set=queries,
                 skill_name="test-skill",
@@ -131,6 +134,7 @@ class TestPassKStats:
 
     def _stats(self, vectors):
         from scripts.skill_eval.aggregate_benchmark import compute_passk_stats
+
         return compute_passk_stats(vectors)
 
     def test_empty(self):
@@ -335,15 +339,21 @@ class TestBaselineWrite:
 
     def test_missing_input_exits_2(self, tmp_path):
         _run_baseline(
-            "write", "--input", str(tmp_path / "nope.json"),
-            "--skill", "sk", "--baseline", str(tmp_path / "b.json"),
+            "write",
+            "--input",
+            str(tmp_path / "nope.json"),
+            "--skill",
+            "sk",
+            "--baseline",
+            str(tmp_path / "b.json"),
             expect_rc=2,
         )
 
     def test_backward_compat_no_run_vector(self, tmp_path):
         """Input without run_vector falls back to triggers > 0."""
         data = {
-            "skill_name": "sk", "description": "d",
+            "skill_name": "sk",
+            "description": "d",
             "results": [
                 {"query": "q0", "should_trigger": True, "triggers": 3, "runs": 3, "pass": True, "trigger_rate": 1.0},
                 {"query": "q1", "should_trigger": True, "triggers": 0, "runs": 3, "pass": False, "trigger_rate": 0.0},
@@ -387,8 +397,15 @@ class TestBaselineDiff:
         vectors = [[i < 6] for i in range(7)]  # 6 True, 1 False
         inp = self._inp(tmp_path, vectors)
         _run_baseline(
-            "diff", "--input", str(inp), "--skill", "sk",
-            "--baseline", str(bl), "--threshold", "0.05",
+            "diff",
+            "--input",
+            str(inp),
+            "--skill",
+            "sk",
+            "--baseline",
+            str(bl),
+            "--threshold",
+            "0.05",
             expect_rc=0,
         )
 
@@ -397,8 +414,15 @@ class TestBaselineDiff:
         inp = self._inp(tmp_path, [[False]])  # drop=0.9
         # threshold=0.95 → drop=0.9 < 0.95 → no regression
         _run_baseline(
-            "diff", "--input", str(inp), "--skill", "sk",
-            "--baseline", str(bl), "--threshold", "0.95",
+            "diff",
+            "--input",
+            str(inp),
+            "--skill",
+            "sk",
+            "--baseline",
+            str(bl),
+            "--threshold",
+            "0.95",
             expect_rc=0,
         )
 
@@ -410,8 +434,13 @@ class TestBaselineDiff:
     def test_missing_baseline_file_exits_0(self, tmp_path):
         inp = self._inp(tmp_path, [[True]])
         _run_baseline(
-            "diff", "--input", str(inp), "--skill", "sk",
-            "--baseline", str(tmp_path / "nope.json"),
+            "diff",
+            "--input",
+            str(inp),
+            "--skill",
+            "sk",
+            "--baseline",
+            str(tmp_path / "nope.json"),
             expect_rc=0,
         )
 
@@ -419,7 +448,13 @@ class TestBaselineDiff:
         bl = self._bl_file(tmp_path, {"my-skill": {"pass_at_k": 0.9, "pass_all_k": 0.8, "k": 3}})
         inp = self._inp(tmp_path, [[False]])
         result = _run_baseline(
-            "diff", "--input", str(inp), "--skill", "my-skill", "--baseline", str(bl),
+            "diff",
+            "--input",
+            str(inp),
+            "--skill",
+            "my-skill",
+            "--baseline",
+            str(bl),
             expect_rc=1,
         )
         assert "my-skill" in result.stdout

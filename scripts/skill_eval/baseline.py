@@ -170,8 +170,7 @@ def diff_baseline(
         print(f"REGRESSION detected for '{skill_name}' (threshold={threshold:.0%}):")
         for r in regressions:
             print(
-                f"  {r['metric']}: {r['baseline']:.4f} -> {r['current']:.4f}"
-                f"  (drop={r['drop']:.4f}, >{threshold:.0%})"
+                f"  {r['metric']}: {r['baseline']:.4f} -> {r['current']:.4f}  (drop={r['drop']:.4f}, >{threshold:.0%})"
             )
         return True
 
@@ -183,17 +182,12 @@ def diff_baseline(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Write or diff pass@k baselines for skill evals"
-    )
+    parser = argparse.ArgumentParser(description="Write or diff pass@k baselines for skill evals")
     sub = parser.add_subparsers(dest="command", required=True)
 
     # write subcommand
     write_p = sub.add_parser("write", help="Write current metrics to baseline.json")
-    write_p.add_argument(
-        "--input", required=True, type=Path,
-        help="Path to run_eval.py JSON output or benchmark.json"
-    )
+    write_p.add_argument("--input", required=True, type=Path, help="Path to run_eval.py JSON output or benchmark.json")
     write_p.add_argument("--skill", required=True, help="Skill name to record in baseline")
     write_p.add_argument(
         "--baseline",
@@ -204,10 +198,7 @@ def main() -> None:
 
     # diff subcommand
     diff_p = sub.add_parser("diff", help="Diff current metrics against stored baseline")
-    diff_p.add_argument(
-        "--input", required=True, type=Path,
-        help="Path to run_eval.py JSON output or benchmark.json"
-    )
+    diff_p.add_argument("--input", required=True, type=Path, help="Path to run_eval.py JSON output or benchmark.json")
     diff_p.add_argument("--skill", required=True, help="Skill name to compare")
     diff_p.add_argument(
         "--threshold",
