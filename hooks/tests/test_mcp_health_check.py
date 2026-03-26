@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tests for the mcp-health-check hook (ADR-101).
+Tests for the mcp-health-check hook (ADR-116).
 
 Run with: python3 -m pytest hooks/tests/test_mcp_health_check.py -v
 """

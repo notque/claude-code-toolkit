@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # hook-version: 1.0.0
 """
-MCP Health Check Hook (ADR-101)
+MCP Health Check Hook (ADR-116)
 
 Monitors MCP server health with exponential backoff and JSON state persistence.
 Handles two events via single-file dispatch on CLAUDE_HOOK_EVENT_NAME:
@@ -11,7 +11,7 @@ Handles two events via single-file dispatch on CLAUDE_HOOK_EVENT_NAME:
 - PostToolUseFailure:  Detect failure patterns, mark server unhealthy. Exit 0
                        always (observing only).
 
-State persisted to ~/.claude/mcp-health-cache.json (compatible with ECC format).
+State persisted to ~/.claude/mcp-health-cache.json.
 Fail-open on any unexpected exception (exit 0).
 
 Bypass:
