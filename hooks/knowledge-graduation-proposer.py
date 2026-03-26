@@ -70,46 +70,50 @@ def _format_proposal(topic: str, entries: list[dict], target_file: str | None) -
     ]
 
     for entry in entries:
-        lines.extend([
-            f"## {entry['category']}: {entry['key']}",
-            "",
-            f"**Confidence**: {entry['confidence']:.2f}  ",
-            f"**Observations**: {entry['observation_count']}  ",
-            f"**Source**: {entry['source']}  ",
-            f"**First seen**: {entry['first_seen']}  ",
-            f"**Last seen**: {entry['last_seen']}",
-            "",
-            "### Learning",
-            "",
-            entry["value"],
-            "",
-            "### Suggested Addition",
-            "",
-            "Add to the **Known Issues** or **Anti-Patterns** section:",
-            "",
-            "```markdown",
-            f"- **{entry['key']}**: {entry['value'].split(chr(10))[0]}",
-            "```",
-            "",
-            "### Rationale",
-            "",
-            f"This learning has been observed {entry['observation_count']} times "
-            f"with {entry['confidence']:.0%} confidence. "
-            f"It qualifies for permanent inclusion in the target file.",
-            "",
-            "---",
-            "",
-        ])
+        lines.extend(
+            [
+                f"## {entry['category']}: {entry['key']}",
+                "",
+                f"**Confidence**: {entry['confidence']:.2f}  ",
+                f"**Observations**: {entry['observation_count']}  ",
+                f"**Source**: {entry['source']}  ",
+                f"**First seen**: {entry['first_seen']}  ",
+                f"**Last seen**: {entry['last_seen']}",
+                "",
+                "### Learning",
+                "",
+                entry["value"],
+                "",
+                "### Suggested Addition",
+                "",
+                "Add to the **Known Issues** or **Anti-Patterns** section:",
+                "",
+                "```markdown",
+                f"- **{entry['key']}**: {entry['value'].split(chr(10))[0]}",
+                "```",
+                "",
+                "### Rationale",
+                "",
+                f"This learning has been observed {entry['observation_count']} times "
+                f"with {entry['confidence']:.0%} confidence. "
+                f"It qualifies for permanent inclusion in the target file.",
+                "",
+                "---",
+                "",
+            ]
+        )
 
-    lines.extend([
-        "## How to Graduate",
-        "",
-        "1. Review each entry above",
-        "2. Edit the target file to include the knowledge",
-        "3. Run: `python3 scripts/learning-db.py graduate TOPIC KEY TARGET`",
-        "   to mark the entry as graduated in the DB",
-        "",
-    ])
+    lines.extend(
+        [
+            "## How to Graduate",
+            "",
+            "1. Review each entry above",
+            "2. Edit the target file to include the knowledge",
+            "3. Run: `python3 scripts/learning-db.py graduate TOPIC KEY TARGET`",
+            "   to mark the entry as graduated in the DB",
+            "",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -117,9 +121,7 @@ def _format_proposal(topic: str, entries: list[dict], target_file: str | None) -
 def _migrate_schema(conn: sqlite3.Connection) -> None:
     """Add graduation_proposed_at column if missing. Idempotent."""
     try:
-        conn.execute(
-            "ALTER TABLE learnings ADD COLUMN graduation_proposed_at TEXT"
-        )
+        conn.execute("ALTER TABLE learnings ADD COLUMN graduation_proposed_at TEXT")
         conn.commit()
     except sqlite3.OperationalError:
         # Column already exists — expected on subsequent runs
@@ -206,10 +208,7 @@ def main():
                 )
             conn.commit()
 
-            print(
-                f"[graduation] {proposal_count} proposal(s) written "
-                f"to {PROPOSALS_DIR}/ ({len(rows)} entries total)"
-            )
+            print(f"[graduation] {proposal_count} proposal(s) written to {PROPOSALS_DIR}/ ({len(rows)} entries total)")
 
         finally:
             conn.close()
