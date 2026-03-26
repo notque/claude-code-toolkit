@@ -118,8 +118,7 @@ def _validate_tweet_text(text: str, label: str = "Tweet") -> None:
     """Exit with code 2 if text exceeds the character limit."""
     if len(text) > TWEET_MAX_CHARS:
         print(
-            f"ERROR: {label} text exceeds {TWEET_MAX_CHARS} characters "
-            f"(got {len(text)}).",
+            f"ERROR: {label} text exceeds {TWEET_MAX_CHARS} characters (got {len(text)}).",
             file=sys.stderr,
         )
         sys.exit(2)
@@ -175,8 +174,7 @@ def _upload_media(media_path: str) -> str:
 
     if resp.status_code != 200:
         print(
-            f"ERROR: Media upload failed at step 1 (HTTP {resp.status_code}): "
-            f"{resp.text}",
+            f"ERROR: Media upload failed at step 1 (HTTP {resp.status_code}): {resp.text}",
             file=sys.stderr,
         )
         sys.exit(3)
@@ -207,8 +205,7 @@ def _upload_media(media_path: str) -> str:
             )
             if check_resp.status_code != 200:
                 print(
-                    f"ERROR: Media upload failed at step 2 (status poll HTTP "
-                    f"{check_resp.status_code}).",
+                    f"ERROR: Media upload failed at step 2 (status poll HTTP {check_resp.status_code}).",
                     file=sys.stderr,
                 )
                 sys.exit(3)
@@ -219,8 +216,7 @@ def _upload_media(media_path: str) -> str:
         if state == "failed":
             error_detail = processing_info.get("error", {})
             print(
-                f"ERROR: Media upload failed at step 2 (processing failed): "
-                f"{error_detail}",
+                f"ERROR: Media upload failed at step 2 (processing failed): {error_detail}",
                 file=sys.stderr,
             )
             sys.exit(3)
@@ -295,7 +291,7 @@ def cmd_post(args: argparse.Namespace) -> int:
                 print(f"ERROR: Media file not found: {args.media}", file=sys.stderr)
                 return 2
             size = os.path.getsize(args.media)
-            if args.media.lower().endswith(('.mp4', '.mov', '.avi')):
+            if args.media.lower().endswith((".mp4", ".mov", ".avi")):
                 if size > 512 * 1024 * 1024:
                     print(f"[x-api] Video {args.media} exceeds 512MB limit ({size / 1024 / 1024:.1f}MB)")
                     sys.exit(1)
@@ -459,11 +455,7 @@ def cmd_search(args: argparse.Namespace) -> int:
         text_preview = tweet["text"][:80].replace("\n", " ")
         metrics = tweet.get("public_metrics", {})
         url = f"https://x.com/i/web/status/{tid}"
-        print(
-            f"[result] id={tid} author={author} "
-            f"likes={metrics.get('like_count', 0)} "
-            f"url={url} text={text_preview!r}"
-        )
+        print(f"[result] id={tid} author={author} likes={metrics.get('like_count', 0)} url={url} text={text_preview!r}")
     return 0
 
 
@@ -524,7 +516,7 @@ def build_parser() -> argparse.ArgumentParser:
     rt_p.add_argument(
         "--user-id",
         default="me",
-        help='User ID or \"me\" for the authenticated user (default: me)',
+        help='User ID or "me" for the authenticated user (default: me)',
     )
     rt_p.add_argument(
         "--max-results",
