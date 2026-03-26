@@ -47,9 +47,15 @@ def _is_stale() -> bool:
 def _update_state() -> None:
     """Write current timestamp to state file."""
     STATE_DIR.mkdir(parents=True, exist_ok=True)
-    STATE_FILE.write_text(json.dumps({
-        "last_distillation_run": _now_iso(),
-    }, indent=2) + "\n")
+    STATE_FILE.write_text(
+        json.dumps(
+            {
+                "last_distillation_run": _now_iso(),
+            },
+            indent=2,
+        )
+        + "\n"
+    )
 
 
 def main() -> int:
