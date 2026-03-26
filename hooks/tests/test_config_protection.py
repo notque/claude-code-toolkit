@@ -387,7 +387,9 @@ class TestTruncationSafety:
         # Generate a payload that just exceeds 1 MB
         oversized = "x" * (_MAX_STDIN_BYTES + 1)
         with (
-            patch.dict(os.environ, {k: v for k, v in os.environ.items() if k != "CONFIG_PROTECTION_BYPASS"}, clear=True),
+            patch.dict(
+                os.environ, {k: v for k, v in os.environ.items() if k != "CONFIG_PROTECTION_BYPASS"}, clear=True
+            ),
             patch.object(mod, "read_stdin", return_value=oversized),
         ):
             try:
@@ -424,7 +426,9 @@ class TestTruncationSafety:
         # NOT exit 2 due to the size guard (it will exit 0 because the string
         # is not valid JSON for the hook's purposes).
         with (
-            patch.dict(os.environ, {k: v for k, v in os.environ.items() if k != "CONFIG_PROTECTION_BYPASS"}, clear=True),
+            patch.dict(
+                os.environ, {k: v for k, v in os.environ.items() if k != "CONFIG_PROTECTION_BYPASS"}, clear=True
+            ),
             patch.object(mod, "read_stdin", return_value=exact_payload),
         ):
             try:
@@ -441,7 +445,9 @@ class TestMalformedInput:
 
     def test_empty_stdin_allows(self):
         with (
-            patch.dict(os.environ, {k: v for k, v in os.environ.items() if k != "CONFIG_PROTECTION_BYPASS"}, clear=True),
+            patch.dict(
+                os.environ, {k: v for k, v in os.environ.items() if k != "CONFIG_PROTECTION_BYPASS"}, clear=True
+            ),
             patch.object(mod, "read_stdin", return_value=""),
         ):
             try:
@@ -453,7 +459,9 @@ class TestMalformedInput:
 
     def test_invalid_json_allows(self):
         with (
-            patch.dict(os.environ, {k: v for k, v in os.environ.items() if k != "CONFIG_PROTECTION_BYPASS"}, clear=True),
+            patch.dict(
+                os.environ, {k: v for k, v in os.environ.items() if k != "CONFIG_PROTECTION_BYPASS"}, clear=True
+            ),
             patch.object(mod, "read_stdin", return_value="not valid json {{{"),
         ):
             try:
@@ -478,7 +486,9 @@ class TestBlockMessageContent:
     def test_block_message_mentions_source_code(self, capsys):
         payload = _make_event("Write", file_path=".eslintrc.js")
         with (
-            patch.dict(os.environ, {k: v for k, v in os.environ.items() if k != "CONFIG_PROTECTION_BYPASS"}, clear=True),
+            patch.dict(
+                os.environ, {k: v for k, v in os.environ.items() if k != "CONFIG_PROTECTION_BYPASS"}, clear=True
+            ),
             patch.object(mod, "read_stdin", return_value=payload),
         ):
             try:
