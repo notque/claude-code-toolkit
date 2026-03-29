@@ -161,7 +161,7 @@ When `--report` is set, it also writes a live HTML dashboard showing:
 - status, baseline, best score, kept/reverted counts
 - convergence chart
 - iteration table with diffs
-- cherry-pick controls for kept iterations
+- review/export controls for kept snapshot diffs from the original target
 
 ## Choosing Good Eval Tasks
 

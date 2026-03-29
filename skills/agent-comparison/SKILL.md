@@ -330,7 +330,7 @@ python3 skills/agent-comparison/scripts/optimize_loop.py \
     --verbose
 ```
 
-The `--report` flag generates a live HTML dashboard that auto-refreshes every 10 seconds, showing a convergence chart, iteration table, and cherry-pick controls.
+The `--report` flag generates a live HTML dashboard that auto-refreshes every 10 seconds, showing a convergence chart, iteration table, and review/export controls.
 
 **Step 5: Present results in UI**
 
@@ -340,19 +340,19 @@ Open the generated `optimization-report.html` in a browser. The report shows:
 - Iteration table with verdict, composite score, delta, and change summary
 - Expandable inline diffs per iteration (click any row)
 
-**Step 6: User cherry-picks improvements**
+**Step 6: Review kept snapshots**
 
-Not all KEEP iterations are real improvements — some may be harness artifacts. The user reviews each kept iteration's diff and selects which to include:
-- Check the "Pick" checkbox for desired iterations
-- Click "Preview Combined" to see the merged diff
-- Click "Export Selected" to download a JSON file with chosen diffs
+Not all KEEP iterations are real improvements — some may be harness artifacts. The user reviews the kept iterations as candidate snapshots from the original target:
+- Inspect each kept iteration's diff in the report
+- Use "Preview Combined" only as a comparison aid in the UI
+- Use "Export Selected" to download a review JSON describing the selected snapshot diffs
 
 **Step 7: Apply selected improvements to target file**
 
-Apply the selected improvements to the original target file.
+Apply one reviewed improvement to the original target file.
 
 - If you want the best single kept variant, use `evals/iterations/best_variant.md`.
-- If you exported selected diffs, treat that JSON as review material for a manual follow-up apply step. It is not auto-applied by the current tooling.
+- If you exported selected diffs, treat that JSON as review material only. It is not auto-applied by the current tooling, and the current workflow does not support merging multiple kept diffs into a generated patch.
 
 ```bash
 # Review the best kept variant before applying
