@@ -33,7 +33,13 @@ Produce concise task-completion summaries when finishing long-running work.
 
 
 def is_afk() -> bool:
-    """Return True if the session appears to be AFK (unattended)."""
+    """Return True if the session appears to be AFK (unattended).
+
+    NOTE: Do NOT use sys.stdin.isatty() or sys.stdout.isatty() here.
+    Claude Code pipes stdin (event JSON) and captures stdout (hook output),
+    so both are always non-TTY in hook context — the check would always
+    return True, activating AFK mode on every session regardless of type.
+    """
     # SSH indicators
     if os.environ.get("SSH_CONNECTION"):
         return True
@@ -45,9 +51,6 @@ def is_afk() -> bool:
     if os.environ.get("TMUX"):
         return True
     if os.environ.get("STY"):
-        return True
-    # Non-interactive TTY
-    if not sys.stdin.isatty():
         return True
     return False
 
