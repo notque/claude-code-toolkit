@@ -112,16 +112,20 @@ def main() -> None:
         file=sys.stderr,
     )
     print("[fix-with-skill] plans", file=sys.stderr)
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "deny",
-            "permissionDecisionReason": (
-                f"Create adr/{component_name}.md before creating this new component. "
-                "Use the plans skill to draft the ADR first."
-            ),
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": (
+                        f"Create adr/{component_name}.md before creating this new component. "
+                        "Use the plans skill to draft the ADR first."
+                    ),
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 

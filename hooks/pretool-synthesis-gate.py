@@ -178,16 +178,20 @@ def main() -> None:
             f"[synthesis-gate] Expected: {synthesis_path}",
             file=sys.stderr,
         )
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "deny",
-                "permissionDecisionReason": (
-                    f"ADR consultation required before implementing {adr_name}. "
-                    f"Run /adr-consultation on {adr_name} first to generate {synthesis_path}."
-                ),
-            }
-        }))
+        print(
+            json.dumps(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "PreToolUse",
+                        "permissionDecision": "deny",
+                        "permissionDecisionReason": (
+                            f"ADR consultation required before implementing {adr_name}. "
+                            f"Run /adr-consultation on {adr_name} first to generate {synthesis_path}."
+                        ),
+                    }
+                }
+            )
+        )
         sys.exit(0)
 
     if verdict == "BLOCKED":
@@ -196,16 +200,20 @@ def main() -> None:
             f"[synthesis-gate] Review {synthesis_path} and resolve concerns before implementing.",
             file=sys.stderr,
         )
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "deny",
-                "permissionDecisionReason": (
-                    f"ADR consultation verdict is BLOCKED for {adr_name}. "
-                    f"Review {synthesis_path} and resolve all concerns before implementing."
-                ),
-            }
-        }))
+        print(
+            json.dumps(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "PreToolUse",
+                        "permissionDecision": "deny",
+                        "permissionDecisionReason": (
+                            f"ADR consultation verdict is BLOCKED for {adr_name}. "
+                            f"Review {synthesis_path} and resolve all concerns before implementing."
+                        ),
+                    }
+                }
+            )
+        )
         sys.exit(0)
 
     if verdict == "UNKNOWN":
@@ -215,17 +223,21 @@ def main() -> None:
             f"[synthesis-gate] Review {synthesis_path} and ensure it contains an explicit PROCEED or BLOCKED verdict.",
             file=sys.stderr,
         )
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "deny",
-                "permissionDecisionReason": (
-                    f"ADR synthesis.md for {adr_name} has no clear PROCEED or BLOCKED verdict. "
-                    f"The consultation may be incomplete or truncated. "
-                    f"Review {synthesis_path} and ensure it contains an explicit verdict."
-                ),
-            }
-        }))
+        print(
+            json.dumps(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "PreToolUse",
+                        "permissionDecision": "deny",
+                        "permissionDecisionReason": (
+                            f"ADR synthesis.md for {adr_name} has no clear PROCEED or BLOCKED verdict. "
+                            f"The consultation may be incomplete or truncated. "
+                            f"Review {synthesis_path} and ensure it contains an explicit verdict."
+                        ),
+                    }
+                }
+            )
+        )
         sys.exit(0)
 
     # Explicit PROCEED — allow through.

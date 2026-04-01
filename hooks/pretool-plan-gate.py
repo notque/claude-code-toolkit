@@ -90,16 +90,20 @@ def main() -> None:
         file=sys.stderr,
     )
     print("[fix-with-skill] plans", file=sys.stderr)
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "deny",
-            "permissionDecisionReason": (
-                "Create task_plan.md before modifying implementation code in agents/ or skills/. "
-                "Use the plan-manager skill to create one."
-            ),
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": (
+                        "Create task_plan.md before modifying implementation code in agents/ or skills/. "
+                        "Use the plan-manager skill to create one."
+                    ),
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 

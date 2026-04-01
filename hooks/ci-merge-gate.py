@@ -101,8 +101,7 @@ def main() -> None:
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "deny",
                 "permissionDecisionReason": (
-                    f"CI checks are failing for PR #{pr_number}: {names}. "
-                    "Fix the failing checks before merging."
+                    f"CI checks are failing for PR #{pr_number}: {names}. Fix the failing checks before merging."
                 ),
             }
         }
