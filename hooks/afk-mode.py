@@ -60,11 +60,9 @@ def main() -> None:
 
     if mode == "always":
         context_output(EVENT_NAME, AFK_CONTEXT).print_and_exit()
-        return
 
     if mode == "never":
         empty_output(EVENT_NAME).print_and_exit()
-        return
 
     # Default: auto-detect
     if is_afk():
