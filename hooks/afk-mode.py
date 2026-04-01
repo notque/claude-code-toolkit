@@ -5,7 +5,7 @@ Detects SSH/tmux/screen/headless sessions and injects a posture block that
 instructs Claude to work proactively without requiring confirmation (ADR-143).
 
 Environment:
-    CLAUDE_AFK_MODE  - Control override: 'auto' (default), 'always', or 'never'
+    CLAUDE_AFK_MODE  - Control override: 'always' (default), 'auto', or 'never'
     SSH_CONNECTION   - Set by SSH daemon when connected via SSH
     SSH_TTY          - Set when SSH allocates a TTY
     SSH_CLIENT       - Set by SSH daemon (older form)
@@ -56,7 +56,7 @@ def is_afk() -> bool:
 
 
 def main() -> None:
-    mode = os.environ.get("CLAUDE_AFK_MODE", "auto").strip().lower()
+    mode = os.environ.get("CLAUDE_AFK_MODE", "always").strip().lower()
 
     if mode == "always":
         context_output(EVENT_NAME, AFK_CONTEXT).print_and_exit()
