@@ -30,10 +30,19 @@ def _debug(message: str) -> None:
         print(f"[kairos-briefing] {message}", file=sys.stderr)
 
 
-def _find_most_recent_briefing(state_dir: Path) -> Path | None:
-    """Return the most recently modified briefing-*.md file, or None."""
+def _compute_project_hash(project_path: str | None = None) -> str:
+    """Compute project hash using same encoding as ~/.claude/projects/ dirs."""
+    if project_path is None:
+        project_path = os.getcwd()
+    # Claude Code encodes project paths by replacing / with -
+    return project_path.replace("/", "-")
+
+
+def _find_most_recent_briefing(state_dir: Path, project_hash: str) -> Path | None:
+    """Return the most recently modified briefing for this project, or None."""
     try:
-        candidates = list(state_dir.glob("briefing-*.md"))
+        pattern = f"briefing{project_hash}-*.md"
+        candidates = list(state_dir.glob(pattern))
     except OSError as e:
         _debug(f"Failed to glob {state_dir}: {e}")
         return None
@@ -103,7 +112,8 @@ def main() -> None:
             empty_output(EVENT_NAME).print_and_exit()
             return
 
-        briefing_path = _find_most_recent_briefing(state_dir)
+        project_hash = _compute_project_hash()
+        briefing_path = _find_most_recent_briefing(state_dir, project_hash)
         if briefing_path is None:
             _debug("No briefing files found")
             empty_output(EVENT_NAME).print_and_exit()
