@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "generated": "2026-04-02T22:27:10Z",
+  "generated": "2026-04-02T22:30:47Z",
   "generated_by": "scripts/generate-skill-index.py",
   "skills": {
     "adr-consultation": {
@@ -863,6 +863,21 @@
         "compile wiki",
         "build knowledge base",
         "compile raw sources"
+      ],
+      "category": "research",
+      "user_invocable": false,
+      "version": "1.0.0",
+      "agent": "general-purpose"
+    },
+    "kb-lint": {
+      "file": "skills/kb-lint/SKILL.md",
+      "description": "Health check and lint a knowledge base wiki for consistency and gaps.",
+      "triggers": [
+        "lint knowledge base",
+        "kb lint",
+        "check kb health",
+        "knowledge base health",
+        "kb consistency"
       ],
       "category": "research",
       "user_invocable": false,
