@@ -1,10 +1,9 @@
-# Component Library: Interactive Components Reference
-<!-- Loaded by ui-design-engineer when task involves buttons, inputs, form controls, modals, dropdowns, tooltips, toasts, tabs, or accordions -->
-
-Accessible components are built once and reused everywhere. Every component here has keyboard navigation, proper ARIA, and visible focus states baked in — not added as an afterthought.
+# Interactive Components Reference
+<!-- Loaded by ui-design-engineer for buttons, inputs, modals, dropdowns, tooltips, toasts, tabs, accordions -->
+Keyboard navigation, ARIA, and visible focus states are built into every component below.
 
 ## Button
-**When to use:** Any clickable action. Never use `<div>` or `<span>` with onClick for actions — semantic button elements are keyboard-focusable and screen-reader-announced by default.
+**When to use:** Any clickable action. Use semantic `<button>` elements — they are keyboard-focusable and screen-reader-announced by default.
 
 ```tsx
 // components/Button.tsx
@@ -456,7 +455,6 @@ export function Toast({ message, type = 'info', onDismiss, duration = 4000 }: To
 **When to use:** Every form field. Validation state must be conveyed through more than just color (for colorblind users).
 
 ```tsx
-// components/FormField.tsx
 type FieldState = 'default' | 'error' | 'success'
 
 interface FormFieldProps {
@@ -492,7 +490,6 @@ export function FormField({ id, label, state = 'default', message, required, chi
           className={`text-sm ${state === 'error' ? 'text-red-700' : 'text-green-700'}`}
           role={state === 'error' ? 'alert' : 'status'}
         >
-          {/* Icon conveys meaning beyond color */}
           {state === 'error' ? '! ' : '✓ '}
           {message}
         </p>

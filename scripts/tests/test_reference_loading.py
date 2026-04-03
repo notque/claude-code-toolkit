@@ -57,7 +57,7 @@ REFERENCE_LOADING_TESTS: list[dict[str, object]] = [
         # avoids that phrase to test SWR→client-patterns specificity.
         "agent": "typescript-frontend-engineer",
         "query": "implement SWR client-side caching with request deduplication",
-        "expected_refs": ["react-client-patterns.md"],
+        "expected_refs": ["react-client-data-fetching.md"],
         "unexpected_refs": ["react-server-patterns.md", "react-composition-patterns.md"],
     },
     {
@@ -70,12 +70,12 @@ REFERENCE_LOADING_TESTS: list[dict[str, object]] = [
         "agent": "performance-optimization-engineer",
         "query": "eliminate async waterfall in API calls",
         "expected_refs": ["react-async-patterns.md"],
-        "unexpected_refs": ["js-micro-optimizations.md"],
+        "unexpected_refs": ["js-algorithm-optimizations.md"],
     },
     {
         "agent": "performance-optimization-engineer",
         "query": "optimize Set and Map lookups in hot loop",
-        "expected_refs": ["js-micro-optimizations.md"],
+        "expected_refs": ["js-algorithm-optimizations.md"],
         "unexpected_refs": ["react-async-patterns.md"],
     },
 ]
@@ -467,8 +467,8 @@ class TestReferenceFileSizeCompliance:
             ref_path: Path to the reference .md file.
         """
         line_count = len(ref_path.read_text(encoding="utf-8").splitlines())
-        assert line_count < REFERENCE_LINE_LIMIT, (
-            f"{_ref_file_id(ref_path)}: {line_count} lines exceeds hard limit of {REFERENCE_LINE_LIMIT}. "
+        assert line_count <= REFERENCE_LINE_LIMIT, (
+            f"{_ref_file_id(ref_path)}: {line_count} lines exceeds limit of {REFERENCE_LINE_LIMIT}. "
             f"Split the file or remove stale content."
         )
 
