@@ -137,6 +137,9 @@ Route to these agents based on the user's task domain. Each entry describes what
 | **docs-sync-checker** | User wants to check if README files or documentation are in sync with the actual code. |
 | **do-perspectives** | User wants multi-perspective analysis of a problem from 10 different lenses simultaneously. |
 | **do → parallel-analysis** | User wants parallel multi-angle extraction of insights from a document or codebase. Loaded from `skills/do/references/parallel-analysis.md`. |
+| **kb-query** | User wants to look up a knowledge base topic, retrieve a structured wiki article, or ask a question answered by the KB. Use when: "query knowledge base", "kb query", "ask knowledge base", "search kb", "what does the kb say about". |
+| **kb-lint** | User wants to validate knowledge base health: check for consistency, broken links, missing sections, or orphaned topics. Use when: "lint knowledge base", "kb lint", "check kb health". |
+| **kb-compile** | User wants to compile raw knowledge base sources (markdown research files) into structured wiki articles. Use when: "compile knowledge base", "kb compile", "compile wiki". |
 | **plan-manager** | User wants to manage the plan lifecycle: create, track, or review plans. |
 | **learn** | User wants to teach Claude a new error pattern or record a reusable insight. |
 | **retro** | User wants to interact with the learning system: view stats, list accumulated knowledge, search learnings, or graduate mature entries into agents/skills. |
@@ -238,6 +241,7 @@ All workflow pipelines live in `skills/workflow/references/` and are accessed vi
 |----------|--------------------|--------|
 | **workflow** (umbrella) | All structured multi-phase workflows. Routes to the correct workflow based on intent. Includes: toolkit-improvement, system-upgrade, research-to-article, explore, doc-generation, comprehensive-review, article-evaluation, voice-calibrator, de-ai, auto-pipeline, and more. Each workflow lives in `skills/workflow/references/`. |
 | **toolkit-improvement** (FORCE) | User wants to evaluate, audit, or improve the toolkit itself. Dispatches 30+ reviewer agents in waves, synthesizes findings, has a skeptical grader challenge them, creates ADRs, implements fixes, and validates. Use for: "improve the toolkit", "evaluate the repo", "audit the system", "find issues", "self-improvement", "repo health check", "what can be better", "how can we improve", "make the toolkit better". NOT: reviewing a single PR (use /pr-review) or fixing one bug (use /systematic-debugging). | EVALUATE → RESEARCH → SYNTHESIZE → CRITIQUE → REPORT → ADR → IMPLEMENT → VALIDATE → REMEDIATE → RECORD |
+| **toolkit-evolution** | User wants the nightly closed-loop self-improvement cycle: diagnose gaps from evidence, propose targeted fixes (max 3), multi-persona critique, A/B test, promote winners via PR. Use for: "evolve toolkit", "run evolution", "toolkit evolution", "what should we improve", "find improvement opportunities", "systematic improvement". NOT: deep multi-wave evaluation with 30+ agents (use toolkit-improvement), or directly fixing one thing (use fast/quick). | DIAGNOSE → PROPOSE → CRITIQUE → BUILD → VALIDATE → EVOLVE |
 | **system-upgrade** (system-upgrade-engineer) | User wants to upgrade the Claude Code toolkit after a model update, apply system-wide changes, or roll out agent improvements. NOT: upgrading a specific library dependency in user code. | CHANGELOG → AUDIT → PLAN → IMPLEMENT → VALIDATE → DEPLOY |
 | **workflow** (skill-creation, skill-creator) | User wants to create a new skill with formal quality gates, phase structure, and integration. | DISCOVER → DESIGN → SCAFFOLD → VALIDATE → INTEGRATE |
 | **research-pipeline** (research-coordinator-engineer) | User wants formal research with saved artifacts, multiple sources, and a synthesized deliverable. NOT: a quick lookup or single-source check. | SCOPE → GATHER → SYNTHESIZE → VALIDATE → DELIVER |
@@ -259,6 +263,7 @@ Workflows that work together in common sequences:
 | **Code review** | workflow (comprehensive-review) → pr-workflow | Review then submit |
 | **Agent improvement** | agent-upgrade → skill-creator | Audit agent, then scaffold missing skills |
 | **Toolkit improvement** | workflow (toolkit-improvement) → system-upgrade → agent-upgrade | Evaluate → fix → upgrade system → upgrade agents |
+| **Toolkit evolution** | toolkit-evolution (nightly) | Closed-loop evidence-driven improvements, max 3 per cycle |
 | **System upgrade** | system-upgrade → agent-upgrade | Upgrade system, then individual agents |
 | **Voice development** | workflow (voice-calibrator) → voice-writer → workflow (article-evaluation) | Calibrate → write → evaluate |
 | **Documentation** | workflow (explore) → workflow (doc-generation) | Understand codebase → generate docs |
@@ -354,6 +359,12 @@ Consolidated reviewer agents, each covering multiple review perspectives:
 | "find issues" | toolkit-improvement (FORCE) | Full 10-phase evaluation + improvement |
 | "what can be better" | toolkit-improvement (FORCE) | Full 10-phase evaluation + improvement |
 | "self-improvement" | toolkit-improvement (FORCE) | Full 10-phase evaluation + improvement |
+| "evolve toolkit" | toolkit-evolution | Nightly 6-phase closed-loop improvement cycle |
+| "toolkit evolution" | toolkit-evolution | Nightly 6-phase closed-loop improvement cycle |
+| "find improvement opportunities" | toolkit-evolution | Evidence-driven gap diagnosis + targeted fixes |
+| "query the knowledge base" | kb-query | KB topic lookup via structured wiki |
+| "compile the wiki" | kb-compile | Compile raw KB sources into articles |
+| "lint the knowledge base" | kb-lint | KB health check for consistency gaps |
 | "upgrade system for new Claude version" | system-upgrade-engineer + system-upgrade | System-wide upgrade |
 | "create skill with quality gates" | skill-creator + workflow (skill-creation) | Formal skill creation |
 | "create hook (formal, with perf test)" | hook-development-engineer + workflow (hook-development) | Formal hook creation |
