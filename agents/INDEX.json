@@ -105,7 +105,6 @@
         "focused go"
       ],
       "pairs_with": [
-        "go-patterns",
         "go-patterns"
       ],
       "complexity": "Medium-Complex",
@@ -483,13 +482,14 @@
         "expo-router",
         "gesture handler",
         "native stack",
-        "ios",
-        "android",
-        "mobile"
+        "mobile",
+        "react native ios",
+        "react native android",
+        "expo ios",
+        "expo android"
       ],
       "pairs_with": [
-        "universal-quality-gate",
-        "typescript-frontend-engineer"
+        "universal-quality-gate"
       ],
       "complexity": "Medium-Complex",
       "category": "language"

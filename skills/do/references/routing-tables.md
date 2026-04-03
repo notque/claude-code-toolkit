@@ -28,7 +28,7 @@ Route to these agents based on the user's task domain. Each entry describes what
 | **opensearch-elasticsearch-engineer** | User needs search cluster work: index management, query optimization, Elasticsearch/OpenSearch operations. |
 | **python-openstack-engineer** | User is developing OpenStack services, plugins, or components — specifically within the OpenStack ecosystem. |
 | **sqlite-peewee-engineer** | User is working with SQLite databases via the Peewee ORM in Python. |
-| **swift-general-engineer** | User is working on Swift code, iOS, macOS, SwiftUI, server-side Swift, or any Swift-language task including concurrency and testing. NOT: tasks that merely mention Swift as context. |
+| **swift-general-engineer** | User is working on Swift code, iOS, macOS, SwiftUI, server-side Swift, or any Swift-language task including concurrency and testing. NOT: tasks that merely mention Swift as context. NOT: React Native apps targeting iOS (use react-native-engineer). |
 | **performance-optimization-engineer** | User wants to improve web performance: Core Web Vitals, load times, bundle size, rendering optimization. Now includes expanded React performance references (React Compiler, memoization, concurrent features, profiling). NOT: React Native mobile performance (use react-native-engineer). |
 | **php-general-engineer** | User is working on PHP code, Laravel, Symfony, Composer, or any PHP-language task including modern PHP 8.x patterns and security. NOT: tasks that merely mention PHP as context. |
 | **mcp-local-docs-engineer** | User wants to build an MCP (Model Context Protocol) server or turn a repository into an MCP documentation source. |
