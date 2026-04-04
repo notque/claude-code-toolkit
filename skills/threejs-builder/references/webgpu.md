@@ -141,9 +141,24 @@ material.colorNode = mix(colorA, colorB, oscSine())  // Smooth sine wave 0-1
 | `normalView` | View-space normal (r178+: renamed from `transformedNormalView`) | Rim/fresnel effects |
 | `uv()` | UV coordinates | Texture mapping |
 | `screenUV` | Screen-space UV coordinates | Full-screen effects |
+| `screenSize` | Screen dimensions in pixels | Resolution-dependent effects |
 | `time` | Elapsed time in seconds | Animation |
 | `cameraPosition` | Camera world position | View-dependent effects |
 | `instanceIndex` | Current instance ID in compute | Per-instance logic |
+
+### Built-in Effect Functions
+
+TSL includes pre-built effect functions that save significant boilerplate:
+
+```typescript
+import { fresnel, triplanarTexture } from 'three/tsl'
+
+// Rim glow — one-liner instead of manual dot/pow calculation
+material.emissiveNode = fresnel()  // Bright at edges, dark at center
+
+// Triplanar texture mapping — no UV unwrap needed for organic/terrain shapes
+material.colorNode = triplanarTexture(texture(myTexture), null, null, float(1.0))
+```
 
 ### Auto-Updating Uniforms
 
@@ -338,6 +353,20 @@ renderer.compute(computePositions)
 This distinction is often missed — using `instancedArray` for read-only data wastes GPU resources,
 and `attributeArray` for write targets silently fails.
 
+### Atomic Operations
+
+For compute shaders that need thread-safe accumulation (counting, finding min/max across threads):
+
+```typescript
+import { atomicAdd, atomicMax, atomicMin, atomicStore } from 'three/tsl'
+
+// Thread-safe counter increment
+atomicAdd(counterBuffer.element(0), int(1))
+
+// Find maximum value across all threads
+atomicMax(resultBuffer.element(0), currentValue)
+```
+
 ### Workgroup Configuration
 
 ```typescript
@@ -348,9 +377,10 @@ const shader = compute(fn, count)
 const shader = compute(fn, count, [64])  // 64 threads per workgroup
 
 // Workgroup barriers for synchronization
-import { workgroupBarrier, storageBarrier } from 'three/tsl'
+import { workgroupBarrier, storageBarrier, textureBarrier } from 'three/tsl'
 workgroupBarrier()   // Sync all threads in workgroup
-storageBarrier()     // Ensure storage writes are visible
+storageBarrier()     // Ensure storage buffer writes are visible
+textureBarrier()     // Ensure texture writes are visible
 ```
 
 ### Device Limits for Large Compute
@@ -484,6 +514,25 @@ Add GPU compute for particle systems, procedural generation, physics. This has n
 | r181+ | `renderer.computeAsync()` deprecated | Use `renderer.compute()` |
 | r183+ | `PostProcessing` replaced by `RenderPipeline` | Use `pass(scene, camera)` + `renderPipeline.outputNode` |
 
+### r183+ Post-Processing with RenderPipeline
+
+The `PostProcessing` class was replaced by `RenderPipeline` in r183. This is a significant API
+change that most tutorials and examples haven't caught up with yet.
+
+```typescript
+import { pass, RenderPipeline } from 'three/tsl'
+
+// Create render pass
+const scenePass = pass(scene, camera)
+
+// Create pipeline and set output
+const renderPipeline = new RenderPipeline(renderer)
+renderPipeline.outputNode = scenePass
+
+// In animation loop:
+renderPipeline.render()
+```
+
 ---
 
 ## Device Loss Recovery
@@ -512,7 +561,12 @@ async function initWebGPU() {
 // Testing device loss:
 // renderer.backend.device.destroy()  // Programmatic trigger
 // Chrome: about:gpucrash for real GPU crash simulation
+// Chrome flags for repeated testing (disables crash rate limiting):
+//   --disable-domain-blocking-for-3d-apis --disable-gpu-process-crash-limit
 ```
+
+For production apps, preserve state across recovery using `localStorage` before
+`renderer.dispose()`, then restore after re-initialization.
 
 ---
 

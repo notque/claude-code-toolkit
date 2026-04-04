@@ -342,6 +342,176 @@ import { Sparkles, Stars } from '@react-three/drei'
 
 ---
 
+## Animation Polish
+
+### AnimationMixer with Crossfade
+
+For character animation (walk cycles, idle, run), blend between clips smoothly:
+
+```javascript
+const mixer = new THREE.AnimationMixer(model)
+const idleAction = mixer.clipAction(idleClip)
+const walkAction = mixer.clipAction(walkClip)
+
+// Crossfade from idle to walk over 0.3 seconds
+idleAction.crossFadeTo(walkAction, 0.3, true)
+walkAction.play()
+
+// In animation loop:
+mixer.update(delta)
+```
+
+**Morph targets** for facial expressions or shape deformations:
+```javascript
+mesh.morphTargetInfluences[0] = Math.sin(time) * 0.5 + 0.5  // Blend 0-1
+```
+
+**Additive animation layers** for breathing on top of other animations:
+```javascript
+breathAction.setEffectiveWeight(0.3)
+breathAction.blendMode = THREE.AdditiveAnimationBlendMode
+breathAction.play()
+```
+
+---
+
+## Additional Post-Processing Effects
+
+Beyond bloom, these passes add cinematic quality:
+
+```javascript
+import { FilmPass } from 'three/addons/postprocessing/FilmPass.js'
+import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js'
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js'
+import { FXAAShader } from 'three/addons/shaders/FXAAShader.js'
+
+// Film grain — adds texture, reduces "CG look"
+const filmPass = new FilmPass(0.35, false)  // intensity, grayscale
+composer.addPass(filmPass)
+
+// Outline — highlight selected/hovered objects
+const outlinePass = new OutlinePass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  scene, camera
+)
+outlinePass.edgeStrength = 3
+outlinePass.edgeGlow = 0.5
+outlinePass.edgeThickness = 1
+outlinePass.selectedObjects = [highlightedMesh]
+composer.addPass(outlinePass)
+
+// FXAA anti-aliasing (cheaper than MSAA, applied as post-pass)
+const fxaaPass = new ShaderPass(FXAAShader)
+fxaaPass.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight)
+composer.addPass(fxaaPass)
+```
+
+**Pass ordering reminder**: `RenderPass` → `SSAO` → `UnrealBloomPass` → `OutlinePass` → color grading → `FilmPass` → `FXAA` → `OutputPass`
+
+---
+
+## Performance Optimization Techniques
+
+### BatchedMesh (Varied Geometries, One Draw Call)
+
+Unlike `InstancedMesh` (identical objects), `BatchedMesh` batches different geometries:
+
+```javascript
+const batchedMesh = new THREE.BatchedMesh(100, 5000, 10000, material)
+const boxId = batchedMesh.addGeometry(new THREE.BoxGeometry(1, 1, 1))
+const sphereId = batchedMesh.addGeometry(new THREE.SphereGeometry(0.5))
+
+// Add instances of different geometries
+for (let i = 0; i < 50; i++) {
+  const instanceId = batchedMesh.addInstance(i % 2 === 0 ? boxId : sphereId)
+  batchedMesh.setMatrixAt(instanceId, matrix)
+}
+scene.add(batchedMesh)
+```
+
+### LOD (Level of Detail)
+
+Switch to simpler geometry at distance — critical for large scenes:
+
+```javascript
+const lod = new THREE.LOD()
+lod.addLevel(highDetailMesh, 0)    // Full detail when close
+lod.addLevel(mediumDetailMesh, 50) // Simpler at 50 units
+lod.addLevel(lowDetailMesh, 200)   // Minimal at 200 units
+scene.add(lod)
+```
+
+### Asset Compression
+
+| Technique | What It Does | Import |
+|-----------|-------------|--------|
+| KTX2/Basis | GPU-compressed textures (4-8x smaller, decoded on GPU) | `KTX2Loader` from `three/addons/loaders/KTX2Loader.js` |
+| Draco | Compressed GLTF geometry (60-90% smaller meshes) | `DRACOLoader` from `three/addons/loaders/DRACOLoader.js` |
+| meshopt | Alternative mesh compression (better for animation) | `MeshoptDecoder` |
+
+```javascript
+import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js'
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
+
+// Draco for GLTF geometry
+const dracoLoader = new DRACOLoader()
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/')
+gltfLoader.setDRACOLoader(dracoLoader)
+
+// KTX2 for textures
+const ktx2Loader = new KTX2Loader()
+ktx2Loader.setTranscoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/basis/')
+ktx2Loader.detectSupport(renderer)
+```
+
+---
+
+## Spatial Audio
+
+For immersive 3D scenes and games:
+
+```javascript
+const listener = new THREE.AudioListener()
+camera.add(listener)
+
+const sound = new THREE.PositionalAudio(listener)
+const audioLoader = new THREE.AudioLoader()
+audioLoader.load('sound.mp3', (buffer) => {
+  sound.setBuffer(buffer)
+  sound.setRefDistance(10)    // Distance at which volume starts falling off
+  sound.setRolloffFactor(1)  // How quickly volume decreases with distance
+  sound.setLoop(true)
+  sound.play()
+})
+
+// Attach to an object — sound follows it in 3D space
+soundEmitter.add(sound)
+```
+
+---
+
+## Special Effects
+
+### Clipping Planes (Portals, Cutaways, Reveals)
+
+```javascript
+const clipPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1)  // Normal + distance
+
+const material = new THREE.MeshStandardMaterial({
+  color: 0x44aa88,
+  clippingPlanes: [clipPlane],  // Per-material clipping
+  clipShadows: true,
+})
+
+renderer.clippingPlanes = [clipPlane]  // Or global clipping
+renderer.localClippingEnabled = true   // Required for per-material clipping
+
+// Animate the clip plane for a reveal effect:
+// clipPlane.constant += delta * 2
+```
+
+---
+
 ## Quick Polish Checklist
 
 Before delivering any Three.js scene, verify these in order:
