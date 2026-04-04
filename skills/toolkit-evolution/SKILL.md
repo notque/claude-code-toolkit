@@ -178,6 +178,16 @@ Output: ranked proposals with consensus scores, key concerns from each persona, 
 
 **Gate**: All personas have reported. Synthesis complete. At least 1 proposal rated STRONG. If no STRONG proposals, revisit Phase 2 with the critique feedback, or report to user that no high-confidence improvements were found this cycle.
 
+**On early exit (no STRONG proposals): always record to the learning DB before stopping.** Do not skip this step — the learning DB accumulates diagnostic value across cycles only if every cycle records, including null-result ones.
+
+```bash
+python3 ~/.claude/scripts/learning-db.py learn \
+  --topic "evolution-cycle" \
+  "toolkit-evolution early exit: {N} proposals evaluated, 0 built, 0 winners. Reason: no STRONG consensus. Top proposal was {title} with score {score}. Critique themes: {themes}."
+```
+
+Then write the evolution report (Phase 6 Step 4) with this cycle's diagnosis and proposal data, even though no implementations were built.
+
 ---
 
 ### Phase 4: BUILD -- Implement winners
