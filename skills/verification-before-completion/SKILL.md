@@ -107,6 +107,24 @@ For each file verify:
 
 This step counteracts confirmation bias where executors believe their own edits are correct without evidence.
 
+### Step 4.5: Run Deterministic Artifact Checks
+
+For any new files created during the task, run the artifact verifier to confirm they are not stubs:
+
+```bash
+# Verify new Python files are substantive and wired
+python3 scripts/artifact-verify.py --files {new_python_files}
+```
+
+This deterministically checks:
+- **EXISTS**: File is present on disk (not a phantom reference)
+- **SUBSTANTIVE**: File contains real logic, not stubs (no TODO, FIXME, pass, NotImplementedError, `...`)
+- **WIRED**: File is imported/used by other files in the repository
+
+Exit code 0 = all checks pass. Exit code 1 = stubs or orphan files detected — resolve before claiming completion.
+
+Skip this step if no new files were created in the task. Run only on files created by this task (not the entire codebase).
+
 ### Step 5: Check for Unintended Changes
 
 ```bash
