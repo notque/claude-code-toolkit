@@ -99,7 +99,7 @@
           {
             "type": "command",
             "command": "python3 \"$HOME/.claude/hooks/auto-plan-detector.py\"",
-            "description": "Detect complex tasks requiring a plan (stub — /do handles plan detection)"
+            "description": "Detect complex tasks requiring a plan (stub \u2014 /do handles plan detection)"
           }
         ]
       }
@@ -232,6 +232,12 @@
             "command": "python3 \"$HOME/.claude/hooks/posttool-security-scan.py\"",
             "description": "Advisory scan for credentials and SQL injection in Write/Edit output",
             "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.claude/hooks/posttool-docs-drift-alert.py\"",
+            "description": "Alert when INDEX.json, routing-tables.md, or agents/*.md are modified and docs appear out of sync",
+            "timeout": 5000
           }
         ]
       },
