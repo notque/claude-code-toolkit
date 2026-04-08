@@ -177,11 +177,10 @@ Generics are NOT used where they would add complexity without clear benefit.
 - **Files**: 3 (`handler.go`, `handler_test.go`, `fixtures/`)
 - **API surface**: ~15 exported symbols
 - **Exported**: `Handler`, `NewHandler`, `RespondTo`, `Response`, `WithBody`, `WithHeader`, `WithHeaders`, `WithJSONBody`, `RequestOption`, `Response.CaptureJSON`, `Response.CaptureHeader`
-- **Philosophy**: Replaces deprecated `assert.HTTPRequest` with fluent API. `RespondTo(ctx, "GET /v1/info")` combines method+path. Response-side operations (JSON capture, header capture) are chained methods on `Response`, not `RequestOption`s.
+- **Philosophy**: Fluent API for HTTP test assertions. `RespondTo(ctx, "GET /v1/info")` combines method+path. `RequestOption`s configure the request side; `Response` methods handle the response side via chaining.
 - **Dual-mode**: Supports both `testing.T` and Ginkgo/Gomega.
 - **Error philosophy**: Never returns errors -- fabricated 999 status for marshal failures.
 - **Method chaining**: `CaptureJSON` and `CaptureHeader` return `Response` for fluent chaining: `h.RespondTo(ctx, "GET /v1/assets").CaptureJSON(&assets).Response()`
-- **Migration note**: `ReceiveJSONInto` (former `RequestOption`) was reworked into `Response.CaptureJSON` (go-bits PR #315). `CaptureHeader` was added in the same PR.
 
 ### jobloop/ -- Worker Loop Abstraction
 
@@ -318,14 +317,13 @@ Pragmatic, implementation-focused:
 | `must.SucceedT`, `must.ReturnT` | Oct 2025 | Test-specific must variants |
 | `assert.ErrEqual` | Oct 2025 | Flexible error assertion |
 | `pluggable.TryInstantiate` | Nov 2025 | Option[T] return for plugin lookup |
-| `Response.CaptureJSON` | Apr 2026 | Replaces `ReceiveJSONInto` as chained method on Response |
-| `Response.CaptureHeader` | Apr 2026 | Capture response headers in method-chain style |
+| `Response.CaptureJSON` | Apr 2026 | JSON response capture as chained method on Response |
+| `Response.CaptureHeader` | Apr 2026 | Response header capture in method-chain style |
 | `liquidapi` package | Growing | Server runtime for LIQUID protocol |
 
 ### Deprecations
 
 - `assert.HTTPRequest` -- soft-deprecated in favor of `httptest.Handler.RespondTo`
-- `httptest.ReceiveJSONInto` -- removed and replaced by `Response.CaptureJSON` (Apr 2026, PR #315)
 - Coveralls removed from CI (Aug 2025)
 
 ### Direction
