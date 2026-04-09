@@ -16,7 +16,7 @@ A router reads your intent and selects a Go specialist agent paired with a syste
 
 This works because the toolkit separates *what you know* from *what the system knows*. Agents carry domain expertise (Go idioms, Python conventions, Kubernetes patterns). Skills enforce process methodology (TDD cycles, debugging phases, review waves). Hooks automate quality gates that fire on lifecycle events. Scripts handle deterministic operations where you want predictable output, not LLM judgment. The router ties it all together -- classifying requests, selecting the right combination, and dispatching.
 
-The result: consistent, specialist-grade output across Go, Python, TypeScript, infrastructure, content, and more -- without configuring anything. A first-time user and a power user get the same quality results. The power user just understands why.
+The result: consistent, domain-specific output across Go, Python, TypeScript, infrastructure, content, and more -- without configuring anything. A first-time user and a power user get the same quality results. The power user just understands why.
 
 ## Built with the Toolkit
 
@@ -56,7 +56,7 @@ The installer links agents, skills, hooks, commands, and scripts into `~/.claude
 
 ## What's Inside
 
-### 44 Domain Agents
+### 43 Domain Agents
 
 Agents carry domain-specific expertise -- not thin wrappers that say "you are an expert," but concrete knowledge: version-specific idiom tables, anti-pattern catalogs with detection commands, error-to-fix mappings from real incidents.
 
@@ -114,7 +114,7 @@ Deterministic Python utilities for mechanical operations: INDEX generation, lear
 
 **[I'm an AI agent](docs/for-claude-code.md)** -- Machine-dense component inventory. Tables, file paths, schemas, routing rules.
 
-**[I'm on LinkedIn](docs/for-linkedin.md)** -- Thought leadership. Agree?
+**[I'm on LinkedIn](docs/for-linkedin.md)** -- 🚀 Thought leadership. Agree? 👇
 
 ## Philosophy
 
