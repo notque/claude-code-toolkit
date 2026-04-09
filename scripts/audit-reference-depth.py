@@ -312,7 +312,7 @@ def scan_all() -> list[ComponentResult]:
     """Scan all agent and skill directories, deduplicating by name."""
     results: list[ComponentResult] = []
 
-    # ~/.claude/ takes priority (live/deployed copies)
+    # Scan both locations; _deduplicate() keeps highest level, preferring repo-local on ties
     results += _scan_directory(_CLAUDE_AGENTS_DIR, "agent")
     results += _scan_directory(_CLAUDE_SKILLS_DIR, "skill")
 

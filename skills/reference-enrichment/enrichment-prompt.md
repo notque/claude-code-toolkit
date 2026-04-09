@@ -99,7 +99,7 @@ This gate prevents reference bloat — only references that add concrete, signal
 End your session with a summary:
 
 ```
-=== Nightly Reference Enrichment Summary ===
+=== Reference Enrichment Summary ===
 Date: {date}
 Targets processed: N/M
   - {name}: Level {before} → Level {after} ({new_files} new reference files)
