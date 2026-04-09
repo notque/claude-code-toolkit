@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Reference Enrichment: nightly domain knowledge improvement via Claude Code headless mode.
+# Reference Enrichment: hourly domain knowledge improvement via Claude Code headless mode.
 # Runs the ADR-171 audit to identify knowledge gaps, then uses ADR-172's enrichment
 # skill to generate reference files for the top-priority agents/skills.
 #
@@ -10,8 +10,8 @@
 #   # Full run (audit + enrich + PR)
 #   ./scripts/reference-enrichment-cron.sh --execute
 #
-# Cron example (nightly at 4:07 AM):
-#   7 4 * * * /home/feedgen/claude-code-toolkit/scripts/reference-enrichment-cron.sh --execute >> /home/feedgen/claude-code-toolkit/cron-logs/reference-enrichment/cron.log 2>&1
+# Cron example (hourly at :07):
+#   7 * * * * /home/feedgen/claude-code-toolkit/scripts/reference-enrichment-cron.sh --execute >> /home/feedgen/claude-code-toolkit/cron-logs/reference-enrichment/cron.log 2>&1
 
 # Ensure claude CLI is in PATH (cron doesn't inherit user PATH)
 export PATH="$HOME/.local/bin:$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node/ 2>/dev/null | tail -1)/bin:$PATH"
