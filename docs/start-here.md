@@ -14,6 +14,10 @@ If that prints a version number, you're good. If not, install Claude Code first 
 
 Optional: if you also use Codex CLI, run `codex --version`. The toolkit mirrors its skills into `~/.codex/skills`, but Claude Code is still the full runtime for hooks, agents, commands, and scripts.
 
+Command entry points:
+- Claude Code: `/do`
+- Codex: `$do`
+
 ## Install
 
 Three commands. Copy-paste them.
@@ -61,7 +65,7 @@ Now try these.
 /do what can you do?
 ```
 
-The `/do` command is the front door. It reads your request, picks the right agent and skill, and runs it. This one shows you the full routing system -- every domain it handles, every workflow it knows.
+The router command is the front door. Use `/do` in Claude Code and `$do` in Codex. It reads your request, picks the right agent and skill, and runs it. This one shows you the full routing system -- every domain it handles, every workflow it knows.
 
 ### Explore a codebase
 

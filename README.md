@@ -12,6 +12,8 @@ It starts from the moment you type a request. You don't pick agents, configure w
 /do debug this Go test
 ```
 
+In Claude Code, the smart router command is `/do`. In Codex, use `$do`.
+
 A router reads your intent and selects a Go specialist agent paired with a systematic debugging methodology. The agent creates a branch, gathers evidence before guessing, runs through phased diagnosis, applies a fix, executes tests, reviews its own work, and presents a PR. You describe the problem. The system handles everything else.
 
 This works because the toolkit separates *what you know* from *what the system knows*. Agents carry domain expertise (Go idioms, Python conventions, Kubernetes patterns). Skills enforce process methodology (TDD cycles, debugging phases, review waves). Hooks automate quality gates that fire on lifecycle events. Scripts handle deterministic operations where you want predictable output, not LLM judgment. The router ties it all together, classifying requests, selecting the right combination, and dispatching.
@@ -47,11 +49,15 @@ python3 ~/.claude/scripts/install-doctor.py inventory
 
 If you update the repo later and want Codex to see newly added skills, rerun `./install.sh --symlink` from the repo root.
 
+Command entry points:
+- Claude Code: `/do`
+- Codex: `$do`
+
 **Detailed setup:** [docs/start-here.md](docs/start-here.md)
 
 ## The Core Workflow
 
-1. **Routing.** You type a request. The `/do` router classifies intent, selects a domain agent and a workflow skill, and dispatches. No menus, no configuration.
+1. **Routing.** You type a request. The router entry point is `/do` in Claude Code and `$do` in Codex. It classifies intent, selects a domain agent and a workflow skill, and dispatches. No menus, no configuration.
 
 2. **Planning.** For non-trivial work, the system creates a plan before touching code. Plans have phases, gates, and saved artifacts at each step.
 

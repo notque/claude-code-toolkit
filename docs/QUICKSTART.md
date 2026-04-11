@@ -15,6 +15,10 @@ cd ~/claude-code-toolkit
 
 Claude Code is the primary runtime. If you also use Codex CLI, the same install mirrors toolkit skills into `~/.codex/skills`.
 
+Command entry points:
+- Claude Code: `/do`
+- Codex: `$do`
+
 **Alternative (bootstrap via Claude):** Start Claude Code in the claude-code-toolkit directory. The sync hook will automatically copy agents, skills, hooks, commands, and scripts to `~/.claude/`.
 
 ```bash
@@ -57,24 +61,28 @@ That's it. You can stop reading here.
 
 ## Want More Control?
 
-### Option A: Use `/do` (Smart Router)
+### Option A: Use the Smart Router
 
 ```
 /do [what you want in plain language]
+$do [what you want in plain language]
 ```
 
 Examples:
 - `/do Debug why authentication is broken`
 - `/do Extract coding patterns from this repo`
 - `/do Make this status update professional`
+- `$do Debug why authentication is broken`
+
+Use `/do` in Claude Code and `$do` in Codex.
 
 The system figures out which tools to use and tells you what it selected.
 
 ---
 
-### Option B: Use `/do` for Specific Workflows
+### Option B: Use the Router for Specific Workflows
 
-The `/do` command routes your request to the right agent and skill automatically:
+The router command routes your request to the right agent and skill automatically. Use `/do` in Claude Code and `$do` in Codex:
 
 | Want This? | Try This |
 |------------|----------|
@@ -124,8 +132,8 @@ These phrases automatically activate the right tools:
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────┐
-│                  /do Smart Router                       │
-│         (or Claude's natural understanding)             │
+│         /do in Claude | $do in Codex                    │
+│         (or natural-language routing)                   │
 └─────────────────────────────────────────────────────────┘
                           │
           ┌───────────────┼───────────────┐
